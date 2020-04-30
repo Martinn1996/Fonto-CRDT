@@ -1,0 +1,19 @@
+{
+  "name": "fonto-crdt",
+  "version": "1.0.0",
+  "description": "Bachelor Project: CRDT for Fonto",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Martinn1996/Fonto-CRDT.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Martinn1996/Fonto-CRDT/issues"
+  },
+  "homepage": "https://github.com/Martinn1996/Fonto-CRDT#readme"
+}
