@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/Martinn1996/Fonto-CRDT/issues"
   },
-  "homepage": "https://github.com/Martinn1996/Fonto-CRDT#readme"
+  "homepage": "https://github.com/Martinn1996/Fonto-CRDT#readme",
+  "devDependencies": {
+    "@fontoxml/eslint-config": "^3.3.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-react": "^7.13.0",
+    "prettier": "^1.17.1"
+  }
 }
