@@ -1,5 +1,5 @@
 const QuillCursors = require('quill-cursors');
-
+const host = location.origin.replace(/^http/, 'ws');
 const Logoot = require('../../CRDT/src/index');
 const l1 = new Logoot('site1');
 
@@ -12,16 +12,19 @@ const quill = new Quill('#editor', {
 	theme: 'snow'
 });
 
-const socket = new WebSocket('ws://192.168.201.75:8000', 'protocolOne');
+const socket = new WebSocket(host);
 
 socket.onopen = function(e) {};
 let socketId = -1;
 
 socket.onmessage = function(event) {
 	const data = JSON.parse(event.data);
-	console.log(data);
-	const cursor = quill.getSelection();
-
+	let cursor = quill.getSelection();
+	if (cursor) {
+		cursor.index = cursor ? cursor.index : 0;
+	} else {
+		cursor = { index: 0 };
+	}
 	if (data.assignSocketId) {
 		socketId = data.assignSocketId;
 		l1.setValue(data.initialValue);

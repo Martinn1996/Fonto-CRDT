@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 const express = require('express');
+// const http = require('http');
+
 const fs = require('fs');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-const WebSocket = require('ws');
-
-const wss = new WebSocket.Server({ port: 8000 });
+const WebSocket = require('ws').Server;
 
 app.use(express.static('src/editor/static'));
 
@@ -17,6 +17,10 @@ app.get('/', (_, res) => {
 	const editor = fs.readFileSync('./src/editor/static/editor.html');
 	res.end(editor);
 });
+
+const server = app.listen(port, () => console.log(`App listening on 3000`));
+
+const wss = new WebSocket({ server: server });
 
 const clients = [];
 
@@ -48,5 +52,3 @@ wss.on('connection', function connection(ws) {
 		});
 	});
 });
-
-app.listen(port, () => console.log(`App listening on 3000`));
