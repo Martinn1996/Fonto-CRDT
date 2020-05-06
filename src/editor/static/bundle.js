@@ -805,7 +805,7 @@ socket.onmessage = function(event) {
 				break;
 		}
 		quill.setText(l1.value());
-		if (cursor) quill.setSelection(cursor.index, 0);
+		if (cursor && cursor.index) quill.setSelection(cursor.index, 0);
 	}
 };
 
