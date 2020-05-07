@@ -40,7 +40,6 @@ socket.onmessage = function(event) {
 };
 
 l1.on('operation', (op) => {
-	// send through your network (just need at-least-once, in-order delivery)
 	if (initialized && (op.type === 'insert' || op.type === 'delete')) {
 		socket.send(JSON.stringify(op));
 	}
