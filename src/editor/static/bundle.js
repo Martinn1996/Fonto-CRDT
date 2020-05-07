@@ -777,6 +777,7 @@ const socket = new WebSocket(host);
 socket.onopen = function(e) {};
 let socketId = -1;
 
+let initialized = false;
 socket.onmessage = function(event) {
 	const data = JSON.parse(event.data);
 	let cursor = quill.getSelection();
@@ -789,31 +790,21 @@ socket.onmessage = function(event) {
 		socketId = data.assignSocketId;
 		l1.setValue(data.initialValue);
 		quill.setText(l1.value());
+		initialized = true;
 	} else {
-		const index = !data.index ? 0 : data.index;
-		switch (data.method) {
-			case 'insert':
-				l1.insert(data.value, index);
-				cursor.index = cursor.index + (index > cursor.index ? 0 : data.value.length);
-				break;
-			case 'delete':
-				l1.delete(index, data.value);
-				cursor.index = cursor.index - (index > cursor.index ? data.value.length : 0);
-				break;
-			default:
-				console.log('method not defined');
-				break;
-		}
+		l1.receive(data);
+
 		quill.setText(l1.value());
 		if (cursor && cursor.index) quill.setSelection(cursor.index, 0);
 	}
 };
 
-socket.onclose = function(_) {};
-
-socket.onerror = function(_) {
-	// alert(`[error] ${error.message}`);
-};
+l1.on('operation', (op) => {
+	// send through your network (just need at-least-once, in-order delivery)
+	if (initialized && (op.type === 'insert' || op.type === 'delete')) {
+		socket.send(JSON.stringify(op));
+	}
+});
 
 quill.on('text-change', function(delta, _, source) {
 	if (source === 'user') {
@@ -823,24 +814,8 @@ quill.on('text-change', function(delta, _, source) {
 				retain = op.retain;
 			} else if (op.hasOwnProperty('insert')) {
 				l1.insert(op.insert, !retain ? 0 : retain);
-				socket.send(
-					JSON.stringify({
-						method: 'insert',
-						value: op.insert,
-						index: !retain ? 0 : retain,
-						socketId: socketId
-					})
-				);
 			} else if (op.hasOwnProperty('delete')) {
 				l1.delete(!retain ? 0 : retain, op.delete);
-				socket.send(
-					JSON.stringify({
-						method: 'delete',
-						value: op.delete,
-						index: !retain ? 0 : retain,
-						socketId: socketId
-					})
-				);
 			}
 		}
 	}

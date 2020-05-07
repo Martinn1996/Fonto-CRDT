@@ -33,18 +33,7 @@ wss.on('connection', function connection(ws) {
 
 	ws.on('message', function incoming(message) {
 		const data = JSON.parse(message);
-
-		switch (data.method) {
-			case 'insert':
-				l1.insert(data.value, !data.index ? 0 : data.index);
-				break;
-			case 'delete':
-				l1.delete(!data.index ? 0 : data.index, data.value);
-				break;
-			default:
-				console.log('method not defined');
-				break;
-		}
+		l1.receive(data);
 		clients.forEach(function each(client) {
 			if (data.socketId !== client.socketId) {
 				client.client.send(message);
