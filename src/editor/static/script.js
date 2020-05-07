@@ -28,7 +28,7 @@ socket.onmessage = function(event) {
 	}
 	if (data.assignSocketId) {
 		socketId = data.assignSocketId;
-		l1.setValue(data.initialValue);
+		l1.setState(data.initialValue);
 		quill.setText(l1.value());
 		initialized = true;
 	} else {

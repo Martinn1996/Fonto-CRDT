@@ -788,7 +788,7 @@ socket.onmessage = function(event) {
 	}
 	if (data.assignSocketId) {
 		socketId = data.assignSocketId;
-		l1.setValue(data.initialValue);
+		l1.setState(data.initialValue);
 		quill.setText(l1.value());
 		initialized = true;
 	} else {
@@ -800,7 +800,6 @@ socket.onmessage = function(event) {
 };
 
 l1.on('operation', (op) => {
-	// send through your network (just need at-least-once, in-order delivery)
 	if (initialized && (op.type === 'insert' || op.type === 'delete')) {
 		socket.send(JSON.stringify(op));
 	}
@@ -816,6 +815,8 @@ quill.on('text-change', function(delta, _, source) {
 				l1.insert(op.insert, !retain ? 0 : retain);
 			} else if (op.hasOwnProperty('delete')) {
 				l1.delete(!retain ? 0 : retain, op.delete);
+			} else {
+				console.log('nani');
 			}
 		}
 	}

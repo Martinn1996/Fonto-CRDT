@@ -29,7 +29,7 @@ wss.on('connection', function connection(ws) {
 		.toString(36)
 		.substring(7);
 	clients.push({ client: ws, socketId: id });
-	ws.send(JSON.stringify({ assignSocketId: id, initialValue: l1.value() }));
+	ws.send(JSON.stringify({ assignSocketId: id, initialValue: l1.getState() }));
 
 	ws.on('message', function incoming(message) {
 		const data = JSON.parse(message);
