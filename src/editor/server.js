@@ -25,17 +25,17 @@ const wss = new WebSocket({ server: server });
 const clients = [];
 
 wss.on('connection', function connection(ws) {
+	const index = clients.length;
 	const id = Math.random()
 		.toString(36)
 		.substring(7);
 	clients.push({ client: ws, socketId: id });
 	ws.send(JSON.stringify({ assignSocketId: id, initialValue: l1.getState() }));
-
 	ws.on('message', function incoming(message) {
 		const data = JSON.parse(message);
 		l1.receive(data);
-		clients.forEach(function each(client) {
-			if (data.socketId !== client.socketId) {
+		clients.forEach(function each(client, i) {
+			if (i !== index) {
 				client.client.send(message);
 			}
 		});
