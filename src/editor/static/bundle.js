@@ -767,7 +767,8 @@ Quill.register('modules/cursors', QuillCursors);
 
 const quill = new Quill('#editor', {
 	modules: {
-		cursors: true
+		cursors: true,
+		toolbar: false
 	},
 	theme: 'snow'
 });
@@ -815,8 +816,6 @@ quill.on('text-change', function(delta, _, source) {
 				l1.insert(op.insert, !retain ? 0 : retain);
 			} else if (op.hasOwnProperty('delete')) {
 				l1.delete(!retain ? 0 : retain, op.delete);
-			} else {
-				console.log('nani');
 			}
 		}
 	}

@@ -7,7 +7,8 @@ Quill.register('modules/cursors', QuillCursors);
 
 const quill = new Quill('#editor', {
 	modules: {
-		cursors: true
+		cursors: true,
+		toolbar: false
 	},
 	theme: 'snow'
 });
