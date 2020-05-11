@@ -1,8 +1,7 @@
 const assert = require('chai').assert;
-const expect = require('chai').expect;
 const Logoot = require('../src/CRDT/src/index');
 
-describe('Replace', function() {
+describe('Replace', () => {
 	let crdt1;
 	let crdt2;
 
@@ -19,7 +18,7 @@ describe('Replace', function() {
 		});
 	});
 
-	it('should be replaced', function() {
+	it('should be replaced', () => {
 		crdt1.insert('abc', 0);
 		crdt1.replaceRange('xyz', 0, 3);
 		assert.equal(crdt1.value(), 'xyz');
@@ -27,7 +26,7 @@ describe('Replace', function() {
 		assert.equal(crdt1.getState(), crdt2.getState());
 	});
 
-	it('should be replaced by text of site 2', function() {
+	it('should be replaced by text of site 2', () => {
 		crdt1.insert('abc', 0);
 		crdt2.replaceRange('xyz', 0, 3);
 		assert.equal(crdt1.value(), 'xyz');
@@ -35,7 +34,7 @@ describe('Replace', function() {
 		assert.equal(crdt1.getState(), crdt2.getState());
 	});
 
-	it('should replace the text at the end by text of site 2', function() {
+	it('should replace the text at the end by text of site 2', () => {
 		crdt1.insert('hfg', 0);
 		crdt2.insert('abc', 0);
 		crdt1.replaceRange('xyz', 3, 6);
@@ -44,7 +43,7 @@ describe('Replace', function() {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('should replace the first character at the start index by text of site 2', function() {
+	it('should replace the first character at the start index by text of site 2', () => {
 		crdt1.insert('abc', 0);
 		crdt2.replaceRange('xyz', 0);
 		assert.equal(crdt1.value(), 'xyzbc');
@@ -52,21 +51,23 @@ describe('Replace', function() {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('should give a TypeError when no start index is given', function() {
-		expect(function() {
+	it('should give a TypeError when no start index is given', () => {
+		const errorFunction = () => {
 			crdt1.insert('abc', 0);
 			crdt2.replaceRange('xyz');
-		}).to.throw(TypeError);
+		};
+		assert.throws(errorFunction, TypeError);
 	});
 
-	it('should give a TypeError when a negative start index is given', function() {
-		expect(function() {
+	it('should give a TypeError when a negative start index is given', () => {
+		const errorFunction = () => {
 			crdt1.insert('abc', 0);
 			crdt2.replaceRange('xyz', -2);
-		}).to.throw(TypeError);
+		};
+		assert.throws(errorFunction, TypeError);
 	});
 
-	it('should be inserted before the start index', function() {
+	it('should be inserted before the start index', () => {
 		crdt1.insert('abc', 0);
 		crdt2.replaceRange('xyz', 0, -100);
 		assert.equal(crdt1.value(), 'xyzabc');
@@ -74,7 +75,7 @@ describe('Replace', function() {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('should be inserted at the end of the document', function() {
+	it('should be inserted at the end of the document', () => {
 		crdt1.insert('abc', 0);
 		crdt2.replaceRange('xyz', 6, 3);
 		assert.equal(crdt1.value(), 'abcxyz');
