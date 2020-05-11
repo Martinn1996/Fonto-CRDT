@@ -26,7 +26,7 @@ describe('Delete suite', () => {
 	});
 
 	// Unit testing
-	it('(One editor) Deletes nothing', () => {
+	it('Deletes nothing', () => {
 		crdt1.delete(0, 0);
 
 		assert.equal(crdt1.value(), testString);
@@ -34,7 +34,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes one character', () => {
+	it('Deletes one character', () => {
 		crdt1.delete(0);
 
 		assert.equal(crdt1.value(), testString.substring(1, testString.length));
@@ -42,7 +42,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes a character with string', () => {
+	it('Deletes a character with string', () => {
 		crdt1.delete('This');
 
 		assert.equal(crdt1.value(), testString);
@@ -50,7 +50,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes a character with a double', () => {
+	it('Deletes a character with a double', () => {
 		crdt1.delete(2.5);
 
 		assert.equal(crdt1.value(), testString);
@@ -58,7 +58,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes a word (range)', () => {
+	it('Deletes a word (range)', () => {
 		crdt1.delete(0, 4);
 
 		assert.equal(crdt1.value(), testString.substring(4, testString.length));
@@ -66,7 +66,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes out of range', () => {
+	it('Deletes out of range', () => {
 		crdt1.delete(0, testString.length + 1);
 
 		assert.equal(crdt1.value(), '');
@@ -74,7 +74,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(One editor) Deletes out of range (negative)', () => {
+	it('Deletes out of range (negative)', () => {
 		crdt1.delete(0, -1);
 
 		assert.equal(crdt1.value(), testString);
@@ -83,7 +83,7 @@ describe('Delete suite', () => {
 	});
 
 	// Concurrent editing
-	it('(Concurrent editing) Deletes nothing', () => {
+	it('Deletes nothing with concurrent editing', () => {
 		crdt1.delete(0, 0);
 		crdt2.delete(0, 0);
 
@@ -92,7 +92,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes one character', () => {
+	it('Deletes one character with concurrent editing', () => {
 		crdt1.delete(testString.length - 1);
 		crdt2.delete(0);
 
@@ -101,7 +101,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes a character with string', () => {
+	it('Deletes a character with string with concurrent editing', () => {
 		crdt1.delete('This');
 		crdt2.delete('string!');
 
@@ -110,7 +110,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes a character with a double', () => {
+	it('Deletes a character with a double with concurrent editing', () => {
 		crdt1.delete(2.5);
 		crdt2.delete(0);
 
@@ -119,7 +119,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes a word (range)', () => {
+	it('Deletes a word (range) with concurrent editing', () => {
 		crdt1.delete(0, 4);
 		crdt2.delete(0, 2);
 
@@ -128,7 +128,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes out of range', () => {
+	it('Deletes out of range with concurrent editing', () => {
 		crdt1.delete(0, testString.length + 1);
 		crdt2.delete(0, 1);
 
@@ -137,7 +137,7 @@ describe('Delete suite', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('(Concurrent editing) Deletes out of range (negative)', () => {
+	it('Deletes out of range (negative) with concurrent editing', () => {
 		crdt1.delete(0, -1);
 		crdt2.delete(0, 2);
 
