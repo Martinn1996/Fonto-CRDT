@@ -4,7 +4,9 @@
   "description": "Bachelor Project: CRDT for Fonto",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No test specified\""
+    "test": "echo \"No test specified\"",
+    "build": "browserify src/editor/static/script.js > src/editor/static/bundle.js",
+    "start": "npm run build && node src/editor/server.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +26,15 @@
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.13.0",
     "prettier": "^1.17.1"
+  },
+  "dependencies": {
+    "browserify": "^16.5.1",
+    "ejs": "^3.1.2",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "inherits": "^2.0.4",
+    "nanobus": "^4.4.0",
+    "quill-cursors": "^3.0.0",
+    "ws": "^7.2.5"
   }
 }
