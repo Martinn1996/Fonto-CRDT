@@ -2,7 +2,7 @@ const assert = require('chai').assert;
 const Logoot = require('../src/CRDT/src/index');
 
 // Extensive testing for the delete operation
-describe('Delete suite', () => {
+describe('Delete', () => {
 	const testString = 'This is a test String!';
 	let crdt1;
 	let crdt2;
