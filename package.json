@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"No test specified\"",
     "build": "browserify src/editor/static/script.js > src/editor/static/bundle.js",
-    "start": "npm run build && node src/editor/server.js"
+    "start": "npm run build && node src/editor/server.js",
+    "checkstyle": "eslint ."
   },
   "repository": {
     "type": "git",
