@@ -5,7 +5,7 @@ describe('Logoot', () => {
 	let crdt;
 
 	beforeEach(() => {
-		crdt = new Logoot('1');
+		crdt = new Logoot('crdt');
 	});
 
 	describe('value() and setValue()', () => {
