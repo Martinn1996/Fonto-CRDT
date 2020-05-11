@@ -31,7 +31,7 @@ describe('Logoot', () => {
 	});
 
 	describe('getState() and setState()', () => {
-		it('Should have exactly the state after setting the state', () => {
+		it('should have exactly the state after setting the state', () => {
 			crdt.setValue('test');
 			const expectedState = crdt.getState();
 			crdt = new Logoot('1');
