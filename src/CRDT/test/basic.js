@@ -1,460 +1,425 @@
-const test = require('tape')
-const sizeof = require('object-sizeof')
+/* eslint-disable no-console */
+/* eslint-disable no-inline-comments */
+const test = require('tape');
+const sizeof = require('object-sizeof');
 
-const Logoot = require('./../src/index')
-const common = require('./common')
+const Logoot = require('./../src/index');
+const common = require('./common');
 
-test('single inserter', function (t) {
-  var nodes = common.makeNodes(1)
+test('single inserter', function(t) {
+	const nodes = common.makeNodes(1);
 
-  var w1 = nodes[0] 
-  
-  w1.insert('abc', 0)
-  w1.insert('123', 0)
-  
-  t.equals(w1.value(), '123abc')
-  t.equals(w1.value(), w1.getModel())
-  
-  t.end()
-})
+	const w1 = nodes[0];
 
-test('test insert', function (t) {
-  var nodes = common.makeNodes(2)
+	w1.insert('abc', 0);
+	w1.insert('123', 0);
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('abc', 0)
-  w2.insert('xyz', 0)
-  w1.insert('123', 1)
-  w2.insert('m', 4)
-  w2.insert('f', w2.value().length)
-  
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), 'x123myzabcf')
+	t.equals(w1.value(), '123abc');
+	t.equals(w1.value(), w1.getModel());
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	t.end();
+});
 
-/*
-// TODO: interleaving tests
-test('test split insert', function (t) {
-  var nodes = common.makeNodesWithHoldingQueue(2)
+test('test insert', function(t) {
+	const nodes = common.makeNodes(2);
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('abc', 0)
-  w2.insert('xyz', 0)
+	const w1 = nodes[0];
+	const w2 = nodes[1];
 
-  w1.receiveAllFrom(w2)
-  w2.receiveAllFrom(w1)
-  
-  t.equals(w1.value(), w2.value())
-  t.assert(w1.value() === 'xyzabc' || w1.value() === 'abcxyz')
+	w1.insert('abc', 0);
+	w2.insert('xyz', 0);
+	w1.insert('123', 1);
+	w2.insert('m', 4);
+	w2.insert('f', w2.value().length);
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), 'x123myzabcf');
 
-test('test reverse split insert', function (t) {
-  var nodes = common.makeNodesWithHoldingQueue(2)
+	t.equals(w1.value(), w1.getModel());
+	t.equals(w2.value(), w2.getModel());
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('c', 0)
-  w1.insert('b', 0)
-  w1.insert('a', 0)
-  w2.insert('z', 0)
-  w2.insert('y', 0)
-  w2.insert('x', 0)
+	t.end();
+});
 
-  w1.receiveAllFrom(w2)
-  w2.receiveAllFrom(w1)
-  
-  t.equals(w1.value(), w2.value())
-  t.assert(w1.value() === 'xyzabc' || w1.value() === 'abcxyz')
+test('test delete', function(t) {
+	const nodes = common.makeNodes(2);
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
-*/
+	const w1 = nodes[0];
+	const w2 = nodes[1];
 
-test('test delete', function (t) {
-  var nodes = common.makeNodes(2)
+	w1.insert('abcdefg', 0);
+	w2.delete(2);
+	w1.delete(0, 3);
+	w1.delete(0);
+	w1.delete(2);
+	w2.delete(w2.value().length - 1);
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('abcdefg', 0)
-  w2.delete(2)
-  w1.delete(0, 3)
-  w1.delete(0)
-  w1.delete(2)
-  w2.delete(w2.value().length - 1)
-  
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), 'f')
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), 'f');
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	t.equals(w1.value(), w1.getModel());
+	t.equals(w2.value(), w2.getModel());
 
-test('test replaceRange', function (t) {
-  var nodes = common.makeNodes(2)
+	t.end();
+});
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.replaceRange('abcdefg', 0, 0)
-  w2.replaceRange('xyz', 0, 3)
-  w1.replaceRange('123', 5, 0)
-  w1.replaceRange('456', 6, 2)
-  w2.replaceRange('x', w2.value().length, 0)
-  w2.replaceRange('y', w2.value().length - 1, 1)
+test('test replaceRange', function(t) {
+	const nodes = common.makeNodes(2);
 
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), 'xyzde1456fgy')
+	const w1 = nodes[0];
+	const w2 = nodes[1];
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	w1.replaceRange('abcdefg', 0, 0);
+	w2.replaceRange('xyz', 0, 3);
+	w1.replaceRange('123', 5, 0);
+	w1.replaceRange('456', 6, 2);
+	w2.replaceRange('x', w2.value().length, 0);
+	w2.replaceRange('y', w2.value().length - 1, 1);
 
-test('test setValue', function (t) {
-  var nodes = common.makeNodes(2)
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), 'xyzde1456fgy');
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('abc', 0)
-  w2.setValue('abc')
-  
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), 'abc')
+	t.equals(w1.value(), w1.getModel());
+	t.equals(w2.value(), w2.getModel());
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	t.end();
+});
 
-test('test delete before insert arrival', function (t) {
-  var nodes = common.makeNodesWithHoldingQueue(3)
+test('test setValue', function(t) {
+	const nodes = common.makeNodes(2);
 
-  nodes[0].insert('a', 0) // 0 inserts "a"
-  nodes[1].receiveAllFrom(nodes[0]) // 0 and 1 sync
-  nodes[1].delete(0, 1) // 1 deletes "a"
-  nodes[2].receiveAllFrom(nodes[1]) // 2 receives delete before insert
-  
-  // nodes fully sync
-  nodes.forEach(n1 => {
-    nodes.forEach(n2 => {
-      n1.receiveAllFrom(n2)
-    })
-  })
+	const w1 = nodes[0];
+	const w2 = nodes[1];
 
-  t.equals(nodes[0].value(), nodes[1].value())
-  t.equals(nodes[1].value(), nodes[2].value())
-  t.equals(nodes[0].value(), '')
+	w1.insert('abc', 0);
+	w2.setValue('abc');
 
-  t.equals(nodes[0].value(), nodes[0].getModel())
-  t.equals(nodes[1].value(), nodes[1].getModel())
-  t.equals(nodes[2].value(), nodes[2].getModel())
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), 'abc');
 
-  t.end()
-})
+	t.equals(w1.value(), w1.getModel());
+	t.equals(w2.value(), w2.getModel());
 
-function getRandomMethod () {
-  var methods = ['insert', 'delete', 'replaceRange']
-  return methods[Math.floor(Math.random() * methods.length)]
+	t.end();
+});
+
+test('test delete before insert arrival', function(t) {
+	const nodes = common.makeNodesWithHoldingQueue(3);
+
+	nodes[0].insert('a', 0); // 0 inserts "a"
+	nodes[1].receiveAllFrom(nodes[0]); // 0 and 1 sync
+	nodes[1].delete(0, 1); // 1 deletes "a"
+	nodes[2].receiveAllFrom(nodes[1]); // 2 receives delete before insert
+
+	// nodes fully sync
+	nodes.forEach(n1 => {
+		nodes.forEach(n2 => {
+			n1.receiveAllFrom(n2);
+		});
+	});
+
+	t.equals(nodes[0].value(), nodes[1].value());
+	t.equals(nodes[1].value(), nodes[2].value());
+	t.equals(nodes[0].value(), '');
+
+	t.equals(nodes[0].value(), nodes[0].getModel());
+	t.equals(nodes[1].value(), nodes[1].getModel());
+	t.equals(nodes[2].value(), nodes[2].getModel());
+
+	t.end();
+});
+
+function getRandomMethod() {
+	const methods = ['insert', 'delete', 'replaceRange'];
+	return methods[Math.floor(Math.random() * methods.length)];
 }
 
-function getRandomArguments (method) {
-  switch (method) {
-    case 'insert':
-      return [Math.random().toString(), Math.floor(Math.random() * 100)]
-      break;
-    case 'delete':
-      return [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)]
-      break;
-    case 'replaceRange':
-      return [Math.random().toString(), Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)]
-      break;
-  }
+function getRandomArguments(method) {
+	switch (method) {
+		case 'insert':
+			return [Math.random().toString(), Math.floor(Math.random() * 100)];
+		case 'delete':
+			return [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)];
+		case 'replaceRange':
+			return [
+				Math.random().toString(),
+				Math.floor(Math.random() * 100),
+				Math.floor(Math.random() * 100)
+			];
+	}
 }
 
-test('test randomized operations n=2', function (t) {
-  var nodes = common.makeNodes(2)
-  var rounds = 50
+test('test randomized operations n=2', function(t) {
+	const nodes = common.makeNodes(2);
+	const rounds = 50;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  var finalValue = nodes[0].value()
-  t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-  t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-  t.end()
-})
+	const finalValue = nodes[0].value();
+	t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+	t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged');
+	t.end();
+});
 
-test('test randomized operations with delay n=2', function (t) {
-  t.plan(2)
+test('test randomized operations with delay n=2', function(t) {
+	t.plan(2);
 
-  var nodes = common.makeNodesWithDelay(2)
-  var rounds = 50
+	const nodes = common.makeNodesWithDelay(2);
+	const rounds = 50;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  setTimeout(() => {
-    var finalValue = nodes[0].value()
-    t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-    t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-    t.end()
-  }, 1000)
-})
+	setTimeout(() => {
+		const finalValue = nodes[0].value();
+		t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+		t.assert(
+			!nodes.some(node => node.value() !== node.getModel()),
+			'all node models converged'
+		);
+		t.end();
+	}, 1000);
+});
 
-test('test randomized operations n=10', function (t) {
-  var nodes = common.makeNodes(10)
-  var rounds = 5
+test('test randomized operations n=10', function(t) {
+	const nodes = common.makeNodes(10);
+	const rounds = 5;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  var finalValue = nodes[0].value()
-  t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-  t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-  t.end()
-})
+	const finalValue = nodes[0].value();
+	t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+	t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged');
+	t.end();
+});
 
-test('test randomized operations with delay n=3', function (t) {
-  t.plan(2)
+test('test randomized operations with delay n=3', function(t) {
+	t.plan(2);
 
-  var nodes = common.makeNodesWithDelay(3)
-  var rounds = 1000
+	const nodes = common.makeNodesWithDelay(3);
+	const rounds = 1000;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  setTimeout(() => {
-    var finalValue = nodes[0].value()
-    t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-    t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-    t.end()
-  }, 1000)
-})
+	setTimeout(() => {
+		const finalValue = nodes[0].value();
+		t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+		t.assert(
+			!nodes.some(node => node.value() !== node.getModel()),
+			'all node models converged'
+		);
+		t.end();
+	}, 1000);
+});
 
-test('test randomized operations with delay n=10', function (t) {
-  t.plan(2)
+test('test randomized operations with delay n=10', function(t) {
+	t.plan(2);
 
-  var nodes = common.makeNodesWithDelay(10)
-  var rounds = 5
+	const nodes = common.makeNodesWithDelay(10);
+	const rounds = 5;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  setTimeout(() => {
-    var finalValue = nodes[0].value()
-    t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-    t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-    t.end()
-  }, 1000)
-})
+	setTimeout(() => {
+		const finalValue = nodes[0].value();
+		t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+		t.assert(
+			!nodes.some(node => node.value() !== node.getModel()),
+			'all node models converged'
+		);
+		t.end();
+	}, 1000);
+});
 
-test('test random delayed repeats n=3', function (t) {
-  t.plan(2)
+test('test random delayed repeats n=3', function(t) {
+	t.plan(2);
 
-  var nodes = common.makeNodesWithDelayedRepeats(3)
-  var rounds = 10
+	const nodes = common.makeNodesWithDelayedRepeats(3);
+	const rounds = 10;
 
-  for (var i=0; i<rounds; i++) {
-    nodes.forEach(node => {
-      var method = getRandomMethod()
-      node[method].apply(node, getRandomArguments(method))
-    })
-  }
+	for (let i = 0; i < rounds; i++) {
+		nodes.forEach(node => {
+			const method = getRandomMethod();
+			node[method].apply(node, getRandomArguments(method));
+		});
+	}
 
-  setTimeout(() => {
-    var finalValue = nodes[0].value()
-    t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged')
-    t.assert(!nodes.some(node => node.value() !== node.getModel()), 'all node models converged')
-    t.end()
-  }, 1000)
-})
+	setTimeout(() => {
+		const finalValue = nodes[0].value();
+		t.assert(!nodes.some(node => node.value() !== finalValue), 'all nodes converged');
+		t.assert(
+			!nodes.some(node => node.value() !== node.getModel()),
+			'all node models converged'
+		);
+		t.end();
+	}, 1000);
+});
 
-test('state transfer', function (t) {
-  var nodes = common.makeNodes(2)
+test('state transfer', function(t) {
+	const nodes = common.makeNodes(2);
 
-  var w1 = nodes[0] 
-  var w2 = nodes[1] 
-  
-  w1.insert('abc', 0)
-  w2.delete(0, 2)
-  w1.insert('123', 1)
-  w2.replaceRange('m', 0, 2)
+	const w1 = nodes[0];
+	const w2 = nodes[1];
 
-  t.equals(w1.value(), w2.value())
+	w1.insert('abc', 0);
+	w2.delete(0, 2);
+	w1.insert('123', 1);
+	w2.replaceRange('m', 0, 2);
 
-  // new node joins
-  var w3 = new Logoot('site3', w1.getState())
-  w3.on('operation', (op) => {
-    w2.receive(op)
-    w1.receive(op)
-  })
-  w1.on('operation', (op) => {
-    w3.receive(op)
-  })
-  w2.on('operation', (op) => {
-    w3.receive(op)
-  })
+	t.equals(w1.value(), w2.value());
 
-  w1.insert('x', 1)
-  w2.insert('y', 1)
-  w3.insert('z', 1)
+	// new node joins
+	const w3 = new Logoot('site3', w1.getState());
+	w3.on('operation', op => {
+		w2.receive(op);
+		w1.receive(op);
+	});
+	w1.on('operation', op => {
+		w3.receive(op);
+	});
+	w2.on('operation', op => {
+		w3.receive(op);
+	});
 
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), w3.value())
+	w1.insert('x', 1);
+	w2.insert('y', 1);
+	w3.insert('z', 1);
 
-  t.equals(w1.value(), w1.getModel())
-  t.equals(w2.value(), w2.getModel())
-  
-  t.end()
-})
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), w3.value());
 
+	t.equals(w1.value(), w1.getModel());
+	t.equals(w2.value(), w2.getModel());
 
-test('test left-to-right edit performance', function (t) {
-  var w1 = new Logoot('site1')
+	t.end();
+});
 
-  var IDCount = 0
-  var totalIDLength = 0
-  w1.on('operation', (op) => {
-    IDCount++
-    totalIDLength += op.position.length
-  })
-  
-  for (var i=0; i < 1000; i++) {
-    w1.insert('a', i)
-  }
+test('test left-to-right edit performance', function(t) {
+	const w1 = new Logoot('site1');
 
-  console.log('Average identifier length:', totalIDLength / IDCount)
-  console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10**6, 'mB')
-  console.log('True document size:', sizeof(w1.value()) / 10**6, 'mB')
-  t.end()
-})
+	let IDCount = 0;
+	let totalIDLength = 0;
+	w1.on('operation', op => {
+		IDCount++;
+		totalIDLength += op.position.length;
+	});
 
-test('test random edit performance', function (t) {
-  var w1 = new Logoot('site1')
+	for (let i = 0; i < 1000; i++) {
+		w1.insert('a', i);
+	}
 
-  var IDCount = 0
-  var totalIDLength = 0
-  w1.on('operation', (op) => {
-    IDCount++
-    totalIDLength += op.position.length
-  })
+	console.log('Average identifier length:', totalIDLength / IDCount);
+	console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10 ** 6, 'mB');
+	console.log('True document size:', sizeof(w1.value()) / 10 ** 6, 'mB');
+	t.end();
+});
 
-  for (var i=0; i < 1000; i++) {
-    w1.insert('a', Math.floor(w1.length() * Math.random()))
-  }
+test('test random edit performance', function(t) {
+	const w1 = new Logoot('site1');
 
-  console.log('Average identifier length:', totalIDLength / IDCount)
-  console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10**6, 'mB')
-  console.log('True document size:', sizeof(w1.value()) / 10**6, 'mB')
-  t.end()
-})
+	let IDCount = 0;
+	let totalIDLength = 0;
+	w1.on('operation', op => {
+		IDCount++;
+		totalIDLength += op.position.length;
+	});
 
-test('test right-to-left edit performance', function (t) {
-  var w1 = new Logoot('site1', null)
+	for (let i = 0; i < 1000; i++) {
+		w1.insert('a', Math.floor(w1.length() * Math.random()));
+	}
 
-  var IDCount = 0
-  var totalIDLength = 0
-  w1.on('operation', (op) => {
-    IDCount++
-    totalIDLength += op.position.length
-  })
+	console.log('Average identifier length:', totalIDLength / IDCount);
+	console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10 ** 6, 'mB');
+	console.log('True document size:', sizeof(w1.value()) / 10 ** 6, 'mB');
+	t.end();
+});
 
-  for (var i=0; i < 1000; i++) {
-    w1.insert('a', 0)
-  }
+test('test right-to-left edit performance', function(t) {
+	const w1 = new Logoot('site1', null);
 
-  console.log('Average identifier length:', totalIDLength / IDCount) // should be high, worst-case for bias strategy
-  console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10**6, 'mB')
-  console.log('True document size:', sizeof(w1.value()) / 10**6, 'mB')
-  t.end()
-})
+	let IDCount = 0;
+	let totalIDLength = 0;
+	w1.on('operation', op => {
+		IDCount++;
+		totalIDLength += op.position.length;
+	});
 
-test('test mixed edit performance', function (t) {
-  var w1 = new Logoot('site1')
+	for (let i = 0; i < 1000; i++) {
+		w1.insert('a', 0);
+	}
 
-  var IDCount = 0
-  var totalIDLength = 0
-  w1.on('operation', (op) => {
-    IDCount++
-    totalIDLength += op.position.length
-  })
+	console.log('Average identifier length:', totalIDLength / IDCount); // should be high, worst-case for bias strategy
+	console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10 ** 6, 'mB');
+	console.log('True document size:', sizeof(w1.value()) / 10 ** 6, 'mB');
+	t.end();
+});
 
-  for (var i=0; i < 500; i++) {
-    w1.insert('a', i)
-    w1.insert('a', Math.floor(w1.length() * Math.random()))
-  }
+test('test mixed edit performance', function(t) {
+	const w1 = new Logoot('site1');
 
-  console.log('Average identifier length:', totalIDLength / IDCount)
-  console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10**6, 'mB')
-  console.log('True document size:', sizeof(w1.value()) / 10**6, 'mB')
-  t.end()
-})
+	let IDCount = 0;
+	let totalIDLength = 0;
+	w1.on('operation', op => {
+		IDCount++;
+		totalIDLength += op.position.length;
+	});
 
-test('more-than-once delivery', function (t) {
-  var w1 = new Logoot('site1')
-  var w2 = new Logoot('site2')
+	for (let i = 0; i < 500; i++) {
+		w1.insert('a', i);
+		w1.insert('a', Math.floor(w1.length() * Math.random()));
+	}
 
-  w1.on('operation', (op) => {
-    for (var i=0; i<10; i++) {
-      w2.receive(op)
-    }
-  })
-  w2.on('operation', (op) => {
-    for (var i=0; i<10; i++) {
-      w1.receive(op)
-    }
-  })
-  
-  w1.insert('abc', 0)
-  w2.delete(0, 2)
-  w1.insert('123', 1)
-  w2.replaceRange('m', 0, 2)
+	console.log('Average identifier length:', totalIDLength / IDCount);
+	console.log('Document size:', JSON.parse(sizeof(w1.getState())) / 10 ** 6, 'mB');
+	console.log('True document size:', sizeof(w1.value()) / 10 ** 6, 'mB');
+	t.end();
+});
 
-  t.equals(w1.value(), w2.value())
-  t.equals(w1.value(), 'm23')
-  t.end()
-})
+test('more-than-once delivery', function(t) {
+	const w1 = new Logoot('site1');
+	const w2 = new Logoot('site2');
+
+	w1.on('operation', op => {
+		for (let i = 0; i < 10; i++) {
+			w2.receive(op);
+		}
+	});
+	w2.on('operation', op => {
+		for (let i = 0; i < 10; i++) {
+			w1.receive(op);
+		}
+	});
+
+	w1.insert('abc', 0);
+	w2.delete(0, 2);
+	w1.insert('123', 1);
+	w2.replaceRange('m', 0, 2);
+
+	t.equals(w1.value(), w2.value());
+	t.equals(w1.value(), 'm23');
+	t.end();
+});

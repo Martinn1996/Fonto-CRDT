@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const QuillCursors = require('quill-cursors');
 const host = location.origin.replace(/^http/, 'ws');
 const Logoot = require('../../CRDT/src/index');
@@ -15,8 +16,7 @@ const quill = new Quill('#editor', {
 
 const socket = new WebSocket(host);
 
-socket.onopen = function(e) {};
-let socketId = -1;
+socket.onopen = function(_) {};
 
 let initialized = false;
 socket.onmessage = function(event) {
@@ -28,7 +28,6 @@ socket.onmessage = function(event) {
 		cursor = { index: 0 };
 	}
 	if (data.assignSocketId) {
-		socketId = data.assignSocketId;
 		l1.setState(data.initialValue);
 		quill.setText(l1.value());
 		initialized = true;
@@ -40,7 +39,7 @@ socket.onmessage = function(event) {
 	}
 };
 
-l1.on('operation', (op) => {
+l1.on('operation', op => {
 	if (initialized && (op.type === 'insert' || op.type === 'delete')) {
 		socket.send(JSON.stringify(op));
 	}

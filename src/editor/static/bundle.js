@@ -361,403 +361,412 @@ module.exports = function removeItems (arr, startIdx, removeCount) {
 }
 
 },{}],8:[function(require,module,exports){
-function Identifier (int, site, clock) {
-  this.int = int
-  this.site = site
-  this.clock = clock
+function Identifier(int, site, clock) {
+	this.int = int;
+	this.site = site;
+	this.clock = clock;
 }
-Identifier.prototype.compare = function (other) {
-  if (this.int > other.int) {
-    return 1
-  } else if (this.int < other.int) {
-    return -1
-  } else {
-    if (this.site > other.site) {
-      return 1
-    } else if (this.site < other.site) {
-      return -1
-    } else {
-      if (this.clock > other.clock) {
-        return 1
-      } else if (this.clock < other.clock) {
-        return -1
-      } else {
-        return 0
-      }
-    }
-  }
-}
-module.exports = Identifier
+Identifier.prototype.compare = function(other) {
+	if (this.int > other.int) {
+		return 1;
+	} else if (this.int < other.int) {
+		return -1;
+	}
+	if (this.site > other.site) {
+		return 1;
+	} else if (this.site < other.site) {
+		return -1;
+	}
+	if (this.clock > other.clock) {
+		return 1;
+	} else if (this.clock < other.clock) {
+		return -1;
+	}
+	return 0;
+};
+module.exports = Identifier;
 
 },{}],9:[function(require,module,exports){
-const EventEmitter = require('nanobus')
-const inherits = require('inherits')
+const EventEmitter = require('nanobus');
+const inherits = require('inherits');
 
-const Node = require('./node')
-const Identifier = require('./identifier')
+const Node = require('./node');
+const Identifier = require('./identifier');
 
-inherits(Logoot, EventEmitter)
+// eslint-disable-next-line no-use-before-define
+inherits(Logoot, EventEmitter);
 
-const MIN = 0
-const MAX = Number.MAX_SAFE_INTEGER
-const BASE = Math.pow(2, 8)
+const MIN = 0;
+const MAX = Number.MAX_SAFE_INTEGER;
+const BASE = Math.pow(2, 8);
 
-function Logoot (site, state, bias) {
-  EventEmitter.call(this)
+function Logoot(site, state, bias) {
+	EventEmitter.call(this);
 
-  this.site = site
-  this.clock = 0
-  this._deleteQueue = []
-  this._bias = bias || 15
+	this.site = site;
+	this.clock = 0;
+	this._deleteQueue = [];
+	this._bias = bias || 15;
 
-  Node.compare = (a, b) => { return a.compare(b) }
+	Node.compare = (a, b) => {
+		return a.compare(b);
+	};
 
-  this._root = new Node()
-  this._root.setEmpty(true)
-  this._root.addChild(new Node(new Identifier(MIN, null, null)))
-  this._root.addChild(new Node(new Identifier(BASE, null, null)))
+	this._root = new Node();
+	this._root.setEmpty(true);
+	this._root.addChild(new Node(new Identifier(MIN, null, null)));
+	this._root.addChild(new Node(new Identifier(BASE, null, null)));
 
-  if (state) this.setState(state)
+	if (state) this.setState(state);
 }
 
-function parseId (id) {
-  if (id) return new Identifier(id.int, id.site, id.clock)
+function parseId(id) {
+	if (id) return new Identifier(id.int, id.site, id.clock);
 }
-function parseOperation (operation) {
-  operation.parsed = true
-  operation.position = operation.position.map(parseId)
-  return operation
+function parseOperation(operation) {
+	operation.parsed = true;
+	operation.position = operation.position.map(parseId);
+	return operation;
 }
-function arePositionsEqual (a, b) {
-  if (a.length !== b.length) return false
-  return !a.some((id, index) => {
-    return id.compare(b[index]) !== 0
-  })
-}
-
-Logoot.prototype.receive = function (operation) {
-  if (!operation.parsed) operation = parseOperation(operation)
-  if (operation.type === 'insert') {
-    const deleteQueueIndex = this._deleteQueue.findIndex(op => {
-      return arePositionsEqual(op.position, operation.position)
-    })
-    if (deleteQueueIndex > -1) {
-      this._deleteQueue.splice(deleteQueueIndex, 1)
-      return
-    }
-    const existingNode = this._root.getChildByPath(operation.position, false)
-    if (existingNode) return // invalid duplication, ignore it
-
-    const node = this._root.getChildByPath(operation.position, true)
-    node.value = operation.value
-    node.setEmpty(false)
-    const index = node.getOrder()
-
-    this.emit('insert', { value: node.value, index })
-  } else if (operation.type === 'delete') {
-    const node = this._root.getChildByPath(operation.position, false)
-    if (node && !node.empty) {
-      const index = node.getOrder()
-      const value = node.value
-      node.setEmpty(true)
-      node.trimEmpty()
-
-      this.emit('delete', { value, index })
-    } else {
-      if (!this._deleteQueue.some(op => {
-        return arePositionsEqual(op.position, operation.position)
-      })) {
-        this._deleteQueue.push(operation)
-      }
-    }
-  }
+function arePositionsEqual(a, b) {
+	if (a.length !== b.length) return false;
+	return !a.some((id, index) => {
+		return id.compare(b[index]) !== 0;
+	});
 }
 
-Logoot.prototype.insert = function (value, index) {
-  value.split('').forEach((character, i) => {
-    this._insert(character, index + i)
-  })
+Logoot.prototype.receive = function(operation) {
+	if (!operation.parsed) operation = parseOperation(operation);
+	if (operation.type === 'insert') {
+		const deleteQueueIndex = this._deleteQueue.findIndex(op => {
+			return arePositionsEqual(op.position, operation.position);
+		});
+		if (deleteQueueIndex > -1) {
+			this._deleteQueue.splice(deleteQueueIndex, 1);
+			return;
+		}
+		const existingNode = this._root.getChildByPath(operation.position, false);
+
+		// invalid duplication, ignore it
+		if (existingNode) return;
+
+		const node = this._root.getChildByPath(operation.position, true);
+		node.value = operation.value;
+		node.setEmpty(false);
+		const index = node.getOrder();
+
+		this.emit('insert', { value: node.value, index });
+	} else if (operation.type === 'delete') {
+		const node = this._root.getChildByPath(operation.position, false);
+		if (node && !node.empty) {
+			const index = node.getOrder();
+			const value = node.value;
+			node.setEmpty(true);
+			node.trimEmpty();
+
+			this.emit('delete', { value, index });
+		} else if (
+			!this._deleteQueue.some(op => {
+				return arePositionsEqual(op.position, operation.position);
+			})
+		) {
+			this._deleteQueue.push(operation);
+		}
+	}
+};
+
+Logoot.prototype.insert = function(value, index) {
+	value.split('').forEach((character, i) => {
+		this._insert(character, index + i);
+	});
+};
+
+Logoot.prototype._insert = function(value, index) {
+	index = Math.min(index, this.length());
+
+	const prev = this._root.getChildByOrder(index);
+	const next = this._root.getChildByOrder(index + 1);
+
+	const prevPos = prev.getPath();
+	const nextPos = next.getPath();
+
+	const position = this._generatePositionBetween(prevPos, nextPos);
+
+	const node = this._root.getChildByPath(position, true);
+	node.value = value;
+	node.setEmpty(false);
+
+	this.emit('operation', { type: 'insert', position, value });
+};
+
+function randomBiasedInt(a, b, bias) {
+	return Math.floor(Math.pow(Math.random(), bias) * (b - (a + 1))) + a + 1;
+}
+function randomAlternation(bias) {
+	return Math.random() > 0.5 ? bias : 1 / bias;
+}
+function doubledBase(depth) {
+	return Math.min(BASE * Math.pow(2, depth), MAX);
 }
 
-Logoot.prototype._insert = function (value, index) {
-  index = Math.min(index, this.length())
+Logoot.prototype._generateNewIdentifier = function(prevInt, nextInt) {
+	const int = randomBiasedInt(prevInt, nextInt, randomAlternation(this._bias));
+	return new Identifier(int, this.site, this.clock++);
+};
 
-  const prev = this._root.getChildByOrder(index)
-  const next = this._root.getChildByOrder(index + 1)
+Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
+	const newPos = [];
 
-  const prevPos = prev.getPath()
-  const nextPos = next.getPath()
+	const maxLength = Math.max(prevPos.length, nextPos.length);
+	let samePrefixes = true;
 
-  const position = this._generatePositionBetween(prevPos, nextPos)
+	for (let depth = 0; depth < maxLength + 1; depth++) {
+		const DEPTH_MAX = doubledBase(depth);
+		const prevId = prevPos[depth] || new Identifier(MIN, null, null);
 
-  const node = this._root.getChildByPath(position, true)
-  node.value = value
-  node.setEmpty(false)
+		// base doubling
+		const nextId =
+			samePrefixes && nextPos[depth] ? nextPos[depth] : new Identifier(DEPTH_MAX, null, null);
 
-  this.emit('operation', { type: 'insert', position, value })
-}
+		const diff = nextId.int - prevId.int;
 
-function randomBiasedInt (a, b, bias) {
-  return Math.floor(Math.pow(Math.random(), bias) * (b - (a + 1))) + a + 1
-}
-function randomAlternation (bias) {
-  return Math.random() > 0.5 ? bias : 1 / bias
-}
-function doubledBase (depth) {
-  return Math.min(BASE * Math.pow(2, depth), MAX)
-}
+		if (diff > 1) {
+			// enough room for integer between prevInt and nextInt
+			newPos.push(this._generateNewIdentifier(prevId.int, nextId.int));
+			break;
+		} else {
+			// eslint-disable-next-line no-unused-expressions
+			if (prevId.site === null && depth > 0) prevId.site === this.site;
+			newPos.push(prevId);
+			if (prevId.compare(nextId) !== 0) samePrefixes = false;
+		}
+	}
 
-Logoot.prototype._generateNewIdentifier = function (prevInt, nextInt) {
-  const int = randomBiasedInt(prevInt, nextInt, randomAlternation(this._bias))
-  return new Identifier(int, this.site, this.clock++)
-}
+	return newPos;
+};
 
-Logoot.prototype._generatePositionBetween = function (prevPos, nextPos) {
-  const newPos = []
+Logoot.prototype.delete = function(index, length = 1) {
+	for (let i = 0; i < length; i++) {
+		this._delete(index);
+	}
+};
 
-  const maxLength = Math.max(prevPos.length, nextPos.length)
-  var samePrefixes = true
+Logoot.prototype._delete = function(index) {
+	const node = this._root.getChildByOrder(index + 1);
+	if (!node || node.id.site === null) return;
 
-  for (var depth = 0; depth < maxLength + 1; depth++) {
-    const DEPTH_MAX = doubledBase(depth)
-    const prevId = prevPos[depth] || new Identifier(MIN, null, null)
-    const nextId = (samePrefixes && nextPos[depth])
-      ? nextPos[depth]
-      : new Identifier(DEPTH_MAX, null, null) // base doubling
-
-    const diff = nextId.int - prevId.int
-
-    if (diff > 1) { // enough room for integer between prevInt and nextInt
-      newPos.push(this._generateNewIdentifier(prevId.int, nextId.int))
-      break
-    } else {
-      if (prevId.site === null && depth > 0) prevId.site === this.site
-      newPos.push(prevId)
-      if (prevId.compare(nextId) !== 0) samePrefixes = false
-    }
-  }
-
-  return newPos
-}
-
-Logoot.prototype.delete = function (index, length = 1) {
-  for (var i = 0; i < length; i++) {
-    this._delete(index)
-  }
-}
-
-Logoot.prototype._delete = function (index) {
-  const node = this._root.getChildByOrder(index + 1)
-  if (!node || node.id.site == null) return
-
-  const position = node.getPath()
-  node.setEmpty(true)
-  node.trimEmpty()
-  this.emit('operation', { type: 'delete', position })
-}
+	const position = node.getPath();
+	node.setEmpty(true);
+	node.trimEmpty();
+	this.emit('operation', { type: 'delete', position });
+};
 
 // construct a string from the sequence
-Logoot.prototype.value = function () {
-  const arr = []
-  this._root.walk(node => {
-    if (!node.empty) arr.push(node.value)
-  })
-  return arr.join('')
-}
+Logoot.prototype.value = function() {
+	const arr = [];
+	this._root.walk(node => {
+		if (!node.empty) arr.push(node.value);
+	});
+	return arr.join('');
+};
 
-Logoot.prototype.length = function () {
-  return this._root.size - 2
-}
+Logoot.prototype.length = function() {
+	return this._root.size - 2;
+};
 
-Logoot.prototype.replaceRange = function (value, start, length) {
-  this.delete(start, length)
-  this.insert(value, start)
-}
+Logoot.prototype.replaceRange = function(value, start, length) {
+	this.delete(start, length);
+	this.insert(value, start);
+};
 
-Logoot.prototype.setValue = function (value) {
-  this.replaceRange(value, 0, this.length())
-}
+Logoot.prototype.setValue = function(value) {
+	this.replaceRange(value, 0, this.length());
+};
 
-Logoot.prototype.getState = function () {
-  return JSON.stringify({
-    root: this._root,
-    deleteQueue: this._deleteQueue
-  }, (key, value) => key === 'parent' ? undefined : value)
-}
+Logoot.prototype.getState = function() {
+	return JSON.stringify(
+		{
+			root: this._root,
+			deleteQueue: this._deleteQueue
+		},
+		(key, value) => (key === 'parent' ? undefined : value)
+	);
+};
 
-Logoot.prototype.setState = function (state) {
-  const parsed = JSON.parse(state)
+Logoot.prototype.setState = function(state) {
+	const parsed = JSON.parse(state);
 
-  function parseNode (n, parent) {
-    const node = new Node(parseId(n.id), n.value)
-    node.parent = parent
-    node.children = n.children.map(c => parseNode(c, node))
-    node.size = n.size
-    node.empty = n.empty
-    return node
-  }
+	function parseNode(n, parent) {
+		const node = new Node(parseId(n.id), n.value);
+		node.parent = parent;
+		node.children = n.children.map(c => parseNode(c, node));
+		node.size = n.size;
+		node.empty = n.empty;
+		return node;
+	}
 
-  this._root = parseNode(parsed.root, null)
-  this._deleteQueue = parsed.deleteQueue
-}
+	this._root = parseNode(parsed.root, null);
+	this._deleteQueue = parsed.deleteQueue;
+};
 
-module.exports = Logoot
+module.exports = Logoot;
 
 },{"./identifier":8,"./node":10,"inherits":1,"nanobus":3}],10:[function(require,module,exports){
+function Node(id, value) {
+	this.id = id;
+	this.value = value || null;
 
-function Node (id, value) {
-  this.id = id
-  this.value = value || null
+	this.children = [];
+	this.parent = null;
 
-  this.children = []
-  this.parent = null
-
-  this.size = 1
-  this.empty = false
+	this.size = 1;
+	this.empty = false;
 }
 
-Node.prototype._leftmostSearch = function (child) {
-  var L = 0
-  var R = this.children.length
-  var M
-  while (L < R) {
-    M = Math.floor((L + R) / 2)
-    if (Node.compare(this.children[M].id, child.id) < 0) {
-      L = M + 1
-    } else {
-      R = M
-    }
-  }
-  return L
-}
+Node.prototype._leftmostSearch = function(child) {
+	let L = 0;
+	let R = this.children.length;
+	let M;
+	while (L < R) {
+		M = Math.floor((L + R) / 2);
+		if (Node.compare(this.children[M].id, child.id) < 0) {
+			L = M + 1;
+		} else {
+			R = M;
+		}
+	}
+	return L;
+};
 
-Node.prototype._exactSearch = function (child) {
-  var L = 0
-  var R = this.children.length - 1
-  var M
-  while (L <= R) {
-    M = Math.floor((L + R) / 2)
-    var comp = Node.compare(this.children[M].id, child.id)
-    if (comp < 0) {
-      L = M + 1
-    } else if (comp > 0) {
-      R = M - 1
-    } else {
-      return M
-    }
-  }
-  return null
-}
+Node.prototype._exactSearch = function(child) {
+	let L = 0;
+	let R = this.children.length - 1;
+	let M;
+	while (L <= R) {
+		M = Math.floor((L + R) / 2);
+		const comp = Node.compare(this.children[M].id, child.id);
+		if (comp < 0) {
+			L = M + 1;
+		} else if (comp > 0) {
+			R = M - 1;
+		} else {
+			return M;
+		}
+	}
+	return null;
+};
 
-Node.prototype.adjustSize = function (amount) {
-  this.size += amount
-  if (this.parent) this.parent.adjustSize(amount)
-}
+Node.prototype.adjustSize = function(amount) {
+	this.size += amount;
+	if (this.parent) this.parent.adjustSize(amount);
+};
 
-Node.prototype.addChild = function (child) {
-  child.parent = this
-  const index = this._leftmostSearch(child)
-  this.children.splice(index, 0, child)
-  this.adjustSize(child.size)
-  return child
-}
+Node.prototype.addChild = function(child) {
+	child.parent = this;
+	const index = this._leftmostSearch(child);
+	this.children.splice(index, 0, child);
+	this.adjustSize(child.size);
+	return child;
+};
 
-Node.prototype.removeChild = function (child) {
-  const index = this._exactSearch(child)
-  if (index == null) return
-  this.children.splice(index, 1)
-  this.adjustSize(child.size)
-  return child
-}
+Node.prototype.removeChild = function(child) {
+	const index = this._exactSearch(child);
+	if (index === null) return;
+	this.children.splice(index, 1);
+	this.adjustSize(child.size);
+	return child;
+};
 
-Node.prototype.setEmpty = function (bool = true) {
-  if (bool === this.empty) return
-  this.empty = bool
-  if (bool) {
-    this.adjustSize(-1)
-  } else {
-    this.adjustSize(1)
-  }
-}
+Node.prototype.setEmpty = function(bool = true) {
+	if (bool === this.empty) return;
+	this.empty = bool;
+	if (bool) {
+		this.adjustSize(-1);
+	} else {
+		this.adjustSize(1);
+	}
+};
 
-Node.prototype.trimEmpty = function () {
-  if (!this.parent) return
-  if (this.empty && this.children.length === 0) {
-    this.parent.removeChild(this)
-    this.parent.trimEmpty()
-  }
-}
+Node.prototype.trimEmpty = function() {
+	if (!this.parent) return;
+	if (this.empty && this.children.length === 0) {
+		this.parent.removeChild(this);
+		this.parent.trimEmpty();
+	}
+};
 
-Node.prototype.getPath = function () {
-  if (!this.parent) return []
-  return this.parent.getPath().concat([this.id])
-}
+Node.prototype.getPath = function() {
+	if (!this.parent) return [];
+	return this.parent.getPath().concat([this.id]);
+};
 
-Node.prototype.getChildById = function (id) {
-  const index = this._exactSearch({ id })
-  if (index == null) return null
-  return this.children[index]
-}
+Node.prototype.getChildById = function(id) {
+	const index = this._exactSearch({ id });
+	if (index === null) return null;
+	return this.children[index];
+};
 
-Node.prototype.getChildByPath = function (path, build) {
-  var current = this
-  var next = null
-  path.every(id => {
-    next = current.getChildById(id)
-    if (!next && !build) {
-      current = null
-      return false
-    }
-    if (!next && build) {
-      next = new Node(id)
-      current.addChild(next)
-      next.setEmpty(true)
-    }
-    current = next
-    return true
-  })
-  return current
-}
+Node.prototype.getChildByPath = function(path, build) {
+	let current = this;
+	let next = null;
+	path.every(id => {
+		next = current.getChildById(id);
+		if (!next && !build) {
+			current = null;
+			return false;
+		}
+		if (!next && build) {
+			next = new Node(id);
+			current.addChild(next);
+			next.setEmpty(true);
+		}
+		current = next;
+		return true;
+	});
+	return current;
+};
 
-Node.prototype.getOrder = function () {
-  if (!this.parent) return -1 // -1 to discount the left end node
-  var order = this.parent.getOrder()
-  if (!this.parent.empty) order += 1
+Node.prototype.getOrder = function() {
+	// -1 to discount the left end node
+	if (!this.parent) return -1;
+	let order = this.parent.getOrder();
+	if (!this.parent.empty) order += 1;
 
-  for (var i = 0; i < this.parent.children.length; i++) {
-    if (Node.compare(this.parent.children[i].id, this.id) === 0) break
-    order += this.parent.children[i].size
-  }
+	for (let i = 0; i < this.parent.children.length; i++) {
+		if (Node.compare(this.parent.children[i].id, this.id) === 0) break;
+		order += this.parent.children[i].size;
+	}
 
-  return order
-}
+	return order;
+};
 
-Node.prototype.getChildByOrder = function (index) {
-  if (index === 0 && !this.empty) return this
+Node.prototype.getChildByOrder = function(index) {
+	if (index === 0 && !this.empty) return this;
 
-  var left = this.empty ? 0 : 1
-  var right = left
-  for (var i = 0; i < this.children.length; i++) {
-    right += this.children[i].size
-    if (left <= index && right > index) {
-      return this.children[i].getChildByOrder(index - left)
-    }
-    left = right
-  }
+	let left = this.empty ? 0 : 1;
+	let right = left;
+	for (let i = 0; i < this.children.length; i++) {
+		right += this.children[i].size;
+		if (left <= index && right > index) {
+			return this.children[i].getChildByOrder(index - left);
+		}
+		left = right;
+	}
 
-  return null
-}
+	return null;
+};
 
-Node.prototype.walk = function (fn) {
-  fn(this)
-  this.children.forEach(child => {
-    child.walk(fn)
-  })
-}
+Node.prototype.walk = function(fn) {
+	fn(this);
+	this.children.forEach(child => {
+		child.walk(fn);
+	});
+};
 
-module.exports = Node
+module.exports = Node;
 
 },{}],11:[function(require,module,exports){
+/* eslint-disable no-undef */
 const QuillCursors = require('quill-cursors');
 const host = location.origin.replace(/^http/, 'ws');
 const Logoot = require('../../CRDT/src/index');
@@ -775,8 +784,7 @@ const quill = new Quill('#editor', {
 
 const socket = new WebSocket(host);
 
-socket.onopen = function(e) {};
-let socketId = -1;
+socket.onopen = function(_) {};
 
 let initialized = false;
 socket.onmessage = function(event) {
@@ -788,7 +796,6 @@ socket.onmessage = function(event) {
 		cursor = { index: 0 };
 	}
 	if (data.assignSocketId) {
-		socketId = data.assignSocketId;
 		l1.setState(data.initialValue);
 		quill.setText(l1.value());
 		initialized = true;
@@ -800,7 +807,7 @@ socket.onmessage = function(event) {
 	}
 };
 
-l1.on('operation', (op) => {
+l1.on('operation', op => {
 	if (initialized && (op.type === 'insert' || op.type === 'delete')) {
 		socket.send(JSON.stringify(op));
 	}
