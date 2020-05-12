@@ -26,7 +26,7 @@ describe('Offline Support', () => {
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.equal(crdt1.getState().root, crdt2.getState().root);
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 
 	it('should converge when both editors start with same state and go offline', () => {
@@ -42,7 +42,7 @@ describe('Offline Support', () => {
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.equal(crdt1.getState().root, crdt2.getState().root);
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 
 	it('should converge when both editors are offline and delete the same text', () => {
@@ -56,6 +56,6 @@ describe('Offline Support', () => {
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.equal(crdt1.getState().root, crdt2.getState().root);
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 });
