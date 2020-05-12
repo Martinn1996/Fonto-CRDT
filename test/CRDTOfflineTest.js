@@ -58,4 +58,18 @@ describe('Offline Support', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
+
+	it('should converge when both editors are offline and delete the same text with some text left', () => {
+		crdt1.setValue('testing');
+		crdt2.setState(crdt1.getState());
+
+		crdt1.delete(0, 4);
+		crdt2.delete(0, 4);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
+	});
 });
