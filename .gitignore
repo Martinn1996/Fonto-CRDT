@@ -1,3 +1,7 @@
 node_modules/
 src/editor/static/bundle.js
 .DS_STORE
+
+coverage.lcov
+
+.nyc_output/

@@ -1,6 +1,11 @@
 language: node_js
 node_js:
   - 14
+install:
+  - npm install
+  - npm install -g codecov
 script:
   - npm run checkstyle
   - npm test
+  - npm run report-coverage
+  - codecov
