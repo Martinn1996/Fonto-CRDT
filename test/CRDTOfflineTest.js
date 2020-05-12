@@ -55,6 +55,8 @@ describe('Offline Support', () => {
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 
+		assert.equal(crdt1.value(), '');
+		assert.equal(crdt2.value(), '');
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
@@ -69,6 +71,8 @@ describe('Offline Support', () => {
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 
+		assert.equal(crdt1.value(), 'ing');
+		assert.equal(crdt2.value(), 'ing');
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
