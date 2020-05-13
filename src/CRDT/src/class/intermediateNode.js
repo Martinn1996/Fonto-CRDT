@@ -10,6 +10,7 @@ class IntermediateNode extends Node {
 		super(id);
 
 		this.empty = true;
+		super.type = 'Intermediate';
 	}
 }
 

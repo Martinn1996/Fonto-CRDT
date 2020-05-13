@@ -5,6 +5,7 @@ class Node {
 		this.parent = null;
 		this.size = 1;
 		this.empty = false;
+		this.type = 'Node';
 	}
 
 	_leftmostSearch(child) {

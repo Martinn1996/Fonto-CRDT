@@ -9,6 +9,7 @@ class CharacterNode extends Node {
 	constructor(id, value) {
 		super(id);
 		this.value = value || null;
+		super.type = 'Character';
 	}
 }
 

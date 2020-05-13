@@ -12,6 +12,7 @@ class BlockNode extends Node {
 
 		this.blockId = blockId;
 		this.empty = true;
+		super.type = 'Block';
 	}
 }
 
