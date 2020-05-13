@@ -1,8 +1,11 @@
 const EventEmitter = require('nanobus');
 const inherits = require('inherits');
 
-const Node = require('./node');
+const Node = require('./class/node');
+const CharacterNode = require('./class/characterNode');
 const Identifier = require('./identifier');
+
+const createNodeFromType = require('./util/getNodeType');
 
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
@@ -56,19 +59,18 @@ Logoot.prototype.receive = function(operation) {
 			this._deleteQueue.splice(deleteQueueIndex, 1);
 			return;
 		}
-		const existingNode = this._root.getChildByPath(operation.position, false);
+		const existingNode = this._root.getChildByPath(operation.position, false, CharacterNode);
 
 		// invalid duplication, ignore it
 		if (existingNode) return;
-
-		const node = this._root.getChildByPath(operation.position, true);
+		const node = this._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
 		const index = node.getOrder();
 
 		this.emit('insert', { value: node.value, index });
 	} else if (operation.type === 'delete') {
-		const node = this._root.getChildByPath(operation.position, false);
+		const node = this._root.getChildByPath(operation.position, false, CharacterNode);
 		if (node && !node.empty) {
 			const index = node.getOrder();
 			const value = node.value;
@@ -103,7 +105,7 @@ Logoot.prototype._insert = function(value, index) {
 
 	const position = this._generatePositionBetween(prevPos, nextPos);
 
-	const node = this._root.getChildByPath(position, true);
+	const node = this._root.getChildByPath(position, true, CharacterNode);
 	node.value = value;
 	node.setEmpty(false);
 
@@ -208,7 +210,8 @@ Logoot.prototype.setState = function(state) {
 	const parsed = JSON.parse(state);
 
 	function parseNode(n, parent) {
-		const node = new Node(parseId(n.id), n.value);
+		const NodeType = createNodeFromType(n.type);
+		const node = new NodeType(parseId(n.id), n.value);
 		node.parent = parent;
 		node.children = n.children.map(c => parseNode(c, node));
 		node.size = n.size;
