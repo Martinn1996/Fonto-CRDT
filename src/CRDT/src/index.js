@@ -5,7 +5,7 @@ const Node = require('./class/node');
 const CharacterNode = require('./class/characterNode');
 const Identifier = require('./identifier');
 
-const createNodeFromType = require('./util/createNodeOnType');
+const createNodeFromType = require('./util/getNodeType');
 
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
