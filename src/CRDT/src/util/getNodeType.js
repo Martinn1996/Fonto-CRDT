@@ -1,5 +1,5 @@
 const CharacterNode = require('../class/characterNode');
-const BlockNode = require('../class/BlockNode');
+const BlockNode = require('../class/blockNode');
 const IntermediateNode = require('../class/intermediateNode');
 const Node = require('../class/node');
 
