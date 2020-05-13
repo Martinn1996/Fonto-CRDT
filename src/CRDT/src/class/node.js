@@ -6,6 +6,7 @@ class Node {
 		this.size = 1;
 		this.empty = false;
 	}
+
 	_leftmostSearch(child) {
 		let L = 0;
 		let R = this.children.length;
@@ -20,6 +21,7 @@ class Node {
 		}
 		return L;
 	}
+
 	_exactSearch(child) {
 		let L = 0;
 		let R = this.children.length - 1;
@@ -37,10 +39,12 @@ class Node {
 		}
 		return null;
 	}
+
 	adjustSize(amount) {
 		this.size += amount;
 		if (this.parent) this.parent.adjustSize(amount);
 	}
+
 	addChild(child) {
 		child.parent = this;
 		const index = this._leftmostSearch(child);
@@ -48,6 +52,7 @@ class Node {
 		this.adjustSize(child.size);
 		return child;
 	}
+
 	removeChild(child) {
 		const index = this._exactSearch(child);
 		if (index === null) return;
@@ -55,6 +60,7 @@ class Node {
 		this.adjustSize(child.size);
 		return child;
 	}
+
 	setEmpty(bool = true) {
 		if (bool === this.empty) return;
 		this.empty = bool;
@@ -64,6 +70,7 @@ class Node {
 			this.adjustSize(1);
 		}
 	}
+
 	trimEmpty() {
 		if (!this.parent) return;
 		if (this.empty && this.children.length === 0) {
@@ -71,15 +78,18 @@ class Node {
 			this.parent.trimEmpty();
 		}
 	}
+
 	getPath() {
 		if (!this.parent) return [];
 		return this.parent.getPath().concat([this.id]);
 	}
+
 	getChildById(id) {
 		const index = this._exactSearch({ id });
 		if (index === null) return null;
 		return this.children[index];
 	}
+
 	getChildByPath(path, build, NodeType) {
 		let current = this;
 		let next = null;
@@ -99,6 +109,7 @@ class Node {
 		});
 		return current;
 	}
+
 	getOrder() {
 		// -1 to discount the left end node
 		if (!this.parent) return -1;
@@ -110,6 +121,7 @@ class Node {
 		}
 		return order;
 	}
+
 	getChildByOrder(index) {
 		if (index === 0 && !this.empty) return this;
 		let left = this.empty ? 0 : 1;
@@ -123,6 +135,7 @@ class Node {
 		}
 		return null;
 	}
+
 	walk(fn) {
 		fn(this);
 		this.children.forEach(child => {

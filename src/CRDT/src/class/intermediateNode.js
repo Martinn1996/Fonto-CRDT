@@ -1,18 +1,17 @@
 const Node = require('./node');
 
-/**
- * Node for resolving conflicts
- * @param {*} id for Logoot
- */
-function IntermediateNode(id) {
-	// Call constructor of parent class
-	Node.call(this, id);
+class IntermediateNode extends Node {
+	/**
+	 * Constructor for creating intermediate nodes
+	 * @param {*} id for Logoot
+	 */
+	constructor(id) {
+		// Call constructor of parent class
+		super(id);
 
-	this.empty = true;
+		this.empty = true;
+	}
 }
-
-// Extend Node class
-IntermediateNode.prototype = Object.create(Node.prototype);
 
 // Export class
 module.exports = IntermediateNode;
