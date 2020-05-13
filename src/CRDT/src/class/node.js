@@ -1,6 +1,5 @@
-function Node(id, value) {
+function Node(id) {
 	this.id = id;
-	this.value = value || null;
 
 	this.children = [];
 	this.parent = null;

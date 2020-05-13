@@ -1,7 +1,8 @@
 const EventEmitter = require('nanobus');
 const inherits = require('inherits');
 
-const Node = require('./node');
+const Node = require('./class/node');
+const CharacterNode = require('./class/characterNode');
 const Identifier = require('./identifier');
 
 // eslint-disable-next-line no-use-before-define
@@ -208,7 +209,7 @@ Logoot.prototype.setState = function(state) {
 	const parsed = JSON.parse(state);
 
 	function parseNode(n, parent) {
-		const node = new Node(parseId(n.id), n.value);
+		const node = new CharacterNode(parseId(n.id), n.value);
 		node.parent = parent;
 		node.children = n.children.map(c => parseNode(c, node));
 		node.size = n.size;
