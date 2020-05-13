@@ -61,7 +61,6 @@ Logoot.prototype.receive = function(operation) {
 
 		// invalid duplication, ignore it
 		if (existingNode) return;
-
 		const node = this._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
