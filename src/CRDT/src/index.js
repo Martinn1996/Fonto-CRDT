@@ -57,19 +57,19 @@ Logoot.prototype.receive = function(operation) {
 			this._deleteQueue.splice(deleteQueueIndex, 1);
 			return;
 		}
-		const existingNode = this._root.getChildByPath(operation.position, false);
+		const existingNode = this._root.getChildByPath(operation.position, false, CharacterNode);
 
 		// invalid duplication, ignore it
 		if (existingNode) return;
 
-		const node = this._root.getChildByPath(operation.position, true);
+		const node = this._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
 		const index = node.getOrder();
 
 		this.emit('insert', { value: node.value, index });
 	} else if (operation.type === 'delete') {
-		const node = this._root.getChildByPath(operation.position, false);
+		const node = this._root.getChildByPath(operation.position, false, CharacterNode);
 		if (node && !node.empty) {
 			const index = node.getOrder();
 			const value = node.value;
@@ -104,7 +104,7 @@ Logoot.prototype._insert = function(value, index) {
 
 	const position = this._generatePositionBetween(prevPos, nextPos);
 
-	const node = this._root.getChildByPath(position, true);
+	const node = this._root.getChildByPath(position, true, CharacterNode);
 	node.value = value;
 	node.setEmpty(false);
 

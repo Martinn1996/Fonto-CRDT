@@ -91,7 +91,7 @@ Node.prototype.getChildById = function(id) {
 	return this.children[index];
 };
 
-Node.prototype.getChildByPath = function(path, build) {
+Node.prototype.getChildByPath = function(path, build, NodeType) {
 	let current = this;
 	let next = null;
 	path.every(id => {
@@ -101,7 +101,7 @@ Node.prototype.getChildByPath = function(path, build) {
 			return false;
 		}
 		if (!next && build) {
-			next = new Node(id);
+			next = NodeType ? new NodeType.prototype.constructor(id) : new Node(id);
 			current.addChild(next);
 			next.setEmpty(true);
 		}

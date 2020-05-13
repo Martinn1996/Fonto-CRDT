@@ -16,7 +16,7 @@ function CharacterNode(id, value) {
 CharacterNode.prototype = Object.create(Node.prototype);
 
 // Overwrite method
-Node.prototype.getChildByPath = function(path, build) {
+CharacterNode.prototype.getChildByPath = function(path, build) {
 	let current = this;
 	let next = null;
 	path.every(id => {
