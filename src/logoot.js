@@ -51,7 +51,7 @@ function arePositionsEqual(a, b) {
 	});
 }
 
-Logoot.prototype.receive = function (operation) {
+Logoot.prototype.receive = function(operation) {
 	if (!operation.parsed) operation = parseOperation(operation);
 	switch (operation.type) {
 		case 'insert':
@@ -66,7 +66,7 @@ Logoot.prototype.receive = function (operation) {
 	}
 };
 
-Logoot.prototype._receiveInsert = function (operation) {
+Logoot.prototype._receiveInsert = function(operation) {
 	const deleteQueueIndex = this._deleteQueue.findIndex(op => {
 		return arePositionsEqual(op.position, operation.position);
 	});
@@ -86,7 +86,7 @@ Logoot.prototype._receiveInsert = function (operation) {
 	this.emit('insert', { value: node.value, index });
 };
 
-Logoot.prototype._receiveDelete = function (operation) {
+Logoot.prototype._receiveDelete = function(operation) {
 	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
 	if (node && !node.empty) {
 		const index = node.getOrder();
@@ -105,7 +105,7 @@ Logoot.prototype._receiveDelete = function (operation) {
 };
 
 // To fix
-Logoot.prototype._receiveInsertBlock = function (operation) {
+Logoot.prototype._receiveInsertBlock = function(operation) {
 	const deleteQueueIndex = this._deleteQueue.findIndex(op => {
 		return arePositionsEqual(op.position, operation.position);
 	});
@@ -126,13 +126,13 @@ Logoot.prototype._receiveInsertBlock = function (operation) {
 	this.emit('insertBlock', { blockId: blockId, index });
 };
 
-Logoot.prototype.insert = function (value, index) {
+Logoot.prototype.insert = function(value, index) {
 	value.split('').forEach((character, i) => {
 		this._insert(character, index + i);
 	});
 };
 
-Logoot.prototype._insert = function (value, index) {
+Logoot.prototype._insert = function(value, index) {
 	index = Math.min(index, this.length());
 
 	const prev = this._root.getChildByOrder(index);
@@ -160,12 +160,12 @@ function doubledBase(depth) {
 	return Math.min(BASE * Math.pow(2, depth), MAX);
 }
 
-Logoot.prototype._generateNewIdentifier = function (prevInt, nextInt) {
+Logoot.prototype._generateNewIdentifier = function(prevInt, nextInt) {
 	const int = randomBiasedInt(prevInt, nextInt, randomAlternation(this._bias));
 	return new Identifier(int, this.site, this.clock++);
 };
 
-Logoot.prototype._generatePositionBetween = function (prevPos, nextPos) {
+Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
 	const newPos = [];
 
 	const maxLength = Math.max(prevPos.length, nextPos.length);
@@ -196,13 +196,13 @@ Logoot.prototype._generatePositionBetween = function (prevPos, nextPos) {
 	return newPos;
 };
 
-Logoot.prototype.delete = function (index, length = 1) {
+Logoot.prototype.delete = function(index, length = 1) {
 	for (let i = 0; i < length; i++) {
 		this._delete(index);
 	}
 };
 
-Logoot.prototype._delete = function (index) {
+Logoot.prototype._delete = function(index) {
 	const node = this._root.getChildByOrder(index + 1);
 	if (!node || node.id.site === null) return;
 
@@ -213,7 +213,7 @@ Logoot.prototype._delete = function (index) {
 };
 
 // construct a string from the sequence
-Logoot.prototype.value = function () {
+Logoot.prototype.value = function() {
 	const arr = [];
 	this._root.walk(node => {
 		if (!node.empty) arr.push(node.value);
@@ -221,20 +221,20 @@ Logoot.prototype.value = function () {
 	return arr.join('');
 };
 
-Logoot.prototype.length = function () {
+Logoot.prototype.length = function() {
 	return this._root.size - 2;
 };
 
-Logoot.prototype.replaceRange = function (value, start, length) {
+Logoot.prototype.replaceRange = function(value, start, length) {
 	this.delete(start, length);
 	this.insert(value, start);
 };
 
-Logoot.prototype.setValue = function (value) {
+Logoot.prototype.setValue = function(value) {
 	this.replaceRange(value, 0, this.length());
 };
 
-Logoot.prototype.getState = function () {
+Logoot.prototype.getState = function() {
 	return JSON.stringify(
 		{
 			root: this._root,
@@ -244,7 +244,7 @@ Logoot.prototype.getState = function () {
 	);
 };
 
-Logoot.prototype.setState = function (state) {
+Logoot.prototype.setState = function(state) {
 	const parsed = JSON.parse(state);
 
 	function parseNode(n, parent) {
@@ -271,7 +271,7 @@ Logoot.prototype.setState = function (state) {
  * @param { * } index the offset
  * @param { * } block to write to
  */
-Logoot.prototype.insertBlock = function (value, index, block) {
+Logoot.prototype.insertBlock = function(value, index, block) {
 	// Initialise node for insertion
 	let node;
 
@@ -293,7 +293,7 @@ Logoot.prototype.insertBlock = function (value, index, block) {
 /**
  * Places the node in the tree
  */
-Logoot.prototype._allocateBlock = function () {
+Logoot.prototype._allocateBlock = function() {
 	// Gets the neighbor nodes
 	const prev = this._root.getChildByOrder(0);
 	const next = this._root.getChildByOrder(1);
@@ -313,14 +313,14 @@ Logoot.prototype._allocateBlock = function () {
 
 	// Create emit operation
 	this.emit('operation', { type: 'insertBlock', position, blockId });
-}
+};
 
 /**
  * Breadth-first search for blocks on id
  * @param { * } id for searching block
  * @return { * } block node with corresponding id
  */
-Logoot.prototype._searchBlock = function (id) {
+Logoot.prototype._searchBlock = function(id) {
 	// Initialise queue
 	const queue = [];
 	queue.push(this.root);
@@ -343,6 +343,6 @@ Logoot.prototype._searchBlock = function (id) {
 
 	// Invalid
 	return null;
-}
+};
 
 module.exports = Logoot;
