@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const QuillCursors = require('quill-cursors');
 const host = location.origin.replace(/^http/, 'ws');
-const Logoot = require('../../CRDT/src/index');
+const Logoot = require('../../src/logoot');
 const l1 = new Logoot('site1');
 
 Quill.register('modules/cursors', QuillCursors);
