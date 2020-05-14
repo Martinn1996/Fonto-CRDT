@@ -1,8 +1,9 @@
 const randomstring = require('randomstring');
 
 /**
- * Returns a random string with parameter length.
- * @param {*} length of random string
+ *
+ * @param {*} length
+ * @return {*} returns a randomized string of length
  */
 function generateCode(length) {
 	return randomstring.generate({
