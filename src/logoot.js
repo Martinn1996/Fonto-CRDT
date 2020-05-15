@@ -4,7 +4,7 @@ const inherits = require('inherits');
 const Node = require('./class/node');
 const CharacterNode = require('./class/characterNode');
 const Identifier = require('./identifier');
-const BlockNode = require('./class/blockNode');
+// const BlockNode = require('./class/blockNode');
 
 const createNodeFromType = require('./util/getNodeType');
 const generateString = require('./util/generateCode');
@@ -305,16 +305,14 @@ Logoot.prototype._allocateBlock = function() {
 
 	// Generates the position
 	const position = this._generatePositionBetween(prevPos, nextPos);
-
 	// Create node
 	const node = this._root.getChildByPath(position, true, BlockNode);
 	node.setEmpty(true);
 	const blockId = generateString(5);
 	node.blockId = blockId;
-
+	// console.log(node.getChildren());
 	// Create emit operation
 	this.emit('operation', { type: 'insertBlock', position, blockId });
-
 	return node;
 };
 
@@ -333,19 +331,41 @@ Logoot.prototype._searchBlock = function(id) {
 		// Get first node in the queue
 		const node = queue.shift();
 
-		// Checks for blocknode and id
-		if (node instanceof BlockNode && node.blockId === id) {
-			return node;
-		}
-
-		// Add children to the queue
-		for (const child of node.children) {
-			queue.push(child);
-		}
+		// if (node instanceof BlockNode) {
+		// 	if (node.blockId === id) {
+		// 		return node;
+		// 	} else {
+		// } else {
+		// 	// Add children to the queue
+		// 	for (const child of node.children) {
+		// 		queue.push(child);
+		// 	}
+		// }
 	}
 
 	// Invalid
 	return null;
 };
+
+class BlockNode extends Node {
+	/**
+	 * Constructor for creating block nodes
+	 * @param {*} id for Logoot
+	 * @param {*} blockId for refering to blocks
+	 */
+	constructor(id, blockId) {
+		// Call constructor of parent class
+		super(id);
+		super.type = 'Block';
+
+		this.blockId = blockId;
+		this.empty = true;
+		this.logoot = new Logoot(blockId);
+	}
+
+	getChildren() {
+		return this.logoot._root.children;
+	}
+}
 
 module.exports = Logoot;

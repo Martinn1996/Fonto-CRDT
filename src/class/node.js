@@ -8,6 +8,10 @@ class Node {
 		this.type = 'Node';
 	}
 
+	getChildren() {
+		return this.children;
+	}
+
 	_leftmostSearch(child) {
 		let L = 0;
 		let R = this.children.length;
@@ -139,7 +143,7 @@ class Node {
 
 	walk(fn) {
 		fn(this);
-		this.children.forEach(child => {
+		this.getChildren().forEach(child => {
 			child.walk(fn);
 		});
 	}
