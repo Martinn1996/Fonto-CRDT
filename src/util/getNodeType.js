@@ -1,5 +1,5 @@
 const CharacterNode = require('../class/characterNode');
-const BlockNode = require('../class/blockNode');
+const BlockNode = require('../logoot').BlockNode;
 const IntermediateNode = require('../class/intermediateNode');
 const Node = require('../class/node');
 
