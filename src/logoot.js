@@ -12,6 +12,27 @@ const generateString = require('./util/generateCode');
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
 
+class BlockNode extends Node {
+	/**
+	 * Constructor for creating block nodes
+	 * @param {*} id for Logoot
+	 * @param {*} blockId for refering to blocks
+	 */
+	constructor(id, blockId) {
+		// Call constructor of parent class
+		super(id);
+		super.type = 'Block';
+
+		this.blockId = blockId;
+		this.empty = true;
+		this.logoot = new Logoot(blockId);
+	}
+
+	getChildren() {
+		return this.logoot._root.children;
+	}
+}
+
 const MIN = 0;
 const MAX = Number.MAX_SAFE_INTEGER;
 const BASE = Math.pow(2, 8);
@@ -288,6 +309,7 @@ Logoot.prototype.insertBlock = function(value, index, block) {
 		// Insert with the logoot in the block node
 		node.logoot.insert(character, index + i);
 	});
+	return node.blockId;
 };
 
 /**
@@ -324,48 +346,23 @@ Logoot.prototype._allocateBlock = function() {
 Logoot.prototype._searchBlock = function(id) {
 	// Initialise queue
 	const queue = [];
-	queue.push(this.root);
+	queue.push(this._root);
 
 	// Loop until all nodes are visited
 	while (queue.length > 0) {
 		// Get first node in the queue
 		const node = queue.shift();
 
-		// if (node instanceof BlockNode) {
-		// 	if (node.blockId === id) {
-		// 		return node;
-		// 	} else {
-		// } else {
-		// 	// Add children to the queue
-		// 	for (const child of node.children) {
-		// 		queue.push(child);
-		// 	}
-		// }
+		if (node instanceof BlockNode && node.blockId === id) {
+			return node;
+		}
+		for (const child of node.getChildren()) {
+			queue.push(child);
+		}
 	}
 
 	// Invalid
 	return null;
 };
-
-class BlockNode extends Node {
-	/**
-	 * Constructor for creating block nodes
-	 * @param {*} id for Logoot
-	 * @param {*} blockId for refering to blocks
-	 */
-	constructor(id, blockId) {
-		// Call constructor of parent class
-		super(id);
-		super.type = 'Block';
-
-		this.blockId = blockId;
-		this.empty = true;
-		this.logoot = new Logoot(blockId);
-	}
-
-	getChildren() {
-		return this.logoot._root.children;
-	}
-}
 
 module.exports = Logoot;

@@ -14,7 +14,7 @@ class Node {
 
 	_leftmostSearch(child) {
 		let L = 0;
-		let R = this.children.length;
+		let R = this.getChildren().length;
 		let M;
 		while (L < R) {
 			M = Math.floor((L + R) / 2);
@@ -29,7 +29,7 @@ class Node {
 
 	_exactSearch(child) {
 		let L = 0;
-		let R = this.children.length - 1;
+		let R = this.getChildren().length - 1;
 		let M;
 		while (L <= R) {
 			M = Math.floor((L + R) / 2);
@@ -78,7 +78,7 @@ class Node {
 
 	trimEmpty() {
 		if (!this.parent) return;
-		if (this.empty && this.children.length === 0) {
+		if (this.empty && this.getChildren().length === 0) {
 			this.parent.removeChild(this);
 			this.parent.trimEmpty();
 		}
@@ -120,9 +120,9 @@ class Node {
 		if (!this.parent) return -1;
 		let order = this.parent.getOrder();
 		if (!this.parent.empty) order += 1;
-		for (let i = 0; i < this.parent.children.length; i++) {
-			if (Node.compare(this.parent.children[i].id, this.id) === 0) break;
-			order += this.parent.children[i].size;
+		for (let i = 0; i < this.parent.getChildren().length; i++) {
+			if (Node.compare(this.parent.getChildren()[i].id, this.id) === 0) break;
+			order += this.parent.getChildren()[i].size;
 		}
 		return order;
 	}
@@ -131,10 +131,10 @@ class Node {
 		if (index === 0 && !this.empty) return this;
 		let left = this.empty ? 0 : 1;
 		let right = left;
-		for (let i = 0; i < this.children.length; i++) {
-			right += this.children[i].size;
+		for (let i = 0; i < this.getChildren().length; i++) {
+			right += this.getChildren()[i].size;
 			if (left <= index && right > index) {
-				return this.children[i].getChildByOrder(index - left);
+				return this.getChildren()[i].getChildByOrder(index - left);
 			}
 			left = right;
 		}
