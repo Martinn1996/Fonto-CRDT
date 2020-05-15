@@ -15,6 +15,9 @@ class BlockNode extends Node {
 		this.blockId = blockId;
 		this.empty = true;
 		this.logoot = new Logoot(this.blockId);
+
+		// Set root of logoot to this block node
+		super.children = this.logoot.children;
 		this.logoot._root = this;
 	}
 }
