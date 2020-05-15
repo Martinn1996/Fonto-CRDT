@@ -276,7 +276,7 @@ Logoot.prototype.insertBlock = function(value, index, block) {
 	let node;
 
 	// Checks whether the insertion is for a specific block
-	if (block !== null && block !== '') {
+	if (block !== undefined && block !== null && block !== '') {
 		node = this._searchBlock(block);
 	} else {
 		// Connect block node to current tree
@@ -292,6 +292,7 @@ Logoot.prototype.insertBlock = function(value, index, block) {
 
 /**
  * Places the node in the tree
+ * @return { * } the block node
  */
 Logoot.prototype._allocateBlock = function() {
 	// Gets the neighbor nodes
@@ -313,6 +314,8 @@ Logoot.prototype._allocateBlock = function() {
 
 	// Create emit operation
 	this.emit('operation', { type: 'insertBlock', position, blockId });
+
+	return node;
 };
 
 /**

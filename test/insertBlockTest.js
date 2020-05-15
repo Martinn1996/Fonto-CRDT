@@ -1,4 +1,4 @@
-// const assert = require('chai').assert;
+const assert = require('chai').assert;
 const Logoot = require('../src/logoot');
 
 describe('Insert', () => {
@@ -14,5 +14,12 @@ describe('Insert', () => {
 		crdt2.on('operation', op => {
 			crdt1.receive(op);
 		});
+	});
+
+	it('should create a new block node when inserting', () => {
+		crdt1.insertBlock('a', 0);
+
+		// console.log(crdt1.getState());
+		assert.equal('', '');
 	});
 });
