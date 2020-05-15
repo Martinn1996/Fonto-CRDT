@@ -12,27 +12,6 @@ const generateString = require('./util/generateCode');
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
 
-class BlockNode extends Node {
-	/**
-	 * Constructor for creating block nodes
-	 * @param {*} id for Logoot
-	 * @param {*} blockId for refering to blocks
-	 */
-	constructor(id, blockId) {
-		// Call constructor of parent class
-		super(id);
-		super.type = 'Block';
-
-		this.blockId = blockId;
-		this.empty = true;
-		this.logoot = new Logoot(blockId);
-	}
-
-	getChildren() {
-		return this.logoot._root.children;
-	}
-}
-
 const MIN = 0;
 const MAX = Number.MAX_SAFE_INTEGER;
 const BASE = Math.pow(2, 8);
@@ -55,6 +34,27 @@ function Logoot(site, state, bias) {
 	this._root.addChild(new Node(new Identifier(BASE, null, null)));
 
 	if (state) this.setState(state);
+}
+
+class BlockNode extends Node {
+	/**
+	 * Constructor for creating block nodes
+	 * @param {*} id for Logoot
+	 * @param {*} blockId for refering to blocks
+	 */
+	constructor(id, blockId) {
+		// Call constructor of parent class
+		super(id);
+		super.type = 'Block';
+
+		this.blockId = blockId;
+		this.empty = true;
+		this.logoot = new Logoot(blockId);
+	}
+
+	getChildren() {
+		return this.logoot._root.children;
+	}
 }
 
 function parseId(id) {
@@ -291,16 +291,20 @@ Logoot.prototype.setState = function(state) {
  * @param { * } value for insertion
  * @param { * } index the offset
  * @param { * } block to write to
+ * @return { * } blockId
  */
 Logoot.prototype.insertBlock = function(value, index, block) {
 	// Initialise node for insertion
-	let node;
+	let node = null;
 
 	// Checks whether the insertion is for a specific block
 	if (block !== undefined && block !== null && block !== '') {
 		node = this._searchBlock(block);
-	} else {
-		// Connect block node to current tree
+	}
+
+	// When block is not found || when no block has been assigned
+	if (node === null) {
+		// Connect new block node to current tree
 		node = this._allocateBlock();
 	}
 
@@ -309,6 +313,7 @@ Logoot.prototype.insertBlock = function(value, index, block) {
 		// Insert with the logoot in the block node
 		node.logoot.insert(character, index + i);
 	});
+
 	return node.blockId;
 };
 
@@ -332,7 +337,7 @@ Logoot.prototype._allocateBlock = function() {
 	node.setEmpty(true);
 	const blockId = generateString(5);
 	node.blockId = blockId;
-	// console.log(node.getChildren());
+
 	// Create emit operation
 	this.emit('operation', { type: 'insertBlock', position, blockId });
 	return node;
@@ -352,15 +357,16 @@ Logoot.prototype._searchBlock = function(id) {
 	while (queue.length > 0) {
 		// Get first node in the queue
 		const node = queue.shift();
-
 		if (node instanceof BlockNode && node.blockId === id) {
 			return node;
 		}
+
 		for (const child of node.getChildren()) {
 			queue.push(child);
 		}
 	}
 
+	console.error('Could not find block:', id);
 	// Invalid
 	return null;
 };
