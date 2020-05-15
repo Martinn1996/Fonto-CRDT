@@ -1,4 +1,5 @@
 const Node = require('./node');
+const Logoot = require('../logoot');
 
 class BlockNode extends Node {
 	/**
@@ -9,10 +10,12 @@ class BlockNode extends Node {
 	constructor(id, blockId) {
 		// Call constructor of parent class
 		super(id);
+		super.type = 'Block';
 
 		this.blockId = blockId;
 		this.empty = true;
-		super.type = 'Block';
+		this.logoot = new Logoot(this.blockId);
+		this.logoot._root = this;
 	}
 }
 
