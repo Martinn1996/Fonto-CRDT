@@ -271,6 +271,9 @@ Logoot.prototype.receive = function(operation) {
 		case 'insertBlock':
 			this._receiveInsertBlock(operation);
 			break;
+		case 'deleteBlock':
+			this._receiveDeleteBlock(operation);
+			break;
 	}
 };
 
@@ -556,6 +559,19 @@ Logoot.prototype._searchBlock = function(id) {
 	console.error('Could not find block:', id);
 	// Invalid
 	return null;
+};
+
+Logoot.prototype.deleteBlock = function(blockId) {
+	const block = this._searchBlock(blockId);
+	if (!block) {
+		throw Error(`There does not exist a block of id ${blockId}`);
+	}
+	const parent = block.parent;
+	parent.children = parent.children.filter(node => node.blockId !== blockId);
+};
+
+Logoot.prototype._receiveDeleteBlock = function(operation) {
+	return operation;
 };
 
 module.exports = Logoot;
