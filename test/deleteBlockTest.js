@@ -48,6 +48,7 @@ describe('Delete Block', () => {
 		const id = crdt1.insertBlock('a', 0);
 		crdt1.deleteBlock(id);
 		assert.equal(crdt1._root.children.length, 2);
+		assert.equal(crdt2._root.children.length, 2);
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
