@@ -480,6 +480,7 @@ Logoot.prototype.setValue = function(value) {
 
 function getStateLogoot(logoot) {
 	const res = {
+		id: logoot.id,
 		size: logoot.size,
 		empty: logoot.empty,
 		type: logoot.type,
@@ -487,19 +488,10 @@ function getStateLogoot(logoot) {
 	};
 	if (logoot.type === 'Block') {
 		res['logoot'] = getStateLogoot(logoot.logoot._root);
+		res['blockId'] = logoot.blockId;
 	}
 	return res;
 }
-
-// function mapChildren(child) {
-// 	if (child.type === 'Block') {
-// 		return {
-// 			children: child.children,
-// 			logoot: getStateLogoot(child.logoot._root, 'Block')
-// 		}
-// 	}
-// 	return child;
-// }
 
 Logoot.prototype.getState = function() {
 	return JSON.stringify(
