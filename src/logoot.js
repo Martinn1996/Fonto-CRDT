@@ -646,7 +646,7 @@ Logoot.prototype._searchBlock = function(blockId) {
 	}
 
 	// Invalid
-	console.error(`Could not find block: ${id}`);
+	console.error(`Could not find block: ${blockId}`);
 	return null;
 };
 

@@ -35,7 +35,7 @@ describe('InsertBlock', () => {
 		}
 
 		assert.equal(crdt1.length(), 100);
-	})
+	});
 
 	it('should create a new block node when inserting', () => {
 		insertContentInNewBlock(crdt1, 'a', 0);
