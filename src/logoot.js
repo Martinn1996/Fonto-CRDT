@@ -478,18 +478,18 @@ Logoot.prototype.setValue = function(value) {
 	this.replaceRange(value, 0, this.length());
 };
 
-function getStateLogoot(logoot) {
+function getStateLogoot(logoot, type) {
 	return {
 		size: logoot.size,
 		empty: logoot.empty,
-		type: logoot.type,
+		type: type ? type : logoot.type,
 		children: logoot.children.map(mapChildren)
 	};
 }
 
 function mapChildren(child) {
 	if (child.type === 'Block') {
-		return getStateLogoot(child._root);
+		return getStateLogoot(child.logoot._root, 'Block');
 	}
 	return child;
 }
