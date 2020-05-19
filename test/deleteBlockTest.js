@@ -24,8 +24,11 @@ describe('Delete Block', () => {
 
 	it('should throw erorr when the block does not exist', () => {
 		crdt1.insertBlock(0);
-		const errorFunction = () => crdt1.deleteBlock('nani');
-		assert.throws(errorFunction, Error);
+
+		const state = crdt1.getState();
+
+		crdt1.deleteBlock('nani');
+		assert.equal(crdt1.getState(), state);
 	});
 
 	it('should delete a block with siblings', () => {
