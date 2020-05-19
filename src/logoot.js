@@ -157,7 +157,7 @@ class Node {
 
 	walk(fn) {
 		fn(this);
-		this.getChildren().forEach(child => {
+		this.children.forEach(child => {
 			child.walk(fn);
 		});
 	}
@@ -456,7 +456,7 @@ Logoot.prototype.value = function() {
 	this._root.walk(node => {
 		if (!node.empty) {
 			if (node.logoot) {
-				arr.push(`${node.logoot.value()}\n`);
+				arr.push(`${node.logoot.value()}\n\n`);
 			} else {
 				arr.push(node.value);
 			}
