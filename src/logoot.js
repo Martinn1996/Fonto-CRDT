@@ -421,10 +421,16 @@ Logoot.prototype._delete = function (index) {
 };
 
 // construct a string from the sequence
-Logoot.prototype.value = function () {
+Logoot.prototype.value = function() {
 	const arr = [];
 	this._root.walk(node => {
-		if (!node.empty) arr.push(node.value);
+		if (!node.empty) {
+			if (node.logoot) {
+				arr.push(`${node.logoot.value()}\n`);
+			} else {
+				arr.push(node.value);
+			}
+		}
 	});
 	return arr.join('');
 };
