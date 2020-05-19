@@ -242,14 +242,14 @@ Logoot.prototype.receive = function(operation) {
 		case 'insert':
 			this._receiveInsert(operation);
 			break;
-		case 'delete':
-			this._receiveDelete(operation);
-			break;
 		case 'insertBlock':
 			this._receiveInsertBlock(operation);
 			break;
 		case 'insertInBlock':
 			this._receiveInsertInBlock(operation);
+			break;
+		case 'delete':
+			this._receiveDelete(operation);
 			break;
 		case 'deleteBlock':
 			this._receiveDeleteBlock(operation);
