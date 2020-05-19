@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const Logoot = require('../src/CRDT/src/index');
+const Logoot = require('../src/logoot');
 
 describe('Delay tests', () => {
 	let crdt1, crdt2, ops1, ops2;
