@@ -8,17 +8,17 @@ const port = process.env.PORT || 3000;
 
 const WebSocket = require('ws').Server;
 
-app.use(express.static('src/editor/static'));
+app.use(express.static('editor/static'));
 
-const Logoot = require('../CRDT/src/index');
+const Logoot = require('../src/logoot');
 const l1 = new Logoot('site1');
 
 app.get('/', (_, res) => {
-	const editor = fs.readFileSync('./src/editor/static/editor.html');
+	const editor = fs.readFileSync('./editor/static/editor.html');
 	res.end(editor);
 });
 
-const server = app.listen(port, () => console.log(`App listening on 3000`));
+const server = app.listen(port, () => console.log(`App listening on localhost:3000`));
 
 const wss = new WebSocket({ server: server });
 

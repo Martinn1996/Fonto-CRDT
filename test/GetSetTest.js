@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
-const Logoot = require('../src/CRDT/src/index');
+const Logoot = require('../src/logoot');
 
-describe('Logoot', () => {
+describe('Get Set', () => {
 	let crdt;
 
 	beforeEach(() => {
