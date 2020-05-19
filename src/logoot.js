@@ -383,7 +383,7 @@ Logoot.prototype._insert = function (value, index) {
 	node.value = value;
 	node.setEmpty(false);
 	
-	// this.emit('operation', { type: 'insert', position, value });
+	this.emit('operation', { type: 'insert', position, value });
 
 	return node.getPath();
 };
