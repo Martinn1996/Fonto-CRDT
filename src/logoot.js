@@ -478,21 +478,28 @@ Logoot.prototype.setValue = function(value) {
 	this.replaceRange(value, 0, this.length());
 };
 
-function getStateLogoot(logoot, type) {
-	return {
+function getStateLogoot(logoot) {
+	const res = {
 		size: logoot.size,
 		empty: logoot.empty,
-		type: type ? type : logoot.type,
-		children: logoot.children.map(mapChildren)
+		type: logoot.type,
+		children: logoot.children.map(getStateLogoot)
 	};
+	if (logoot.type === 'Block') {
+		res['logoot'] = getStateLogoot(logoot.logoot._root);
+	}
+	return res;
 }
 
-function mapChildren(child) {
-	if (child.type === 'Block') {
-		return getStateLogoot(child.logoot._root, 'Block');
-	}
-	return child;
-}
+// function mapChildren(child) {
+// 	if (child.type === 'Block') {
+// 		return {
+// 			children: child.children,
+// 			logoot: getStateLogoot(child.logoot._root, 'Block')
+// 		}
+// 	}
+// 	return child;
+// }
 
 Logoot.prototype.getState = function() {
 	return JSON.stringify(
