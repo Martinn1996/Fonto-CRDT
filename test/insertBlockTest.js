@@ -29,6 +29,14 @@ describe('InsertBlock', () => {
 		});
 	});
 
+	it('should insert 100 blocks', () => {
+		for (let i = 0; i < 100; i++) {
+			crdt1.insertBlock(i);
+		}
+
+		assert.equal(crdt1.length(), 100);
+	})
+
 	it('should create a new block node when inserting', () => {
 		insertContentInNewBlock(crdt1, 'a', 0);
 		assert.equal(crdt1.value(), 'a\n\n');
@@ -59,23 +67,23 @@ describe('InsertBlock', () => {
 		insertContentInNewBlock(crdt1, 'a', 0);
 
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.equal(crdt1.getState(), crdt2.getState());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	// it('should add a new block and insert text in that block and converge', () => {
-	// 	const blockId = insertContentInNewBlock(crdt1, 'Hallo', 0);
-	// 	crdt1.insertContentInBlock(' Meneer', 5, blockId);
+	it('should add a new block and insert text in that block and converge', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'Hallo', 0);
+		crdt1.insertContentInBlock(' Meneer', 5, blockId);
 
-	// 	//assert.equal(crdt1.value(), crdt2.value());
-	// 	assert.equal(crdt1.getState(), crdt2.getState());
-	// });
+		assert.deepEqual(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 
-	// it('should add a block at start, end and inbetween and converge', () => {
-	// 	crdt1.insertContentInNewBlock('a', 0);
-	// 	crdt1.insertContentInNewBlock('c', 1);
-	// 	crdt1.insertContentInNewBlock('b', 1);
+	it('should add a block at start, end and inbetween and converge', () => {
+		insertContentInNewBlock(crdt1, 'a', 0);
+		insertContentInNewBlock(crdt1, 'c', 1);
+		insertContentInNewBlock(crdt1, 'b', 1);
 
-	// 	//assert.equal(crdt1.value(), crdt2.value());
-	// 	assert.equal(crdt1.getState(), crdt2.getState());
-	// });
+		assert.deepEqual(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 });
