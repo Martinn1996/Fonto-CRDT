@@ -478,10 +478,26 @@ Logoot.prototype.setValue = function(value) {
 	this.replaceRange(value, 0, this.length());
 };
 
+function getStateLogoot(logoot) {
+	return {
+		size: logoot.size,
+		empty: logoot.empty,
+		type: logoot.type,
+		children: logoot.children.map(mapChildren)
+	};
+}
+
+function mapChildren(child) {
+	if (child.type === 'Block') {
+		return getStateLogoot(child._root);
+	}
+	return child;
+}
+
 Logoot.prototype.getState = function() {
 	return JSON.stringify(
 		{
-			root: this._root,
+			root: getStateLogoot(this._root),
 			deleteQueue: this._deleteQueue
 		},
 		(key, value) => (key === 'parent' ? undefined : value)
