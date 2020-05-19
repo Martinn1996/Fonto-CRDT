@@ -275,6 +275,9 @@ Logoot.prototype.receive = function(operation) {
 		case 'insertInBlock':
 			this._receiveInsertInBlock(operation);
 			break;
+		case 'deleteBlock':
+			this._receiveDeleteBlock(operation);
+			break;
 	}
 };
 
@@ -616,19 +619,26 @@ Logoot.prototype._searchBlock = function(id) {
 	return null;
 };
 
-Logoot.prototype._findBlockIndex = function(blockId) {
-	return this._findBlockIndexDFS(this._root, blockId, 0);
+Logoot.prototype._deleteBlock = function(blockId) {
+	const block = this._searchBlock(blockId);
+	if (!block) {
+		throw Error(`There does not exist a block of id ${blockId}`);
+	}
+	const parent = block.parent;
+	parent.children = parent.children.filter(node => node.blockId !== blockId);
 };
 
-Logoot.prototype._findBlockIndexDFS = function(parent, blockId, accumulator) {
-	for (const child of parent.children) {
-		if (child.blockId === blockId) {
-			return accumulator;
-		}
+Logoot.prototype.deleteBlock = function(blockId) {
+	this._deleteBlock(blockId);
+	this.emit('operation', {
+		type: 'deleteBlock',
+		position: [new Identifier(0, this.site, this.clock++)],
+		blockId: blockId
+	});
+};
 
-		accumulator = this._findBlockIndexDFS(child, blockId, accumulator) + 1;
-	}
-	return accumulator;
+Logoot.prototype._receiveDeleteBlock = function(operation) {
+	this._deleteBlock(operation.blockId);
 };
 
 module.exports = Logoot;
