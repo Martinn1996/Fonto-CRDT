@@ -301,7 +301,6 @@ Logoot.prototype._receiveDelete = function(operation) {
 	}
 };
 
-// To fix
 Logoot.prototype._receiveInsertBlock = function(operation) {
 	const deleteQueueIndex = this._deleteQueue.findIndex(op => {
 		return arePositionsEqual(op.position, operation.position);
@@ -352,6 +351,31 @@ Logoot.prototype._receiveInsertInBlock = function(operation) {
 		index: index,
 		blockId: block.blockId
 	});
+};
+
+Logoot.prototype._receiveDelete = function(operation) {
+	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
+	if (node && !node.empty) {
+		const index = node.getOrder();
+		const value = node.value;
+		node.setEmpty(true);
+		node.trimEmpty();
+
+		this.emit('delete', {
+			value: value,
+			index: index
+		});
+	} else if (
+		!this._deleteQueue.some(op => {
+			return arePositionsEqual(op.position, operation.position);
+		})
+	) {
+		this._deleteQueue.push(operation);
+	}
+};
+
+Logoot.prototype._receiveDeleteBlock = function(operation) {
+	this._deleteBlock(operation.blockId);
 };
 
 Logoot.prototype.insert = function(value, index) {
@@ -485,10 +509,12 @@ function getStateLogoot(logoot) {
 		value: logoot.value,
 		children: logoot.children.map(getStateLogoot)
 	};
+
 	if (logoot.type === 'Block') {
 		res['logoot'] = getStateLogoot(logoot.logoot._root);
 		res['blockId'] = logoot.blockId;
 	}
+
 	return res;
 }
 
@@ -577,7 +603,7 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 
 	// Cancel insertion when block is undefined or unfindable
 	if (node === null) {
-		console.error('Block not found! Insertion in block: ', blockId, ' cancelled.');
+		console.error(`Block not found! Insertion in block: ${blockId} cancelled.`);
 		return;
 	}
 
@@ -595,10 +621,10 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 
 /**
  * Breadth-first search for blocks on id
- * @param { * } id for searching block
+ * @param { * } blockId for searching block
  * @return { * } block node with corresponding id
  */
-Logoot.prototype._searchBlock = function(id) {
+Logoot.prototype._searchBlock = function(blockId) {
 	// Initialise queue
 	const queue = [];
 	queue.push(this._root);
@@ -609,7 +635,7 @@ Logoot.prototype._searchBlock = function(id) {
 		const node = queue.shift();
 
 		// Found the node
-		if (node instanceof BlockNode && node.blockId === id) {
+		if (node instanceof BlockNode && node.blockId === blockId) {
 			return node;
 		}
 
@@ -620,32 +646,45 @@ Logoot.prototype._searchBlock = function(id) {
 	}
 
 	// Invalid
-	console.error('Could not find block:', id);
+	console.error(`Could not find block: ${id}`);
 	return null;
 };
 
+/**
+ * Deletes the block in the tree
+ * @param {*} blockId id for block
+ */
 Logoot.prototype._deleteBlock = function(blockId) {
+	// Find block
 	const block = this._searchBlock(blockId);
+
+	// No block is found
 	if (!block) {
-		throw Error(`There does not exist a block of id ${blockId}`);
+		console.error(`There does not exist a block of id ${blockId}`);
+		return;
 	}
+
+	// Remove block node from parent node
 	const parent = block.parent;
 	block.setEmpty(true);
 	block.trimEmpty();
 	parent.children = parent.children.filter(node => node.blockId !== blockId);
 };
 
+/**
+ * Removes block from tree and communicates with other CRDTs
+ * @param {*} blockId id for block
+ */
 Logoot.prototype.deleteBlock = function(blockId) {
+	// Remove block from tree
 	this._deleteBlock(blockId);
+
+	// Emit message to other CRDTs
 	this.emit('operation', {
 		type: 'deleteBlock',
 		position: [new Identifier(0, this.site, this.clock++)],
 		blockId: blockId
 	});
-};
-
-Logoot.prototype._receiveDeleteBlock = function(operation) {
-	this._deleteBlock(operation.blockId);
 };
 
 module.exports = Logoot;
