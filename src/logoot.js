@@ -625,6 +625,8 @@ Logoot.prototype._deleteBlock = function(blockId) {
 		throw Error(`There does not exist a block of id ${blockId}`);
 	}
 	const parent = block.parent;
+	block.setEmpty(true);
+	block.trimEmpty();
 	parent.children = parent.children.filter(node => node.blockId !== blockId);
 };
 
