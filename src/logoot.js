@@ -22,10 +22,6 @@ class Node {
 		this.type = 'Node';
 	}
 
-	getChildren() {
-		return this.children;
-	}
-
 	_leftmostSearch(child) {
 		let L = 0;
 		let R = this.children.length;
@@ -197,10 +193,6 @@ class BlockNode extends Node {
 		this.blockId = blockId;
 		this.empty = false;
 		this.logoot = new Logoot(blockId);
-	}
-
-	getChildren() {
-		return this.children.concat(this.logoot._root.children);
 	}
 }
 
