@@ -223,8 +223,6 @@ function createNodeFromType(nodeType) {
 			return CharacterNode;
 		case 'Block':
 			return BlockNode;
-		case 'Intermediate':
-			return IntermediateNode;
 		default:
 			return Node;
 	}
