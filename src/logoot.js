@@ -261,6 +261,7 @@ function arePositionsEqual(a, b) {
 
 Logoot.prototype.receive = function (operation) {
 	if (!operation.parsed) operation = parseOperation(operation);
+
 	switch (operation.type) {
 		case 'insert':
 			this._receiveInsert(operation);
@@ -270,6 +271,9 @@ Logoot.prototype.receive = function (operation) {
 			break;
 		case 'insertBlock':
 			this._receiveInsertBlock(operation);
+			break;
+		case 'insertInBlock':
+			this._receiveInsertInBlock(operation);
 			break;
 	}
 };
@@ -325,13 +329,37 @@ Logoot.prototype._receiveInsertBlock = function (operation) {
 
 	// invalid duplication, ignore it
 	if (existingNode) return;
+
 	const node = this._root.getChildByPath(operation.position, true, BlockNode);
 	const blockId = operation.blockId;
 	node.blockId = blockId;
-	node.setEmpty(true);
+	node.setEmpty(false);
 	const index = node.getOrder();
 
 	this.emit('insertBlock', { blockId: blockId, index });
+};
+
+Logoot.prototype._receiveInsertInBlock = function (operation) {
+	const block = this._searchBlock(operation.blockId);
+	const logoot = block.logoot;
+
+	const deleteQueueIndex = logoot._deleteQueue.findIndex(op => {
+		return arePositionsEqual(op.position, operation.position);
+	});
+	if (deleteQueueIndex > -1) {
+		logoot._deleteQueue.splice(deleteQueueIndex, 1);
+		return;
+	}
+	const existingNode = logoot._root.getChildByPath(operation.position, false, CharacterNode);
+
+	// invalid duplication, ignore it
+	if (existingNode) return;
+	const node = logoot._root.getChildByPath(operation.position, true, CharacterNode);
+	node.value = operation.value;
+	node.setEmpty(false);
+	const index = node.getOrder();
+
+	this.emit('insertInBlock', { value: node.value, index });
 };
 
 Logoot.prototype.insert = function (value, index) {
@@ -354,8 +382,10 @@ Logoot.prototype._insert = function (value, index) {
 	const node = this._root.getChildByPath(position, true, CharacterNode);
 	node.value = value;
 	node.setEmpty(false);
+	
+	// this.emit('operation', { type: 'insert', position, value });
 
-	this.emit('operation', { type: 'insert', position, value });
+	return node.getPath();
 };
 
 function randomBiasedInt(a, b, bias) {
@@ -512,7 +542,7 @@ Logoot.prototype.insertBlock = function (index) {
  * @param { * } index of the block to write the value to
  * @param { * } blockId of the block to write to
  */
-Logoot.prototype.insertContentInBlock = function (value, index, blockId) {
+Logoot.prototype.insertContentInBlock = function (content, index, blockId) {
 	// Initialise node for insertion
 	let node = null;
 
@@ -527,21 +557,10 @@ Logoot.prototype.insertContentInBlock = function (value, index, blockId) {
 		return;
 	}
 
-	// Insert with the logoot in the block node
-	node.logoot.insert(value, index);
-};
-
-/**
- * 
- * @param { * } value to write to
- * @param { * } index of the block
- * @return { * } newly created block
- */
-Logoot.prototype.insertContentInNewBlock = function (value, index) {
-	const block = this.insertBlock(index);
-	block.logoot.insert(value, 0);
-
-	return block;
+	content.split('').forEach((value, i) => {
+		const position = node.logoot._insert(value, index + i);
+		this.emit('operation', { type: 'insertInBlock', position, value, blockId});
+	});
 };
 
 /**
