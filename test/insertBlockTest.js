@@ -5,9 +5,16 @@ describe('InsertBlock', () => {
 	let crdt1;
 	let crdt2;
 
+	/**
+	 * Function to create a new block and insert text
+	 * @param {*} crdt which inserts
+	 * @param {*} value to insert
+	 * @param {*} index of block
+	 * @return {*} id of block
+	 */
 	function insertContentInNewBlock(crdt, value, index) {
 		const block = crdt.insertBlock(index);
-		block.logoot.insert(value, 0);
+		crdt.insertContentInBlock(value, 0, block.blockId);
 		return block.blockId;
 	}
 
@@ -48,12 +55,12 @@ describe('InsertBlock', () => {
 		assert.equal(crdt1.value(), 'Hallo Meneer\n\n');
 	});
 
-	// it('should add a block and converge', () => {
-	// 	insertContentInNewBlock(crdt1, 'a', 0);
+	it('should add a block and converge', () => {
+		insertContentInNewBlock(crdt1, 'a', 0);
 
-	// 	assert.equal(crdt1.value(), crdt2.value());
-	// 	assert.equal(crdt1.getState(), crdt2.getState());
-	// });
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
+	});
 
 	// it('should add a new block and insert text in that block and converge', () => {
 	// 	const blockId = insertContentInNewBlock(crdt1, 'Hallo', 0);
