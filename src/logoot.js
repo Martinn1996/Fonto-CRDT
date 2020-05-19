@@ -259,7 +259,7 @@ function arePositionsEqual(a, b) {
 	});
 }
 
-Logoot.prototype.receive = function (operation) {
+Logoot.prototype.receive = function(operation) {
 	if (!operation.parsed) operation = parseOperation(operation);
 
 	switch (operation.type) {
@@ -278,7 +278,7 @@ Logoot.prototype.receive = function (operation) {
 	}
 };
 
-Logoot.prototype._receiveInsert = function (operation) {
+Logoot.prototype._receiveInsert = function(operation) {
 	const deleteQueueIndex = this._deleteQueue.findIndex(op => {
 		return arePositionsEqual(op.position, operation.position);
 	});
@@ -298,7 +298,7 @@ Logoot.prototype._receiveInsert = function (operation) {
 	this.emit('insert', { value: node.value, index });
 };
 
-Logoot.prototype._receiveDelete = function (operation) {
+Logoot.prototype._receiveDelete = function(operation) {
 	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
 	if (node && !node.empty) {
 		const index = node.getOrder();
@@ -317,7 +317,7 @@ Logoot.prototype._receiveDelete = function (operation) {
 };
 
 // To fix
-Logoot.prototype._receiveInsertBlock = function (operation) {
+Logoot.prototype._receiveInsertBlock = function(operation) {
 	const deleteQueueIndex = this._deleteQueue.findIndex(op => {
 		return arePositionsEqual(op.position, operation.position);
 	});
@@ -339,7 +339,7 @@ Logoot.prototype._receiveInsertBlock = function (operation) {
 	this.emit('insertBlock', { blockId: blockId, index });
 };
 
-Logoot.prototype._receiveInsertInBlock = function (operation) {
+Logoot.prototype._receiveInsertInBlock = function(operation) {
 	const block = this._searchBlock(operation.blockId);
 	const logoot = block.logoot;
 
@@ -362,13 +362,13 @@ Logoot.prototype._receiveInsertInBlock = function (operation) {
 	this.emit('insertInBlock', { value: node.value, index });
 };
 
-Logoot.prototype.insert = function (value, index) {
+Logoot.prototype.insert = function(value, index) {
 	value.split('').forEach((character, i) => {
 		this._insert(character, index + i);
 	});
 };
 
-Logoot.prototype._insert = function (value, index) {
+Logoot.prototype._insert = function(value, index) {
 	index = Math.min(index, this.length());
 
 	const prev = this._root.getChildByOrder(index);
@@ -382,7 +382,7 @@ Logoot.prototype._insert = function (value, index) {
 	const node = this._root.getChildByPath(position, true, CharacterNode);
 	node.value = value;
 	node.setEmpty(false);
-	
+
 	this.emit('operation', { type: 'insert', position, value });
 
 	return node.getPath();
@@ -398,12 +398,12 @@ function doubledBase(depth) {
 	return Math.min(BASE * Math.pow(2, depth), MAX);
 }
 
-Logoot.prototype._generateNewIdentifier = function (prevInt, nextInt) {
+Logoot.prototype._generateNewIdentifier = function(prevInt, nextInt) {
 	const int = randomBiasedInt(prevInt, nextInt, randomAlternation(this._bias));
 	return new Identifier(int, this.site, this.clock++);
 };
 
-Logoot.prototype._generatePositionBetween = function (prevPos, nextPos) {
+Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
 	const newPos = [];
 
 	const maxLength = Math.max(prevPos.length, nextPos.length);
@@ -434,13 +434,13 @@ Logoot.prototype._generatePositionBetween = function (prevPos, nextPos) {
 	return newPos;
 };
 
-Logoot.prototype.delete = function (index, length = 1) {
+Logoot.prototype.delete = function(index, length = 1) {
 	for (let i = 0; i < length; i++) {
 		this._delete(index);
 	}
 };
 
-Logoot.prototype._delete = function (index) {
+Logoot.prototype._delete = function(index) {
 	const node = this._root.getChildByOrder(index + 1);
 	if (!node || node.id.site === null) return;
 
@@ -465,20 +465,20 @@ Logoot.prototype.value = function() {
 	return arr.join('');
 };
 
-Logoot.prototype.length = function () {
+Logoot.prototype.length = function() {
 	return this._root.size - 2;
 };
 
-Logoot.prototype.replaceRange = function (value, start, length) {
+Logoot.prototype.replaceRange = function(value, start, length) {
 	this.delete(start, length);
 	this.insert(value, start);
 };
 
-Logoot.prototype.setValue = function (value) {
+Logoot.prototype.setValue = function(value) {
 	this.replaceRange(value, 0, this.length());
 };
 
-Logoot.prototype.getState = function () {
+Logoot.prototype.getState = function() {
 	return JSON.stringify(
 		{
 			root: this._root,
@@ -488,7 +488,7 @@ Logoot.prototype.getState = function () {
 	);
 };
 
-Logoot.prototype.setState = function (state) {
+Logoot.prototype.setState = function(state) {
 	const parsed = JSON.parse(state);
 
 	function parseNode(n, parent) {
@@ -514,7 +514,7 @@ Logoot.prototype.setState = function (state) {
  * @param { * } index index of the block
  * @return { * } blockId
  */
-Logoot.prototype.insertBlock = function (index) {
+Logoot.prototype.insertBlock = function(index) {
 	// Get block to insert after and before
 	index = Math.min(index, this.length());
 
@@ -544,11 +544,11 @@ Logoot.prototype.insertBlock = function (index) {
 
 /**
  * Inserts the value into the index of block with blockId
- * @param { * } value to write
+ * @param { * } content to write
  * @param { * } index of the block to write the value to
  * @param { * } blockId of the block to write to
  */
-Logoot.prototype.insertContentInBlock = function (content, index, blockId) {
+Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 	// Initialise node for insertion
 	let node = null;
 
@@ -565,7 +565,7 @@ Logoot.prototype.insertContentInBlock = function (content, index, blockId) {
 
 	content.split('').forEach((value, i) => {
 		const position = node.logoot._insert(value, index + i);
-		this.emit('operation', { type: 'insertInBlock', position, value, blockId});
+		this.emit('operation', { type: 'insertInBlock', position, value, blockId });
 	});
 };
 
@@ -574,7 +574,7 @@ Logoot.prototype.insertContentInBlock = function (content, index, blockId) {
  * @param { * } id for searching block
  * @return { * } block node with corresponding id
  */
-Logoot.prototype._searchBlock = function (id) {
+Logoot.prototype._searchBlock = function(id) {
 	// Initialise queue
 	const queue = [];
 	queue.push(this._root);
@@ -600,11 +600,11 @@ Logoot.prototype._searchBlock = function (id) {
 	return null;
 };
 
-Logoot.prototype._findBlockIndex = function (blockId) {
+Logoot.prototype._findBlockIndex = function(blockId) {
 	return this._findBlockIndexDFS(this._root, blockId, 0);
 };
 
-Logoot.prototype._findBlockIndexDFS = function (parent, blockId, accumulator) {
+Logoot.prototype._findBlockIndexDFS = function(parent, blockId, accumulator) {
 	for (const child of parent.children) {
 		if (child.blockId === blockId) {
 			return accumulator;
