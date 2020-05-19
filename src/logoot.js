@@ -484,6 +484,7 @@ function getStateLogoot(logoot) {
 		size: logoot.size,
 		empty: logoot.empty,
 		type: logoot.type,
+		value: logoot.value,
 		children: logoot.children.map(getStateLogoot)
 	};
 	if (logoot.type === 'Block') {
