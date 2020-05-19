@@ -274,7 +274,10 @@ Logoot.prototype._receiveInsert = function(operation) {
 	node.setEmpty(false);
 	const index = node.getOrder();
 
-	this.emit('insert', { value: node.value, index });
+	this.emit('insert', {
+		value: node.value,
+		index: index
+	});
 };
 
 Logoot.prototype._receiveDelete = function(operation) {
@@ -285,7 +288,10 @@ Logoot.prototype._receiveDelete = function(operation) {
 		node.setEmpty(true);
 		node.trimEmpty();
 
-		this.emit('delete', { value, index });
+		this.emit('delete', {
+			value: value,
+			index: index
+		});
 	} else if (
 		!this._deleteQueue.some(op => {
 			return arePositionsEqual(op.position, operation.position);
@@ -315,7 +321,10 @@ Logoot.prototype._receiveInsertBlock = function(operation) {
 	node.setEmpty(false);
 	const index = node.getOrder();
 
-	this.emit('insertBlock', { blockId: blockId, index });
+	this.emit('insertBlock', {
+		blockId: blockId,
+		index: index
+	});
 };
 
 Logoot.prototype._receiveInsertInBlock = function(operation) {
@@ -338,7 +347,11 @@ Logoot.prototype._receiveInsertInBlock = function(operation) {
 	node.setEmpty(false);
 	const index = node.getOrder();
 
-	this.emit('insertInBlock', { value: node.value, index });
+	this.emit('insertInBlock', {
+		value: node.value,
+		index: index,
+		blockId: block.blockId
+	});
 };
 
 Logoot.prototype.insert = function(value, index) {
@@ -362,7 +375,11 @@ Logoot.prototype._insert = function(value, index) {
 	node.value = value;
 	node.setEmpty(false);
 
-	this.emit('operation', { type: 'insert', position, value });
+	this.emit('operation', {
+		type: 'insert',
+		position: position,
+		value: value
+	});
 
 	return node.getPath();
 };
@@ -423,10 +440,12 @@ Logoot.prototype._delete = function(index) {
 	const node = this._root.getChildByOrder(index + 1);
 	if (!node || node.id.site === null) return;
 
-	const position = node.getPath();
 	node.setEmpty(true);
 	node.trimEmpty();
-	this.emit('operation', { type: 'delete', position });
+	this.emit('operation', {
+		type: 'delete',
+		position: node.getPath()
+	});
 };
 
 // construct a string from the sequence
@@ -531,7 +550,11 @@ Logoot.prototype.insertBlock = function(index) {
 	node.blockId = blockId;
 
 	// Create emit operation
-	this.emit('operation', { type: 'insertBlock', position, blockId });
+	this.emit('operation', {
+		type: 'insertBlock',
+		position: position,
+		blockId: blockId
+	});
 
 	// Return newly created node
 	return node;
@@ -558,9 +581,15 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 		return;
 	}
 
+	// Insert each character individually
 	content.split('').forEach((value, i) => {
 		const position = node.logoot._insert(value, index + i);
-		this.emit('operation', { type: 'insertInBlock', position, value, blockId });
+		this.emit('operation', {
+			type: 'insertInBlock',
+			position: position,
+			value: value,
+			blockId: blockId
+		});
 	});
 };
 
