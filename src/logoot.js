@@ -353,27 +353,6 @@ Logoot.prototype._receiveInsertInBlock = function(operation) {
 	});
 };
 
-Logoot.prototype._receiveDelete = function(operation) {
-	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
-	if (node && !node.empty) {
-		const index = node.getOrder();
-		const value = node.value;
-		node.setEmpty(true);
-		node.trimEmpty();
-
-		this.emit('delete', {
-			value: value,
-			index: index
-		});
-	} else if (
-		!this._deleteQueue.some(op => {
-			return arePositionsEqual(op.position, operation.position);
-		})
-	) {
-		this._deleteQueue.push(operation);
-	}
-};
-
 Logoot.prototype._receiveDeleteBlock = function(operation) {
 	this._deleteBlock(operation.blockId);
 };

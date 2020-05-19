@@ -74,7 +74,7 @@ describe('InsertBlock', () => {
 		const blockId = insertContentInNewBlock(crdt1, 'Hallo', 0);
 		crdt1.insertContentInBlock(' Meneer', 5, blockId);
 
-		assert.deepEqual(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
@@ -83,7 +83,24 @@ describe('InsertBlock', () => {
 		insertContentInNewBlock(crdt1, 'c', 1);
 		insertContentInNewBlock(crdt1, 'b', 1);
 
-		assert.deepEqual(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should insert 2 blocks at 2 different replicas and converge', () => {
+		insertContentInNewBlock(crdt1, 'Paragraaf 1', 0);
+		insertContentInNewBlock(crdt2, 'Paragraaf2', 0);
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('replica 1 should insert the block and replica 1 and 2 should alter it', () => {
+		const block = crdt1.insertBlock(0);
+		crdt2.insertContentInBlock('crdt2', 0, block.blockId);
+		crdt1.insertContentInBlock('crdt1', 5, block.blockId);
+
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
