@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 const Logoot = require('../src/logoot');
 
-describe('Insert Block', () => {
+describe('Insert', () => {
 	let crdt1;
 	let crdt2;
 
@@ -17,40 +17,52 @@ describe('Insert Block', () => {
 	});
 
 	// it('should create a new block node when inserting', () => {
-	// 	let blockId = crdt1.insertContentInBlock('b1', 0);
-	// 	let blockId2 = crdt1.insertContentInBlock('b2', 0);
-	// 	let blockId3 = crdt1.insertContentInNewBlock('A', 0, blockId, blockId2);
-	// 	let blockId4 = crdt1.insertContentInNewBlock('CAS', 0, null, null);
-
-	// 	// crdt1.insertBlock('a', 0, blockId);
-	// 	// crdt1.insertBlock('a', 0, blockId2);
-
-	// 	console.log(crdt1.getState());
-	// 	console.log(crdt1.value());
-	// 	assert.equal('', '');
+	// 	crdt1.insertContentInNewBlock('a', 0);
+	// 	assert.equal(crdt1.value(), 'a');
 	// });
 
-	it('should create a new block node when inserting', () => {
-		// let blockId = crdt1.insertContentInBlock('b1', 0);
-		// let blockId2 = crdt1.insertContentInBlock('b1', 0);
-		let blockId = crdt1.insertBlock(null).blockId;
-		let blockId2 = crdt1.insertBlock(1000).blockId;
+	// it('should create a new block node at the start when inserting when there is already another block', () => {
+	// 	crdt1.insertContentInNewBlock('a', 0);
+	// 	crdt1.insertContentInNewBlock('b', 0);
+	// 	assert.equal(crdt1.value(), 'ba');
+	// });
 
-		let block3 = crdt1.insertContentInNewBlock('cas', 4);
-		// let blockId3 = crdt1.insertBlock(blockId, blockId2).blockId;
-		// let blockId4 = crdt1.insertBlock(blockId, blockId3).blockId;
+	// it('should add a block at start, end and inbetween', () => {
+	// 	crdt1.insertContentInNewBlock('a', 0);
+	// 	crdt1.insertContentInNewBlock('c', 1);
+	// 	crdt1.insertContentInNewBlock('b', 1);
 
-		crdt1.insertContentInBlock('block1', 0, blockId);
-		crdt1.insertContentInBlock('block2', 0, blockId2);
+	// 	assert.equal(crdt1.value(), 'abc');
+	// });
 
-		// console.log('1', blockId, '2', blockId2, '3', blockId3, '4', blockId4);
-		console.log('1', blockId, '2', blockId2, '3', block3.blockId);
+	// it('should create a new block and insert text in that block', () => {
+	// 	const blockId = crdt1.insertContentInNewBlock('Hallo', 0);
+	// 	crdt1.insertContentInBlock(' Meneer', 5, blockId);
 
-		// crdt1.insertContentInBlock('block 3', 0, blockId3);
+	// 	assert.equal(crdt1.value(), 'Hallo Meneer');
+	// });
 
+	it('should add a block and converge', () => {
+		crdt1.insertContentInNewBlock('a', 0);
 
-		console.log(crdt1.getState());
-		console.log(crdt1.value());
-		assert.equal('', '');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should add a new block and insert text in that block and converge', () => {
+		const blockId = crdt1.insertContentinNewBlock('Hallo', 0);
+		crdt1.insertContentInBlock(' Meneer', 5, blockId);
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should add a block at start, end and inbetween and converge', () => {
+		crdt1.insertContentInNewBlock('a', 0);
+		crdt1.insertContentInNewBlock('c', 1);
+		crdt1.insertContentInNewBlock('b', 1);
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
 	});
 });
