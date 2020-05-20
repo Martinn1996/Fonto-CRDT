@@ -1,0 +1,30 @@
+const assert = require('chai').assert;
+const Logoot = require('../src/logoot');
+
+describe('Delete Block', () => {
+	let crdt1;
+	let crdt2;
+
+	beforeEach(() => {
+		crdt1 = new Logoot('crdt1');
+		crdt2 = new Logoot('crdt2');
+		crdt1.on('operation', op => {
+			crdt2.receive(op);
+		});
+		crdt2.on('operation', op => {
+			crdt1.receive(op);
+		});
+	});
+
+	it('should move a block', () => {
+		const block = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block.blockId);
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		crdt1.moveBlock(block.blockId, 2);
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+});
