@@ -106,7 +106,11 @@ describe('InsertBlock', () => {
 
 	it('should have replica 1 insert a block with text, replica 2 alter the text and it should converge', () => {
 		const blockId = insertContentInNewBlock(crdt1, 'het is vandaag dinsdag', 0);
-		crdt2.replaceRange('maandag', 15, 7, blockId);
+		crdt2.replaceRangeInBlock('maandag', 15, 7, blockId);
+
+		assert.equal(crdt1.value(), 'het is vandaag maandag\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('should not be able to add a block with negative index', () => {

@@ -652,7 +652,6 @@ Logoot.prototype.replaceRangeInBlock = function(value, start, length, blockId) {
 	this.insertContentInBlock(value, start, blockId);
 };
 
-
 /**
  * Breadth-first search for blocks on id
  * @param { * } blockId for searching block
