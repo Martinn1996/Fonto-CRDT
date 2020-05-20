@@ -697,6 +697,23 @@ Logoot.prototype.deleteBlock = function(blockId) {
 };
 
 /**
+ * Merge two blocks into one and delete the second block
+ * @param {blockId} blockId1 The first block where all content will be merged into
+ * @param {blockId} blockId2 The second block which will be deleted after the merge
+ */
+Logoot.prototype.mergeBlocks = function(blockId1, blockId2) {
+	const block1 = this._searchBlock(blockId1);
+	const block2 = this._searchBlock(blockId2);
+
+	if (!block1 || !block2) {
+		throw Error('BlockId does not exist');
+	}
+
+	this.insertContentInBlock(block2.logoot.value(), block1.logoot.value().length, blockId1);
+	this.deleteBlock(blockId2);
+};
+
+/**
  * Deletes content in block
  * @param {*} index of start of deletion
  * @param {*} length amount of items to delete
