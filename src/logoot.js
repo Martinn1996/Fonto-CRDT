@@ -511,7 +511,7 @@ function getStateLogoot(logoot) {
 	};
 
 	if (logoot.type === 'Block') {
-		res['logoot'] = getStateLogoot(logoot.logoot._root);
+		res['logoot'] = logoot.logoot ? getStateLogoot(logoot.logoot._root) : {};
 		res['blockId'] = logoot.blockId;
 	}
 
