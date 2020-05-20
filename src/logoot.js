@@ -690,16 +690,29 @@ Logoot.prototype.deleteBlock = function(blockId) {
 	});
 };
 
+/**
+ * Deletes content in block
+ * @param {*} index of start of deletion
+ * @param {*} length amount of items to delete
+ * @param {*} blockId of location to delete the content
+ */
 Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
+	// Find block
 	const block = this._searchBlock(blockId);
 
+	// Deletes character 'length' times
 	for (let i = 0; i < length; i++) {
+		// Finds the character
 		const node = block.logoot._root.getChildByOrder(index + 1);
+
+		// No node is found
 		if (!node || node.id.site === null) continue;
 
+		// Removes the node
 		node.setEmpty(true);
 		node.trimEmpty();
 
+		// Emits the operation
 		this.emit('operation', {
 			type: 'deleteInBlock',
 			position: node.getPath(),
