@@ -897,6 +897,11 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 	});
 };
 
+Logoot.prototype.replaceRangeInBlock = function(value, start, length, blockId) {
+	this.deleteContentInBlock(start, length, blockId);
+	this.insertContentInBlock(value, start, blockId);
+};
+
 /**
  * Breadth-first search for blocks on id
  * @param {string} blockId for searching block
@@ -1035,18 +1040,28 @@ Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
  * Split block into two and moves the content over
  * @param {string} blockId
  * @param {Integer} index
+ * @return {BlockNode} newBlock
  */
 Logoot.prototype.splitBlock = function(blockId, index) {
 	const block = this._searchBlock(blockId);
 
+	if (!block) {
+		throw Error('BlockId does not exist');
+	}
+
+	if (index > block.logoot.value().length || index < 0) {
+		throw Error('Index out of range');
+	}
+
 	const blockIndex = block.getOrder();
-	const newBlock = this.insertBlock(blockIndex);
+	const newBlock = this.insertBlock(blockIndex + 1);
 
 	const content = block.logoot.value().substring(index, block.logoot.value().length);
 
 	this.deleteContentInBlock(index, content.length, block.blockId);
 
 	this.insertContentInBlock(content, 0, newBlock.blockId);
+	return newBlock;
 };
 
 module.exports = Logoot;
