@@ -1049,14 +1049,13 @@ Logoot.prototype.splitBlock = function(blockId, index) {
 		throw Error('BlockId does not exist');
 	}
 
-	// Create new block
-	const blockIndex = block.getOrder();
-	const newBlock = this.insertBlock(blockIndex + 1);
-
 	if (index > block.logoot.value().length || index < 0) {
 		throw Error('Index out of range');
 	}
-	// Content to move
+
+	const blockIndex = block.getOrder();
+	const newBlock = this.insertBlock(blockIndex + 1);
+
 	const content = block.logoot.value().substring(index, block.logoot.value().length);
 
 	this.deleteContentInBlock(index, content.length, block.blockId);
