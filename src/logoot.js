@@ -237,7 +237,6 @@ function arePositionsEqual(a, b) {
 
 Logoot.prototype.receive = function(operation) {
 	if (!operation.parsed) operation = parseOperation(operation);
-
 	switch (operation.type) {
 		case 'insert':
 			this._receiveInsert(operation);
@@ -256,7 +255,31 @@ Logoot.prototype.receive = function(operation) {
 			break;
 		case 'deleteInBlock':
 			this._receiveDeleteInBlock(operation);
+			break;
+		case 'moveBlock':
+			this.receiveMoveBlock(operation);
+			break;
+		case 'changeBlockId':
+			this.changeBlockId(operation);
+			break;
 	}
+};
+
+Logoot.prototype.receiveMoveBlock = function(operation) {
+	const oldBlock = this._searchBlock(operation.oldBlockId);
+	const newBlock = this._searchBlock(operation.newBlockId);
+	if (!oldBlock || !newBlock) {
+		throw Error('One of the blocks is not defined');
+	}
+	newBlock.logoot = oldBlock.logoot;
+};
+
+Logoot.prototype.changeBlockId = function(operation) {
+	const block = this._searchBlock(operation.oldId);
+	if (!block) {
+		throw Error(`Could not find block of blockId: ${operation.oldBlockId}`);
+	}
+	block.blockId = operation.newBlockId;
 };
 
 Logoot.prototype._receiveInsert = function(operation) {
@@ -556,9 +579,10 @@ Logoot.prototype.setState = function(state) {
 /**
  * New insertion for characters
  * @param { * } index index of the block
+ * @param { string } id optional id of the block
  * @return { * } blockId
  */
-Logoot.prototype.insertBlock = function(index) {
+Logoot.prototype.insertBlock = function(index, id) {
 	// Get block to insert after and before
 	index = Math.min(index, this.length());
 
@@ -576,7 +600,7 @@ Logoot.prototype.insertBlock = function(index) {
 	// Create node
 	const node = this._root.getChildByPath(position, true, BlockNode);
 	node.setEmpty(false);
-	const blockId = generateString(5);
+	const blockId = id ? id : generateString(5);
 	node.blockId = blockId;
 
 	// Create emit operation
@@ -652,6 +676,32 @@ Logoot.prototype._searchBlock = function(blockId) {
 	// Invalid
 	console.error(`Could not find block: ${blockId}`);
 	return null;
+};
+
+Logoot.prototype.moveBlock = function(blockId, index) {
+	const block = this._searchBlock(blockId);
+
+	if (!block) {
+		throw Error(`Could not find block of id: ${blockId}`);
+	}
+
+	const newBlock = this.insertBlock(index);
+	newBlock.logoot = block.logoot;
+	this.emit('operation', {
+		type: 'moveBlock',
+		position: [],
+		oldBlockId: blockId,
+		newBlockId: newBlock.blockId
+	});
+
+	this.deleteBlock(blockId);
+	this.emit('operation', {
+		type: 'changeBlockId',
+		position: [],
+		oldId: newBlock.blockId,
+		newBlockId: blockId
+	});
+	newBlock.blockId = blockId;
 };
 
 /**
