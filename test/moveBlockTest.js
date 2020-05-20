@@ -16,7 +16,7 @@ describe('Delete Block', () => {
 		});
 	});
 
-	it('should move a block', () => {
+	it('should move a block one time', () => {
 		const block = crdt1.insertBlock(0);
 		crdt1.insertContentInBlock('1', 0, block.blockId);
 		const block2 = crdt1.insertBlock(1);
@@ -25,6 +25,45 @@ describe('Delete Block', () => {
 		crdt1.insertContentInBlock('3', 0, block3.blockId);
 
 		crdt1.moveBlock(block.blockId, 2);
+		assert.equal(crdt1.value(), '2\n\n1\n\n3\n\n');
+	});
+
+	it('should move a block multiple times', () => {
+		const block = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block.blockId);
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		crdt1.moveBlock(block.blockId, 2);
+		crdt1.moveBlock(block.blockId, 4);
+		assert.equal(crdt1.value(), '2\n\n3\n\n1\n\n');
+	});
+
+	it('should converge move block on different crdts', () => {
+		const block = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block.blockId);
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		crdt1.moveBlock(block.blockId, 2);
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should move a block multiple times on different crdts', () => {
+		const block = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block.blockId);
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		crdt1.moveBlock(block.blockId, 2);
+		crdt2.moveBlock(block.blockId, 4);
+		assert.equal(crdt1.value(), '2\n\n3\n\n1\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
