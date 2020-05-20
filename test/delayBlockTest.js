@@ -44,13 +44,12 @@ describe('Delay Block tests', () => {
 		const blockId1 = insertContentInNewBlock(crdt1, 'block1', 0);
 		const blockId2 = insertContentInNewBlock(crdt1, 'block2', 0);
 
-		ops2.forEach(op => crdt2.receive(op));
-		ops2 = [];
+		mergeAll();
+
 		crdt2.insertContentInBlock(' text voor in block2', 6, blockId2);
 		crdt1.mergeBlocks(blockId1, blockId2);
 
-		ops2.forEach(op => crdt2.receive(op));
-		ops1.forEach(op => crdt1.receive(op));
+		mergeAll();
 
 		assert.equal(crdt1.value(), 'block1\n\nblock2 text voor in block2');
 		assert.equal(crdt1.value(), crdt2.value());
@@ -63,11 +62,42 @@ describe('Delay Block tests', () => {
 
 		mergeAll();
 
-		crdt1.addContentInBlock('dit is blok 1', 0, blockId1);
+		crdt1.insertContentInBlock('dit is blok 1', 0, blockId1);
 		crdt2.deleteBlock(blockId1);
+
+		mergeAll();
 
 		assert.equal(crdt1.value(), 'block2\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should converge when replica1 merges 2 blocks and replica2 moves one of the 2 blocks', () => {
+		const blockId1 = insertContentInNewBlock(crdt1, 'a', 0);
+		insertContentInNewBlock(crdt2, 'a', 0);
+		const blockId3 = insertContentInNewBlock(crdt1, 'b', 1);
+
+		mergeAll();
+
+		crdt2.moveBlock(blockId3, 0);
+		crdt1.mergeBlocks(blockId1, blockId3);
+
+		mergeAll();
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	})
+
+	it('should converge when replica1 is splitting a block while replica2 is editting the text in the block', () => {
+		const blockId1 = insertContentInNewBlock(crdt1, 'block1', 0);
+
+		mergeAll();
+
+		crdt2.insertContentInBlock('vooraan ', 0, blockId1);
+		crdt2.insertContentInBlock(' achteraan', 14, blockId1);
+		crdt1.splitBlock(blockId1);
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	})
 });
