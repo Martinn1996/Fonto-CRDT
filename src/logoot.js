@@ -903,7 +903,7 @@ Logoot.prototype._searchBlock = function(blockId) {
 	while (queue.length > 0) {
 		const node = queue.shift();
 
-		if (node instanceof BlockNode && node.blockId === blockId) {
+		if (node instanceof BlockNode && node.blockId === blockId && !node.empty) {
 			return node;
 		}
 
