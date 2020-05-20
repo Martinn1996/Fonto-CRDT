@@ -4,7 +4,6 @@ const inherits = require('inherits');
 const Identifier = require('./identifier');
 
 const generateString = require('./util/generateCode');
-
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
 
@@ -16,7 +15,6 @@ const BASE = Math.pow(2, 8);
  * Node class for the tree
  */
 class Node {
-	// Constructor for creating a Node
 	constructor(id) {
 		this.id = id;
 		this.children = [];
@@ -84,15 +82,12 @@ class Node {
 	 * @return {Node} returns the child
 	 */
 	addChild(child) {
-		// Sets paretn to this node
 		child.parent = this;
 		const index = this._leftmostSearch(child);
 
-		// Adds the children at index
 		this.children.splice(index, 0, child);
 		this.adjustSize(child.size);
 
-		// Returns the added child
 		return child;
 	}
 
@@ -102,17 +97,13 @@ class Node {
 	 * @return {Node} returns the removed child
 	 */
 	removeChild(child) {
-		// Find index of the child
 		const index = this._exactSearch(child);
 
-		// Nothing to remove
 		if (index === null) return;
 
-		// Removes child from this node
 		this.children.splice(index, 1);
 		this.adjustSize(child.size);
 
-		// Returns the removed child
 		return child;
 	}
 
@@ -121,13 +112,10 @@ class Node {
 	 * @param {boolean} bool whether the node is empty
 	 */
 	setEmpty(bool = true) {
-		// No adjustments
 		if (bool === this.empty) return;
 
-		// Adjust empty attribute
 		this.empty = bool;
 
-		// Adjust size
 		if (bool) {
 			this.adjustSize(-1);
 		} else {
@@ -139,10 +127,8 @@ class Node {
 	 * Removes the node from the tree when it has no children
 	 */
 	trimEmpty() {
-		// Already disconnected
 		if (!this.parent) return;
 
-		// Remove node when no children and empty
 		if (this.empty && this.children.length === 0) {
 			this.parent.removeChild(this);
 			this.parent.trimEmpty();
@@ -154,10 +140,8 @@ class Node {
 	 * @return {[Integer]} path to get to this node
 	 */
 	getPath() {
-		// No parent; disconnected from the tree.
 		if (!this.parent) return [];
 
-		// Return path with recursive call
 		return this.parent.getPath().concat([this.id]);
 	}
 
@@ -167,13 +151,10 @@ class Node {
 	 * @return {Node} child with the corresponding id
 	 */
 	getChildById(id) {
-		// Find index
 		const index = this._exactSearch({ id });
 
-		// No nodes found with corresponding id
 		if (index === null) return null;
 
-		// Return children with corresponding id
 		return this.children[index];
 	}
 
@@ -188,33 +169,25 @@ class Node {
 		let current = this;
 		let next = null;
 
-		// Traverse along path
 		path.every(id => {
-			// Get first child of path
 			next = current.getChildById(id);
 
-			// No child found and no build
 			if (!next && !build) {
 				current = null;
 				return false;
 			}
 
-			// No child found and build the child
 			if (!next && build) {
-				// Creates node from NodeType
 				next = NodeType ? new NodeType(id) : new Node(id);
 
-				// Sets new child
 				current.addChild(next);
 				next.setEmpty(true);
 			}
 
-			// Prepare for next iteration
 			current = next;
 			return true;
 		});
 
-		// Return the node
 		return current;
 	}
 
@@ -223,22 +196,17 @@ class Node {
 	 * @return {Integer} the order
 	 */
 	getOrder() {
-		// -1 to discount the left end node
 		if (!this.parent) return -1;
 
-		// Find order of parent
 		let order = this.parent.getOrder();
 
-		// Adjust order for this node when attached to existing parent
 		if (!this.parent.empty) order += 1;
 
-		// Iterate through all the children and adjust order accordingly
 		for (const child of this.parent.children) {
 			if (Node.compare(child.id, this.id) === 0) break;
 			order += child.size;
 		}
 
-		// Return order
 		return order;
 	}
 
@@ -248,14 +216,11 @@ class Node {
 	 * @return {Node}
 	 */
 	getChildByOrder(index) {
-		// Get this
 		if (index === 0 && !this.empty) return this;
 
-		// Prepare for iteration
 		let left = this.empty ? 0 : 1;
 		let right = left;
 
-		// Iterate through children
 		for (const child of this.children) {
 			right += child.size;
 			if (left <= index && right > index) {
@@ -264,7 +229,6 @@ class Node {
 			left = right;
 		}
 
-		// No child found
 		return null;
 	}
 
@@ -273,10 +237,8 @@ class Node {
 	 * @param {function(_): _} fn callback function
 	 */
 	walk(fn) {
-		// Perform callback function on this node
 		fn(this);
 
-		// Perform recursive call for all children
 		this.children.forEach(child => {
 			child.walk(fn);
 		});
@@ -292,7 +254,6 @@ class Node {
 function Logoot(site, state, bias) {
 	EventEmitter.call(this);
 
-	// Set attributes
 	this.site = site;
 	this.clock = 0;
 	this._deleteQueue = [];
@@ -302,13 +263,11 @@ function Logoot(site, state, bias) {
 		return a.compare(b);
 	};
 
-	// Setup root and start children
 	this._root = new Node();
 	this._root.setEmpty(true);
 	this._root.addChild(new Node(new Identifier(MIN, null, null)));
 	this._root.addChild(new Node(new Identifier(BASE, null, null)));
 
-	// Set state when provided
 	if (state) this.setState(state);
 }
 
@@ -322,10 +281,8 @@ class BlockNode extends Node {
 	 * @param {*} blockId for refering to blocks
 	 */
 	constructor(id, blockId) {
-		// Call constructor of parent class
 		super(id);
 
-		// Set attributes
 		super.type = 'Block';
 		this.blockId = blockId;
 		this.empty = false;
@@ -343,10 +300,8 @@ class CharacterNode extends Node {
 	 * @param {*} value to save
 	 */
 	constructor(id, value) {
-		// Call constructor of parent class
 		super(id);
 
-		// Set attributes
 		super.type = 'Character';
 		this.value = value || null;
 	}
@@ -395,10 +350,8 @@ function parseOperation(operation) {
  * @return {boolean} whether a and b are equal
  */
 function arePositionsEqual(a, b) {
-	// Incorrect length
 	if (a.length !== b.length) return false;
 
-	// Compare all items
 	return !a.some((id, index) => {
 		return id.compare(b[index]) !== 0;
 	});
@@ -409,10 +362,8 @@ function arePositionsEqual(a, b) {
  * @param {JSON} operation
  */
 Logoot.prototype.receive = function(operation) {
-	// Parse operation if not done yet
 	if (!operation.parsed) operation = parseOperation(operation);
 
-	// Redirects to the corrseponding method for the type
 	switch (operation.type) {
 		case 'insert':
 			this._receiveInsert(operation);
@@ -455,13 +406,10 @@ Logoot.prototype._receiveInsert = function(operation) {
 		return;
 	}
 
-	// Checks whether the node already exists
 	const existingNode = this._root.getChildByPath(operation.position, false, CharacterNode);
 
-	// Invalid duplication, ignore it
 	if (existingNode) return;
 
-	// Create new character node at the same position
 	const node = this._root.getChildByPath(operation.position, true, CharacterNode);
 	node.value = operation.value;
 	node.setEmpty(false);
@@ -487,13 +435,10 @@ Logoot.prototype._receiveInsertBlock = function(operation) {
 		return;
 	}
 
-	// Checks whether the node already exists
 	const existingNode = this._root.getChildByPath(operation.position, false, BlockNode);
 
-	// Invalid duplication, ignore it
 	if (existingNode) return;
 
-	// Create new block node at the same position
 	const node = this._root.getChildByPath(operation.position, true, BlockNode);
 	const blockId = operation.blockId;
 	node.blockId = blockId;
@@ -511,7 +456,6 @@ Logoot.prototype._receiveInsertBlock = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._receiveInsertInBlock = function(operation) {
-	// Retrieves the block the operation needs to be performed on
 	const block = this._searchBlock(operation.blockId);
 	const logoot = block.logoot;
 
@@ -524,13 +468,10 @@ Logoot.prototype._receiveInsertInBlock = function(operation) {
 		return;
 	}
 
-	// Checks whether the node already exists
 	const existingNode = logoot._root.getChildByPath(operation.position, false, CharacterNode);
 
-	// Invalid duplication, ignore it
 	if (existingNode) return;
 
-	// Create new character node at the same position
 	const node = logoot._root.getChildByPath(operation.position, true, CharacterNode);
 	node.value = operation.value;
 	node.setEmpty(false);
@@ -548,12 +489,9 @@ Logoot.prototype._receiveInsertInBlock = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._receiveDelete = function(operation) {
-	// Retrieves the node to delete
 	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
 
-	// Checks whether the node is found and removable
 	if (node && !node.empty) {
-		// Removes the node
 		const index = node.getOrder();
 		const value = node.value;
 		node.setEmpty(true);
@@ -568,7 +506,6 @@ Logoot.prototype._receiveDelete = function(operation) {
 			return arePositionsEqual(op.position, operation.position);
 		})
 	) {
-		// Enqueue
 		this._deleteQueue.push(operation);
 	}
 };
@@ -578,7 +515,6 @@ Logoot.prototype._receiveDelete = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._receiveDeleteBlock = function(operation) {
-	// Calls the remove block function
 	this._deleteBlock(operation.blockId);
 };
 
@@ -587,13 +523,10 @@ Logoot.prototype._receiveDeleteBlock = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._receiveDeleteInBlock = function(operation) {
-	// Retrieves the block node
 	const block = this._searchBlock(operation.blockId);
 	const node = block.logoot._root.getChildByPath(operation.position, false, CharacterNode);
 
-	// Checks whether the node is found and removable
 	if (node && !node.empty) {
-		// Removes the node
 		const index = node.getOrder();
 		const value = node.value;
 		node.setEmpty(true);
@@ -609,7 +542,6 @@ Logoot.prototype._receiveDeleteInBlock = function(operation) {
 			return arePositionsEqual(op.position, operation.position);
 		})
 	) {
-		// Enqueue
 		this._deleteQueue.push(operation);
 	}
 };
@@ -619,16 +551,13 @@ Logoot.prototype._receiveDeleteInBlock = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._receiveMoveBlock = function(operation) {
-	// Retrieves the blocks
 	const oldBlock = this._searchBlock(operation.oldBlockId);
 	const newBlock = this._searchBlock(operation.newBlockId);
 
-	// Throw error when one of them are empty
 	if (!oldBlock || !newBlock) {
 		throw Error('One of the blocks is not defined');
 	}
 
-	// Copy the logoot
 	newBlock.logoot = oldBlock.logoot;
 };
 
@@ -637,15 +566,12 @@ Logoot.prototype._receiveMoveBlock = function(operation) {
  * @param {JSON} operation to perform
  */
 Logoot.prototype._changeBlockId = function(operation) {
-	// Retrieves the block
 	const block = this._searchBlock(operation.oldId);
 
-	// Throw error when no block is found
 	if (!block) {
 		throw Error(`Could not find block of blockId: ${operation.oldBlockId}`);
 	}
 
-	// Give block a new Id
 	block.blockId = operation.newBlockId;
 };
 
@@ -655,7 +581,6 @@ Logoot.prototype._changeBlockId = function(operation) {
  * @param {Integer} index for insertion
  */
 Logoot.prototype.insert = function(value, index) {
-	// Perform the insert for each character individually
 	value.split('').forEach((character, i) => {
 		this._insert(character, index + i);
 	});
@@ -668,21 +593,16 @@ Logoot.prototype.insert = function(value, index) {
  * @return {[Integer]} path to the newly created node
  */
 Logoot.prototype._insert = function(value, index) {
-	// Filters the index
 	index = Math.min(index, this.length());
 
-	// Retrieve the neighbor nodes
 	const prev = this._root.getChildByOrder(index);
 	const next = this._root.getChildByOrder(index + 1);
 
-	// Retrieves the path of the neighbor nodes
 	const prevPos = prev.getPath();
 	const nextPos = next.getPath();
 
-	// Create new position
 	const position = this._generatePositionBetween(prevPos, nextPos);
 
-	// Create the node with the newly created position
 	const node = this._root.getChildByPath(position, true, CharacterNode);
 	node.value = value;
 	node.setEmpty(false);
@@ -693,7 +613,6 @@ Logoot.prototype._insert = function(value, index) {
 		value: value
 	});
 
-	// Return the path to the new node
 	return node.getPath();
 };
 
@@ -744,30 +663,24 @@ Logoot.prototype._generateNewIdentifier = function(prevInt, nextInt) {
  * @return {[Integer]} generated position
  */
 Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
-	// Initialise position
 	const newPos = [];
 
-	// Gets max length to check
 	const maxLength = Math.max(prevPos.length, nextPos.length);
 	let samePrefixes = true;
 
-	// Loop until depth is reached
 	for (let depth = 0; depth < maxLength + 1; depth++) {
 		const DEPTH_MAX = doubledBase(depth);
 		const prevId = prevPos[depth] || new Identifier(MIN, null, null);
 
-		// base doubling
 		const nextId =
 			samePrefixes && nextPos[depth] ? nextPos[depth] : new Identifier(DEPTH_MAX, null, null);
 
 		const diff = nextId.int - prevId.int;
 
 		if (diff > 1) {
-			// Enough room for integer between prevInt and nextInt
 			newPos.push(this._generateNewIdentifier(prevId.int, nextId.int));
 			break;
 		} else {
-			// Insufficient room between prevInt and nextInt
 			// eslint-disable-next-line no-unused-expressions
 			if (prevId.site === null && depth > 0) prevId.site === this.site;
 			newPos.push(prevId);
@@ -775,7 +688,6 @@ Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
 		}
 	}
 
-	// Returns new position in between
 	return newPos;
 };
 
@@ -785,7 +697,6 @@ Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
  * @param {Integer} length
  */
 Logoot.prototype.delete = function(index, length = 1) {
-	// Calls the delete function for every character that needs to be deleted
 	for (let i = 0; i < length; i++) {
 		this._delete(index);
 	}
@@ -796,13 +707,10 @@ Logoot.prototype.delete = function(index, length = 1) {
  * @param {Integer} index
  */
 Logoot.prototype._delete = function(index) {
-	// Gets the node to delete
 	const node = this._root.getChildByOrder(index + 1);
 
-	// No node is found
 	if (!node || node.id.site === null) return;
 
-	// Delete node
 	node.setEmpty(true);
 	node.trimEmpty();
 
@@ -817,10 +725,8 @@ Logoot.prototype._delete = function(index) {
  * @return {string} value of the tree
  */
 Logoot.prototype.value = function() {
-	// Construct new array
 	const arr = [];
 
-	// Append the value of all the nodes starting from the root
 	this._root.walk(node => {
 		if (!node.empty) {
 			if (node.logoot) {
@@ -831,7 +737,6 @@ Logoot.prototype.value = function() {
 		}
 	});
 
-	// Convert to string
 	return arr.join('');
 };
 
@@ -868,7 +773,6 @@ Logoot.prototype.setValue = function(value) {
  * @return {JSON} state of the logoot
  */
 function getStateLogoot(node) {
-	// Sets basic attributes
 	const res = {
 		id: node.id,
 		size: node.size,
@@ -878,13 +782,11 @@ function getStateLogoot(node) {
 		children: node.children.map(getStateLogoot)
 	};
 
-	// When the type is a block
 	if (node.type === 'Block') {
 		res['logoot'] = node.logoot ? getStateLogoot(node.logoot._root) : null;
 		res['blockId'] = node.blockId;
 	}
 
-	// Return representation
 	return res;
 }
 
@@ -907,13 +809,12 @@ Logoot.prototype.getState = function() {
  * @param {string} state
  */
 Logoot.prototype.setState = function(state) {
-	// Parse to JSON
 	const parsed = JSON.parse(state);
 
 	/**
 	 * Function to parse the JSON into the tree
-	 * @param {Node} n 
-	 * @param {Node} parent 
+	 * @param {Node} n
+	 * @param {Node} parent
 	 * @return {Node}
 	 */
 	function parseNode(n, parent) {
@@ -926,14 +827,9 @@ Logoot.prototype.setState = function(state) {
 		return node;
 	}
 
-	// Parse the JSON
 	this._root = parseNode(parsed.root, null);
 	this._deleteQueue = parsed.deleteQueue;
 };
-
-// ***********************************
-// | ADDITIONAL FUNCTIONS FOR BLOCKS |
-// ***********************************
 
 /**
  * New insertion for characters
@@ -942,34 +838,27 @@ Logoot.prototype.setState = function(state) {
  * @return {string} blockId
  */
 Logoot.prototype.insertBlock = function(index, id) {
-	// Get block to insert after and before
 	index = Math.min(index, this.length());
 
-	// Get neighbors
 	const prev = this._root.getChildByOrder(index);
 	const next = this._root.getChildByOrder(index + 1);
 
-	// Gets the position of neighbors
 	const prevPos = prev.getPath();
 	const nextPos = next.getPath();
 
-	// Generates the position
 	const position = this._generatePositionBetween(prevPos, nextPos);
 
-	// Create node
 	const node = this._root.getChildByPath(position, true, BlockNode);
 	node.setEmpty(false);
 	const blockId = id ? id : generateString(5);
 	node.blockId = blockId;
 
-	// Create emit operation
 	this.emit('operation', {
 		type: 'insertBlock',
 		position: position,
 		blockId: blockId
 	});
 
-	// Return newly created node
 	return node;
 };
 
@@ -980,21 +869,17 @@ Logoot.prototype.insertBlock = function(index, id) {
  * @param {string} blockId of the block to write to
  */
 Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
-	// Initialise node for insertion
 	let node = null;
 
-	// Checks whether the insertion is for a specific block
 	if (blockId !== undefined && blockId !== null && blockId !== '') {
 		node = this._searchBlock(blockId);
 	}
 
-	// Cancel insertion when block is undefined or unfindable
 	if (node === null) {
 		console.error(`Block not found! Insertion in block: ${blockId} cancelled.`);
 		return;
 	}
 
-	// Insert each character individually
 	content.split('').forEach((value, i) => {
 		const position = node.logoot._insert(value, index + i);
 		this.emit('operation', {
@@ -1012,27 +897,21 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
  * @return {BlockNode} block node with corresponding id
  */
 Logoot.prototype._searchBlock = function(blockId) {
-	// Initialise queue
 	const queue = [];
 	queue.push(this._root);
 
-	// Loop until all nodes are visited
 	while (queue.length > 0) {
-		// Get first node in the queue
 		const node = queue.shift();
 
-		// Found the node
 		if (node instanceof BlockNode && node.blockId === blockId) {
 			return node;
 		}
 
-		// Append children into the queue
 		for (const child of node.children) {
 			queue.push(child);
 		}
 	}
 
-	// Invalid
 	console.error(`Could not find block: ${blockId}`);
 	return null;
 };
@@ -1043,21 +922,16 @@ Logoot.prototype._searchBlock = function(blockId) {
  * @param {Integer} index of the position of the new block
  */
 Logoot.prototype.moveBlock = function(blockId, index) {
-	// Retrieves the block to move
 	const block = this._searchBlock(blockId);
 
-	// Throw error when no block is found
 	if (!block) {
 		throw Error(`Could not find block of id: ${blockId}`);
 	}
 
-	// Create new block at the new position
 	const newBlock = this.insertBlock(index);
 
-	// Copy the content
 	newBlock.logoot = block.logoot;
 
-	// Emit the move block operation
 	this.emit('operation', {
 		type: 'moveBlock',
 		position: [],
@@ -1065,10 +939,8 @@ Logoot.prototype.moveBlock = function(blockId, index) {
 		newBlockId: newBlock.blockId
 	});
 
-	// Delete the old block
 	this.deleteBlock(blockId);
 
-	// Change new blockId to old blockId
 	this.emit('operation', {
 		type: 'changeBlockId',
 		position: [],
@@ -1076,7 +948,6 @@ Logoot.prototype.moveBlock = function(blockId, index) {
 		newBlockId: blockId
 	});
 
-	// Update blockId
 	newBlock.blockId = blockId;
 };
 
@@ -1085,16 +956,13 @@ Logoot.prototype.moveBlock = function(blockId, index) {
  * @param {string} blockId id for block
  */
 Logoot.prototype._deleteBlock = function(blockId) {
-	// Find block
 	const block = this._searchBlock(blockId);
 
-	// No block is found
 	if (!block) {
 		console.error(`There does not exist a block of id ${blockId}`);
 		return;
 	}
 
-	// Remove block node
 	block.logoot = null;
 	block.setEmpty(true);
 	block.trimEmpty();
@@ -1105,10 +973,8 @@ Logoot.prototype._deleteBlock = function(blockId) {
  * @param {string} blockId id for block
  */
 Logoot.prototype.deleteBlock = function(blockId) {
-	// Remove block from tree
 	this._deleteBlock(blockId);
 
-	// Emit message to other CRDTs
 	this.emit('operation', {
 		type: 'deleteBlock',
 		position: [new Identifier(0, this.site, this.clock++)],
@@ -1122,19 +988,15 @@ Logoot.prototype.deleteBlock = function(blockId) {
  * @param {string} blockId2 The second block which will be deleted after the merge
  */
 Logoot.prototype.mergeBlocks = function(blockId1, blockId2) {
-	// Retrieves the blocks
 	const block1 = this._searchBlock(blockId1);
 	const block2 = this._searchBlock(blockId2);
 
-	// Throw error when a block is not found
 	if (!block1 || !block2) {
 		throw Error('BlockId does not exist');
 	}
 
-	// Insert the content in one block
 	this.insertContentInBlock(block2.logoot.value(), block1.logoot.value().length, blockId1);
 
-	// Delete the unused block
 	this.deleteBlock(blockId2);
 };
 
@@ -1145,22 +1007,16 @@ Logoot.prototype.mergeBlocks = function(blockId1, blockId2) {
  * @param {string} blockId of location to delete the content
  */
 Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
-	// Find block
 	const block = this._searchBlock(blockId);
 
-	// Deletes character 'length' times
 	for (let i = 0; i < length; i++) {
-		// Finds the character
 		const node = block.logoot._root.getChildByOrder(index + 1);
 
-		// No node is found
 		if (!node || node.id.site === null) continue;
 
-		// Removes the node
 		node.setEmpty(true);
 		node.trimEmpty();
 
-		// Emits the operation
 		this.emit('operation', {
 			type: 'deleteInBlock',
 			position: node.getPath(),
@@ -1175,20 +1031,15 @@ Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
  * @param {Integer} index
  */
 Logoot.prototype.splitBlock = function(blockId, index) {
-	// Search for the block to split
 	const block = this._searchBlock(blockId);
 
-	// Create new block
 	const blockIndex = block.getOrder();
 	const newBlock = this.insertBlock(blockIndex);
 
-	// Content to move
 	const content = block.logoot.value().substring(index, block.logoot.value().length);
 
-	// Delete from old block
 	this.deleteContentInBlock(index, content.length, block.blockId);
 
-	// Insert into new block
 	this.insertContentInBlock(content, 0, newBlock.blockId);
 };
 
