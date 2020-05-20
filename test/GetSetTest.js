@@ -38,7 +38,8 @@ describe('Get Set', () => {
 			crdt.setState(expectedState);
 			assert.equal(crdt.getState(), expectedState);
 		});
-		it('should work with blocks', () => {
+
+		it('should work with one block', () => {
 			const block = crdt.insertBlock(0);
 			crdt.insertContentInBlock('fsdf', 0, block.blockId);
 			const expectedValue = crdt.value();
@@ -48,6 +49,23 @@ describe('Get Set', () => {
 			assert.equal(crdt.value(), expectedValue);
 			assert.deepEqual(crdt.getState(), state);
 		});
+
+		it('should work with multiple block', () => {
+			const block = crdt.insertBlock(0);
+			crdt.insertContentInBlock('1', 0, block.blockId);
+			const block1 = crdt.insertBlock(1);
+			crdt.insertContentInBlock('2', 0, block1.blockId);
+			const block2 = crdt.insertBlock(2);
+			crdt.insertContentInBlock('3', 0, block2.blockId);
+
+			const expectedValue = crdt.value();
+			const state = crdt.getState();
+			crdt.setState(state);
+
+			assert.equal(crdt.value(), expectedValue);
+			assert.deepEqual(crdt.getState(), state);
+		});
+
 		it('should throw error when state is not a valid state', () => {
 			const errorFunction = () => crdt.setState({ test: 2 });
 			assert.throws(errorFunction, Error);
