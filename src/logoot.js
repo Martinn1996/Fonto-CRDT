@@ -254,6 +254,8 @@ Logoot.prototype.receive = function(operation) {
 		case 'deleteBlock':
 			this._receiveDeleteBlock(operation);
 			break;
+		case 'deleteInBlock':
+			this._receiveDeleteInBlock(operation);
 	}
 };
 
@@ -278,27 +280,6 @@ Logoot.prototype._receiveInsert = function(operation) {
 		value: node.value,
 		index: index
 	});
-};
-
-Logoot.prototype._receiveDelete = function(operation) {
-	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
-	if (node && !node.empty) {
-		const index = node.getOrder();
-		const value = node.value;
-		node.setEmpty(true);
-		node.trimEmpty();
-
-		this.emit('delete', {
-			value: value,
-			index: index
-		});
-	} else if (
-		!this._deleteQueue.some(op => {
-			return arePositionsEqual(op.position, operation.position);
-		})
-	) {
-		this._deleteQueue.push(operation);
-	}
 };
 
 Logoot.prototype._receiveInsertBlock = function(operation) {
@@ -376,6 +357,29 @@ Logoot.prototype._receiveDelete = function(operation) {
 
 Logoot.prototype._receiveDeleteBlock = function(operation) {
 	this._deleteBlock(operation.blockId);
+};
+
+Logoot.prototype._receiveDeleteInBlock = function(operation) {
+	const block = this._searchBlock(operation.blockId);
+	const node = block.logoot._root.getChildByPath(operation.position, false, CharacterNode);
+	if (node && !node.empty) {
+		const index = node.getOrder();
+		const value = node.value;
+		node.setEmpty(true);
+		node.trimEmpty();
+
+		this.emit('deleteInBlock', {
+			value: value,
+			index: index,
+			blockId: operation.blockId
+		});
+	} else if (
+		!this._deleteQueue.some(op => {
+			return arePositionsEqual(op.position, operation.position);
+		})
+	) {
+		this._deleteQueue.push(operation);
+	}
 };
 
 Logoot.prototype.insert = function(value, index) {
@@ -511,7 +515,7 @@ function getStateLogoot(logoot) {
 	};
 
 	if (logoot.type === 'Block') {
-		res['logoot'] = logoot.logoot ? getStateLogoot(logoot.logoot._root) : null;
+		res['logoot'] = getStateLogoot(logoot.logoot._root);
 		res['blockId'] = logoot.blockId;
 	}
 
@@ -663,9 +667,12 @@ Logoot.prototype._deleteBlock = function(blockId) {
 		console.error(`There does not exist a block of id ${blockId}`);
 		return;
 	}
-	block.logoot = null;
+
+	// Remove block node from parent node
+	const parent = block.parent;
 	block.setEmpty(true);
 	block.trimEmpty();
+	parent.children = parent.children.filter(node => node.blockId !== blockId);
 };
 
 /**
@@ -682,6 +689,47 @@ Logoot.prototype.deleteBlock = function(blockId) {
 		position: [new Identifier(0, this.site, this.clock++)],
 		blockId: blockId
 	});
+};
+
+Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
+	const block = this._searchBlock(blockId);
+
+	for (let i = 0; i < length; i++) {
+		const node = block.logoot._root.getChildByOrder(index + 1);
+		if (!node || node.id.site === null) continue;
+
+		node.setEmpty(true);
+		node.trimEmpty();
+
+		this.emit('operation', {
+			type: 'deleteInBlock',
+			position: node.getPath(),
+			blockId: blockId
+		});
+	}
+};
+
+/**
+ * Split block into two and moves the content over
+ * @param {*} blockId
+ * @param {*} index
+ */
+Logoot.prototype.splitBlock = function(blockId, index) {
+	// Search for the block to split
+	const block = this._searchBlock(blockId);
+
+	// Create new block
+	const blockIndex = block.getOrder();
+	const newBlock = this.insertBlock(blockIndex);
+
+	// Content to move
+	const content = block.logoot.value().substring(index, block.logoot.value().length);
+
+	// Delete from old block
+	this.deleteContentInBlock(index, content.length, block.blockId);
+
+	// Insert into new block
+	this.insertContentInBlock(content, 0, newBlock.blockId);
 };
 
 module.exports = Logoot;
