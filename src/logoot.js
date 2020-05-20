@@ -511,7 +511,7 @@ function getStateLogoot(logoot) {
 	};
 
 	if (logoot.type === 'Block') {
-		res['logoot'] = getStateLogoot(logoot.logoot._root);
+		res['logoot'] = logoot.logoot ? getStateLogoot(logoot.logoot._root) : null;
 		res['blockId'] = logoot.blockId;
 	}
 
@@ -663,12 +663,9 @@ Logoot.prototype._deleteBlock = function(blockId) {
 		console.error(`There does not exist a block of id ${blockId}`);
 		return;
 	}
-
-	// Remove block node from parent node
-	const parent = block.parent;
+	block.logoot = null;
 	block.setEmpty(true);
 	block.trimEmpty();
-	parent.children = parent.children.filter(node => node.blockId !== blockId);
 };
 
 /**
