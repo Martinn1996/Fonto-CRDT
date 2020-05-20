@@ -40,7 +40,6 @@ describe('Delete and Insert Block Integration', () => {
 			crdt1.deleteBlock(blockIndexes[i]);
 		}
 
-		console.log(crdt1.getState());
 		assert.equal(crdt1.length(), 50);
 	});
 
@@ -48,7 +47,7 @@ describe('Delete and Insert Block Integration', () => {
 		let blockIndex = '';
 		for (let i = 0; i < 1000; i++) {
 			const blockId = insertContentInNewBlock(crdt1, 'a', 0);
-			if (i == 0) {
+			if (i === 0) {
 				blockIndex = blockId;
 			}
 		}

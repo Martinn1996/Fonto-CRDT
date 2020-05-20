@@ -103,4 +103,11 @@ describe('InsertBlock', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should not be able to add a block with negative index', () => {
+		const errorFunction = () => {
+			insertContentInNewBlock(crdt1, 'a', -1);
+		};
+		assert.throws(errorFunction, TypeError);
+	});
 });
