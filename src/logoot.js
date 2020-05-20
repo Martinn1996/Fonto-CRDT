@@ -1040,7 +1040,7 @@ Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
  * Split block into two and moves the content over
  * @param {string} blockId
  * @param {Integer} index
- * @return {blockNode} newBlock
+ * @return {BlockNode} newBlock
  */
 Logoot.prototype.splitBlock = function(blockId, index) {
 	const block = this._searchBlock(blockId);
