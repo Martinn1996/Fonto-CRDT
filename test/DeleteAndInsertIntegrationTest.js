@@ -43,6 +43,22 @@ describe('Delete and Insert Block Integration', () => {
 		assert.equal(crdt1.length(), 50);
 	});
 
+	it('should insert 20 blocks and delete 10 blocks and not change order', () => {
+		const blockIndexes = [];
+		for (let i = 0; i <= 20; i++) {
+			const blockId = insertContentInNewBlock(crdt1, '' + i, i);
+			blockIndexes.push(blockId);
+		}
+
+		for (let i = 1; i < 20; i += 2) {
+			crdt1.deleteBlock(blockIndexes[i]);
+		}
+		assert.equal(
+			crdt1.value(),
+			'0\n\n2\n\n4\n\n6\n\n8\n\n10\n\n12\n\n14\n\n16\n\n18\n\n20\n\n'
+		);
+	});
+
 	it('should insert 1000 blocks and delete the first block added', () => {
 		let blockIndex = '';
 		for (let i = 0; i < 1000; i++) {
@@ -75,5 +91,24 @@ describe('Delete and Insert Block Integration', () => {
 		assert.equal(crdt1.value(), 'blok1\n\nblok3\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 		assert.equal(crdt1.value(), crdt2.value());
+	});
+
+	it('should insert 2 paragraphs on replica 1, 2 paragraphs on replica 2 and replica 2 adjust one of replica 1 paragraphs and they should converge', () => {
+		const block1 = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('Vandaag is vrijdag', 0, block1.blockId);
+		const block2 = crdt2.insertBlock(1);
+		crdt2.insertContentInBlock('Het is mooi weer', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('Ik ga vandaag tenissen', 0, block3.blockId);
+		const block4 = crdt2.insertBlock(1);
+		crdt2.insertContentInBlock('Ik ben vrij vandaag', 0, block4.blockId);
+		crdt2.deleteContentInBlock('maandag', 11, 7, block1.blockId);
+
+		assert.equal(
+			crdt1.value(),
+			'Vandaag is maandag\n\nIk ben vrij vandaag\n\nHet is mooi weer\n\nIk ga vandaag tenissen\n\n'
+		);
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });

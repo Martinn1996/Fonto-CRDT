@@ -95,13 +95,18 @@ describe('InsertBlock', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('replica 1 should insert the block and replica 1 and 2 should alter it', () => {
+	it('should have replica 1 insert the block and replica 1 and 2 should add text to it', () => {
 		const block = crdt1.insertBlock(0);
 		crdt2.insertContentInBlock('crdt2', 0, block.blockId);
 		crdt1.insertContentInBlock('crdt1', 5, block.blockId);
 
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should have replica 1 insert a block with text, replica 2 alter the text and it should converge', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'het is vandaag dinsdag', 0);
+		crdt2.replaceRange('maandag', 15, 7, blockId);
 	});
 
 	it('should not be able to add a block with negative index', () => {

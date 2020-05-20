@@ -598,6 +598,13 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 	});
 };
 
+Logoot.prototype.replaceRangeInBlock = function(value, start, length, blockId) {
+	const node = this._searchBlock(blockId);
+	node.logoot.deleteContentInBlock(start, length);
+	node.logoot.insertCOntentInBlock(value, start);
+};
+
+
 /**
  * Breadth-first search for blocks on id
  * @param { * } blockId for searching block
