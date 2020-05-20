@@ -82,6 +82,17 @@ describe('Delete and Insert Block Integration', () => {
 		assert.equal(crdt1.length(), 1);
 	});
 
+	it('should insert 2 blocks on replica1 and delete the first block on replica2', () => {
+		const blockId1 = insertContentInNewBlock(crdt1, 'block1', 0);
+		insertContentInNewBlock(crdt1, 'block2', 1);
+		crdt2.deleteBlock(blockId1);
+
+		assert.equal(crdt1.value(), 'block2\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+		assert.equal(crdt1.length(), 1);
+	});
+
 	it('should insert 3 blocks with text and delete the middle block with text', () => {
 		insertContentInNewBlock(crdt1, 'blok1', 0);
 		const blockId2 = insertContentInNewBlock(crdt1, 'blok2', 1);
