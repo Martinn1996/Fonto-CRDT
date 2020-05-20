@@ -102,7 +102,8 @@ describe('Delete and Insert Block Integration', () => {
 		crdt1.insertContentInBlock('Ik ga vandaag tenissen', 0, block3.blockId);
 		const block4 = crdt2.insertBlock(1);
 		crdt2.insertContentInBlock('Ik ben vrij vandaag', 0, block4.blockId);
-		crdt2.deleteContentInBlock('maandag', 11, 7, block1.blockId);
+		crdt2.deleteContentInBlock(11, 7, block1.blockId);
+		crdt2.insertContentInBlock('maandag', 11, block1.blockId);
 
 		assert.equal(
 			crdt1.value(),

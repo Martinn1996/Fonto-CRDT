@@ -115,4 +115,13 @@ describe('InsertBlock', () => {
 		};
 		assert.throws(errorFunction, TypeError);
 	});
+
+	it('should have replica 1 add a paragraph and replica 2 alter it', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'ik ging naar de h&m om kleren te kopen', 0);
+		crdt2.replaceRangeInBlock('bijenkorf', 16, 3, blockId);
+
+		assert.equal(crdt2.value(), 'ik ging naar de bijenkorf om kleren te kopen\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 });

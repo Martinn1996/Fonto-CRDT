@@ -624,9 +624,8 @@ Logoot.prototype.insertContentInBlock = function(content, index, blockId) {
 };
 
 Logoot.prototype.replaceRangeInBlock = function(value, start, length, blockId) {
-	const node = this._searchBlock(blockId);
-	node.logoot.deleteContentInBlock(start, length);
-	node.logoot.insertCOntentInBlock(value, start);
+	this.deleteContentInBlock(start, length, blockId);
+	this.insertContentInBlock(value, start, blockId);
 };
 
 
