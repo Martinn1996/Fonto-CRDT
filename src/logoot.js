@@ -802,10 +802,17 @@ Logoot.prototype.splitBlock = function(blockId, index) {
 	// Search for the block to split
 	const block = this._searchBlock(blockId);
 
+	if (!block) {
+		throw Error('BlockId does not exist');
+	}
+
 	// Create new block
 	const blockIndex = block.getOrder();
-	const newBlock = this.insertBlock(blockIndex);
+	const newBlock = this.insertBlock(blockIndex + 1);
 
+	if(index > block.logoot.value().length || index < 0){
+		throw Error('Index out of range');
+	}
 	// Content to move
 	const content = block.logoot.value().substring(index, block.logoot.value().length);
 
@@ -814,6 +821,7 @@ Logoot.prototype.splitBlock = function(blockId, index) {
 
 	// Insert into new block
 	this.insertContentInBlock(content, 0, newBlock.blockId);
+	return newBlock;
 };
 
 module.exports = Logoot;
