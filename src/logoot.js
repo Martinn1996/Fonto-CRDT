@@ -255,6 +255,7 @@ Logoot.prototype.receive = function(operation) {
 			break;
 		case 'deleteInBlock':
 			this._receiveDeleteInBlock(operation);
+			break;
 		case 'moveBlock':
 			this.receiveMoveBlock(operation);
 			break;
@@ -578,6 +579,7 @@ Logoot.prototype.setState = function(state) {
 /**
  * New insertion for characters
  * @param { * } index index of the block
+ * @param { string } id optional id of the block
  * @return { * } blockId
  */
 Logoot.prototype.insertBlock = function(index, id) {
