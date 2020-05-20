@@ -668,7 +668,7 @@ Logoot.prototype._deleteBlock = function(blockId) {
 		return;
 	}
 
-	// Remove block node from parent node
+	// Remove block node
 	block.logoot = null;
 	block.setEmpty(true);
 	block.trimEmpty();
