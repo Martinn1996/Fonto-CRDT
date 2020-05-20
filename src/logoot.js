@@ -565,6 +565,12 @@ Logoot.prototype.setState = function(state) {
 		node.children = n.children.map(c => parseNode(c, node));
 		node.size = n.size;
 		node.empty = n.empty;
+		if (n.type === 'Block') {
+			node.blockId = n.blockId;
+			node.logoot = new Logoot(node.blockId);
+
+			node.logoot.setState(JSON.stringify({ root: n.logoot }));
+		}
 		return node;
 	}
 
