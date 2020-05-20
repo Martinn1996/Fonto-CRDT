@@ -674,9 +674,11 @@ Logoot.prototype._searchBlock = function(blockId) {
 
 Logoot.prototype.moveBlock = function(blockId, index) {
 	const block = this._searchBlock(blockId);
+
 	if (!block) {
 		throw Error(`Could not find block of id: ${blockId}`);
 	}
+
 	const newBlock = this.insertBlock(index);
 	newBlock.logoot = block.logoot;
 	this.emit('operation', {
@@ -685,6 +687,7 @@ Logoot.prototype.moveBlock = function(blockId, index) {
 		oldBlockId: blockId,
 		newBlockId: newBlock.blockId
 	});
+
 	this.deleteBlock(blockId);
 	this.emit('operation', {
 		type: 'changeBlockId',
