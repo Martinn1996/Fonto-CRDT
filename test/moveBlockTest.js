@@ -41,6 +41,18 @@ describe('Delete Block', () => {
 		assert.equal(crdt1.value(), '2\n\n3\n\n1\n\n');
 	});
 
+	it('should throw error when block does not exist', () => {
+		const block = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block.blockId);
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		const errorFunction = () => crdt1.moveBlock('fsafssfs', 2);
+		assert.throws(errorFunction, Error);
+	});
+
 	it('should converge move block on different crdts', () => {
 		const block = crdt1.insertBlock(0);
 		crdt1.insertContentInBlock('1', 0, block.blockId);
