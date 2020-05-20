@@ -237,7 +237,6 @@ function arePositionsEqual(a, b) {
 
 Logoot.prototype.receive = function(operation) {
 	if (!operation.parsed) operation = parseOperation(operation);
-
 	switch (operation.type) {
 		case 'insert':
 			this._receiveInsert(operation);
@@ -254,7 +253,33 @@ Logoot.prototype.receive = function(operation) {
 		case 'deleteBlock':
 			this._receiveDeleteBlock(operation);
 			break;
+		case 'deleteInBlock':
+			this._receiveDeleteInBlock(operation);
+			break;
+		case 'moveBlock':
+			this.receiveMoveBlock(operation);
+			break;
+		case 'changeBlockId':
+			this.changeBlockId(operation);
+			break;
 	}
+};
+
+Logoot.prototype.receiveMoveBlock = function(operation) {
+	const oldBlock = this._searchBlock(operation.oldBlockId);
+	const newBlock = this._searchBlock(operation.newBlockId);
+	if (!oldBlock || !newBlock) {
+		throw Error('One of the blocks is not defined');
+	}
+	newBlock.logoot = oldBlock.logoot;
+};
+
+Logoot.prototype.changeBlockId = function(operation) {
+	const block = this._searchBlock(operation.oldId);
+	if (!block) {
+		throw Error(`Could not find block of blockId: ${operation.oldBlockId}`);
+	}
+	block.blockId = operation.newBlockId;
 };
 
 Logoot.prototype._receiveInsert = function(operation) {
@@ -278,27 +303,6 @@ Logoot.prototype._receiveInsert = function(operation) {
 		value: node.value,
 		index: index
 	});
-};
-
-Logoot.prototype._receiveDelete = function(operation) {
-	const node = this._root.getChildByPath(operation.position, false, CharacterNode);
-	if (node && !node.empty) {
-		const index = node.getOrder();
-		const value = node.value;
-		node.setEmpty(true);
-		node.trimEmpty();
-
-		this.emit('delete', {
-			value: value,
-			index: index
-		});
-	} else if (
-		!this._deleteQueue.some(op => {
-			return arePositionsEqual(op.position, operation.position);
-		})
-	) {
-		this._deleteQueue.push(operation);
-	}
 };
 
 Logoot.prototype._receiveInsertBlock = function(operation) {
@@ -376,6 +380,29 @@ Logoot.prototype._receiveDelete = function(operation) {
 
 Logoot.prototype._receiveDeleteBlock = function(operation) {
 	this._deleteBlock(operation.blockId);
+};
+
+Logoot.prototype._receiveDeleteInBlock = function(operation) {
+	const block = this._searchBlock(operation.blockId);
+	const node = block.logoot._root.getChildByPath(operation.position, false, CharacterNode);
+	if (node && !node.empty) {
+		const index = node.getOrder();
+		const value = node.value;
+		node.setEmpty(true);
+		node.trimEmpty();
+
+		this.emit('deleteInBlock', {
+			value: value,
+			index: index,
+			blockId: operation.blockId
+		});
+	} else if (
+		!this._deleteQueue.some(op => {
+			return arePositionsEqual(op.position, operation.position);
+		})
+	) {
+		this._deleteQueue.push(operation);
+	}
 };
 
 Logoot.prototype.insert = function(value, index) {
@@ -552,9 +579,10 @@ Logoot.prototype.setState = function(state) {
 /**
  * New insertion for characters
  * @param { * } index index of the block
+ * @param { string } id optional id of the block
  * @return { * } blockId
  */
-Logoot.prototype.insertBlock = function(index) {
+Logoot.prototype.insertBlock = function(index, id) {
 	// Get block to insert after and before
 	index = Math.min(index, this.length());
 
@@ -572,7 +600,7 @@ Logoot.prototype.insertBlock = function(index) {
 	// Create node
 	const node = this._root.getChildByPath(position, true, BlockNode);
 	node.setEmpty(false);
-	const blockId = generateString(5);
+	const blockId = id ? id : generateString(5);
 	node.blockId = blockId;
 
 	// Create emit operation
@@ -650,6 +678,32 @@ Logoot.prototype._searchBlock = function(blockId) {
 	return null;
 };
 
+Logoot.prototype.moveBlock = function(blockId, index) {
+	const block = this._searchBlock(blockId);
+
+	if (!block) {
+		throw Error(`Could not find block of id: ${blockId}`);
+	}
+
+	const newBlock = this.insertBlock(index);
+	newBlock.logoot = block.logoot;
+	this.emit('operation', {
+		type: 'moveBlock',
+		position: [],
+		oldBlockId: blockId,
+		newBlockId: newBlock.blockId
+	});
+
+	this.deleteBlock(blockId);
+	this.emit('operation', {
+		type: 'changeBlockId',
+		position: [],
+		oldId: newBlock.blockId,
+		newBlockId: blockId
+	});
+	newBlock.blockId = blockId;
+};
+
 /**
  * Deletes the block in the tree
  * @param {*} blockId id for block
@@ -663,6 +717,8 @@ Logoot.prototype._deleteBlock = function(blockId) {
 		console.error(`There does not exist a block of id ${blockId}`);
 		return;
 	}
+
+	// Remove block node
 	block.logoot = null;
 	block.setEmpty(true);
 	block.trimEmpty();
@@ -682,6 +738,77 @@ Logoot.prototype.deleteBlock = function(blockId) {
 		position: [new Identifier(0, this.site, this.clock++)],
 		blockId: blockId
 	});
+};
+
+/**
+ * Merge two blocks into one and delete the second block
+ * @param {blockId} blockId1 The first block where all content will be merged into
+ * @param {blockId} blockId2 The second block which will be deleted after the merge
+ */
+Logoot.prototype.mergeBlocks = function(blockId1, blockId2) {
+	const block1 = this._searchBlock(blockId1);
+	const block2 = this._searchBlock(blockId2);
+
+	if (!block1 || !block2) {
+		throw Error('BlockId does not exist');
+	}
+
+	this.insertContentInBlock(block2.logoot.value(), block1.logoot.value().length, blockId1);
+	this.deleteBlock(blockId2);
+};
+
+/**
+ * Deletes content in block
+ * @param {*} index of start of deletion
+ * @param {*} length amount of items to delete
+ * @param {*} blockId of location to delete the content
+ */
+Logoot.prototype.deleteContentInBlock = function(index, length = 1, blockId) {
+	// Find block
+	const block = this._searchBlock(blockId);
+
+	// Deletes character 'length' times
+	for (let i = 0; i < length; i++) {
+		// Finds the character
+		const node = block.logoot._root.getChildByOrder(index + 1);
+
+		// No node is found
+		if (!node || node.id.site === null) continue;
+
+		// Removes the node
+		node.setEmpty(true);
+		node.trimEmpty();
+
+		// Emits the operation
+		this.emit('operation', {
+			type: 'deleteInBlock',
+			position: node.getPath(),
+			blockId: blockId
+		});
+	}
+};
+
+/**
+ * Split block into two and moves the content over
+ * @param {*} blockId
+ * @param {*} index
+ */
+Logoot.prototype.splitBlock = function(blockId, index) {
+	// Search for the block to split
+	const block = this._searchBlock(blockId);
+
+	// Create new block
+	const blockIndex = block.getOrder();
+	const newBlock = this.insertBlock(blockIndex);
+
+	// Content to move
+	const content = block.logoot.value().substring(index, block.logoot.value().length);
+
+	// Delete from old block
+	this.deleteContentInBlock(index, content.length, block.blockId);
+
+	// Insert into new block
+	this.insertContentInBlock(content, 0, newBlock.blockId);
 };
 
 module.exports = Logoot;
