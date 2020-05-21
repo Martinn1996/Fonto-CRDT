@@ -82,7 +82,6 @@ describe('InsertBlock', () => {
 		insertContentInNewBlock(crdt1, 'a', 0);
 		insertContentInNewBlock(crdt1, 'c', 1);
 		insertContentInNewBlock(crdt1, 'b', 1);
-
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});

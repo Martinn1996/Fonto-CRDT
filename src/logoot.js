@@ -740,6 +740,20 @@ Logoot.prototype.value = function() {
 	return arr.join('');
 };
 
+Logoot.prototype.blockValue = function() {
+	const arr = [];
+
+	this._root.walk(node => {
+		if (!node.empty) {
+			if (node.logoot) {
+				arr.push({ blockId: node.blockId, value: node.logoot.value() });
+			}
+		}
+	});
+
+	return arr;
+};
+
 /**
  * Returns the size of the root excluding the start and end node
  * @return {Integer} size of the root
@@ -834,7 +848,7 @@ Logoot.prototype.setState = function(state) {
 	}
 
 	this._root = parseNode(parsed.root, null);
-	this._deleteQueue = parsed.deleteQueue;
+	this._deleteQueue = parsed.deleteQueue ? parsed.deleteQueue : [];
 };
 
 /**
