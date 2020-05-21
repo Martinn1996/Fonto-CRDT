@@ -14,20 +14,17 @@ socket.onopen = function(_) {};
 let initialized = false;
 socket.onmessage = function(event) {
 	const data = JSON.parse(event.data);
-	// let cursor = quill.getSelection();
-	// if (cursor) {
-	// 	cursor.index = cursor ? cursor.index : 0;
-	// } else {
-	// 	cursor = { index: 0 };
-	// }
 	if (data.assignSocketId) {
 		l1.setState(data.initialValue);
 		render(l1.blockValue());
 		initialized = true;
 	} else {
+		const cursor = getCursor();
 		l1.receive(data);
 		render(l1.blockValue());
-		// if (cursor && cursor.index) quill.setSelection(cursor.index, 0);
+		if (cursor) {
+			setCursor(cursor);
+		}
 	}
 };
 const supportedOps = [
@@ -71,7 +68,24 @@ const html = `
 		<% } %>
 	</div>
 `;
-let editors;
+let editors = [];
+function getCursor() {
+	for (const editor of editors) {
+		const cursor = editor.editor.getSelection();
+		if (cursor) {
+			return { cursor: cursor, blockId: editor.blockId };
+		}
+	}
+	return null;
+}
+
+function setCursor(cursor) {
+	const editor = editors.filter(e1 => e1.blockId === cursor.blockId);
+	if (editor) {
+		console.log(editor, cursor);
+		editor[0].editor.setSelection(cursor.cursor.index);
+	}
+}
 function render(blocks) {
 	$('#editor').html(
 		ejs.render(html, {
