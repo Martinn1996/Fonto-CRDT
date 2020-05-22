@@ -33,7 +33,12 @@ function putOffline(index){
 
 function putOnline(index){
     offline[index].offline = 0;
-    crdts[index].operations.forEach(op => crdt2.receive(op));
+    crdts[index].operations.forEach(op =>  
+        crdts.forEach(function(e, idx){
+        if (idx !== e.index){ 
+            e.operations.push(op);
+        }
+     }));
 }
 
 function putAllOffline() {
@@ -41,7 +46,13 @@ function putAllOffline() {
 }
 
 function putAllOnline() {
-    crdts.forEach(element => elementoffline = 1);
+    crdts.forEach(element => element.offline = 1);
+    crdts.forEach(element => element.operations.forEach(op =>  
+        crdts.forEach(function(e, idx){
+        if (idx !== e.index){ 
+            e.operations.push(op);
+        }
+     })));
 }
 
 function setDelay(index, delay) {
