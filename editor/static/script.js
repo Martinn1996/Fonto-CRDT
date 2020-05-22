@@ -82,7 +82,6 @@ function getCursor() {
 function setCursor(cursor) {
 	const editor = editors.filter(e1 => e1.blockId === cursor.blockId);
 	if (editor) {
-		console.log(editor, cursor);
 		editor[0].editor.setSelection(cursor.cursor.index);
 	}
 }
