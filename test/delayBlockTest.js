@@ -80,4 +80,21 @@ describe('Delay Block tests', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should converge when 2 replicas move blocks in different order', () => {
+		insertContentInNewBlock(crdt1, 'block1', 0);
+		const blockId2 = insertContentInNewBlock(crdt1, 'block2', 1);
+		insertContentInNewBlock(crdt1, 'block3', 2);
+		const blockId4 = insertContentInNewBlock(crdt1, 'block4', 3);
+
+		mergeAll();
+
+		crdt1.moveBlock(blockId4, 2);
+		crdt2.moveBlock(blockId2, 4);
+
+		mergeAll();
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 });
