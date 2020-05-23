@@ -8,8 +8,34 @@ const l1 = new Logoot('site1');
 Quill.register('modules/cursors', QuillCursors);
 
 const socket = new WebSocket(host);
-
 socket.onopen = function(_) {};
+
+let online = true;
+const opsToSend = [];
+const opsToReceive = [];
+
+function receiveOperation(op) {
+	const cursor = getCursor();
+	l1.receive(op);
+	render(l1.blockValue());
+	if (cursor) {
+		setCursor(cursor);
+	}
+}
+
+$('#trigger-online').on('click', () => {
+	online = !online;
+	$('#trigger-online').html(online ? 'Go offline' : 'Go online');
+	$('#network-status').html(online ? 'Online' : 'Offline');
+	if (online) {
+		opsToSend.forEach(op => {
+			socket.send(JSON.stringify(op));
+		});
+		opsToReceive.forEach(op => {
+			receiveOperation(op);
+		});
+	}
+});
 
 let initialized = false;
 socket.onmessage = function(event) {
@@ -18,13 +44,10 @@ socket.onmessage = function(event) {
 		l1.setState(data.initialValue);
 		render(l1.blockValue());
 		initialized = true;
+	} else if (online) {
+		receiveOperation(data);
 	} else {
-		const cursor = getCursor();
-		l1.receive(data);
-		render(l1.blockValue());
-		if (cursor) {
-			setCursor(cursor);
-		}
+		opsToReceive.push(data);
 	}
 };
 const supportedOps = [
@@ -39,7 +62,11 @@ const supportedOps = [
 ];
 l1.on('operation', op => {
 	if (initialized && supportedOps.includes(op.type)) {
-		socket.send(JSON.stringify(op));
+		if (online) {
+			socket.send(JSON.stringify(op));
+		} else {
+			opsToSend.push(op);
+		}
 	}
 });
 const html = `
@@ -68,6 +95,7 @@ const html = `
 		<% } %>
 	</div>
 `;
+
 let editors = [];
 function getCursor() {
 	for (const editor of editors) {
