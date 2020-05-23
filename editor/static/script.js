@@ -71,10 +71,16 @@ l1.on('operation', op => {
 });
 const html = `
 	<div id="test" class="container">
-		<button class="insert" id="insert-0">insert block here</button>
+		<div class="row">
+			<div class="col-sm">
+				<button class="insert" id="insert-0">insert block here</button>
+			</div>
+		</div>
 		<% for(let i = 0; i < blocks.length; i++) { %>
 		<div class="row">
-			Blockid: <%= blocks[i].blockId %>
+			<div class="col-sm">
+				Blockid: <%= blocks[i].blockId %>
+			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm-8">
@@ -87,10 +93,12 @@ const html = `
 			</div>
 		</div>
 		<div class="row">
-			<button class="insert" id="insert-<%= i + 1 %>">insert block here</button>
-			<%if (i < blocks.length - 1) { %>
-				<button class="merge" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge block</button>
-			<% } %>
+			<div class="col-sm">
+				<button class="insert" id="insert-<%= i + 1 %>">insert block here</button>
+				<%if (i < blocks.length - 1) { %>
+					<button class="merge" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge block</button>
+				<% } %>
+			</div>
 		</div>
 		<% } %>
 	</div>
