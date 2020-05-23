@@ -89,7 +89,7 @@ const html = `
 			<div class="col-sm-4">
 				<button class="delete" id="delete-<%= blocks[i].blockId %>">Delete block</button>
 				<button class="split" id="split-<%= blocks[i].blockId %>">Split block</button>
-				<div><button class="move" id="move-<%= blocks[i].blockId %>">Move block</button><input id="input-<%= blocks[i].blockId %>" placeholder="Move to"/></div>
+				<div><button class="move" id="move-<%= blocks[i].blockId %>">Move block</button><input id="input-<%= blocks[i].blockId %>" placeholder="Move to index"/></div>
 			</div>
 		</div>
 		<div class="row">
