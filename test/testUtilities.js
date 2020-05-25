@@ -2,7 +2,16 @@ const Logoot = require('../src/logoot');
 
 let crdts = [];
 
-// TODO: Delays with threads??? or is there a better way?
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+exports.sleep = async function(ms) {
+	sleep(ms);
+};
+
+// TODO: Delays with setTimeOut?? Or is there a better way?
+// Delays not working at the moment :'(
 exports.getCRDTs = function() {
 	return crdts;
 };
@@ -23,43 +32,53 @@ exports.createCRDT = function() {
 
 	tempCrdt.logoot.on('operation', op => {
 		if (tempCrdt.offline === 0) {
-			crdts.forEach(function(e) {
-				if (tempCrdt.insertBlock !== e.index) {
-					e.logoot.receive(op);
-				}
-			});
+			if (tempCrdt.delay <= 0) {
+				crdts.forEach(function(e) {
+					if (tempCrdt.index !== e.index) {
+						e.logoot.receive(op);
+					}
+				});
+			} else {
+				crdts.forEach(function(e) {
+					if (tempCrdt.index !== e.index) {
+						setTimeout(() => {
+							e.logoot.receive(op);
+						}, tempCrdt.delay);
+					}
+				});
+			}
 		} else {
 			tempCrdt.operations.push(op);
 		}
 	});
 };
 
-exports.putOffline = function(index) {
-	crdts[index].offline = 1;
+exports.setOffline = function(index) {
+	crdts[index - 1].offline = 1;
 };
 
-exports.putOnline = function(index) {
-	crdts[index].offline = 0;
-	crdts[index].operations.forEach(op =>
-		crdts.forEach(function(e, idx) {
-			if (idx !== e.index) {
-				e.operations.push(op);
+exports.setOnline = function(index) {
+	crdts[index - 1].offline = 0;
+	crdts[index - 1].operations.forEach(op =>
+		crdts.forEach(function(e) {
+			if (index !== e.index) {
+				e.logoot.receive(op);
 			}
 		})
 	);
 };
 
-exports.putAllOffline = function() {
-	crdts.forEach(element => (element.offline = 0));
+exports.setAllOffline = function() {
+	crdts.forEach(element => (element.offline = 1));
 };
 
-exports.putAllOnline = function() {
-	crdts.forEach(element => (element.offline = 1));
+exports.setAllOnline = function() {
+	crdts.forEach(element => (element.offline = 0));
 	crdts.forEach(element =>
 		element.operations.forEach(op =>
-			crdts.forEach(function(e, idx) {
-				if (idx !== e.index) {
-					e.operations.push(op);
+			crdts.forEach(function(e) {
+				if (element.index !== e.index) {
+					e.logoot.receive(op);
 				}
 			})
 		)
@@ -67,15 +86,19 @@ exports.putAllOnline = function() {
 };
 
 exports.setDelay = function(index, delay) {
-	crdts[index].delay = delay;
+	crdts[index - 1].delay = delay;
 };
 
 exports.getStatus = function(index) {
-	return crdts[index];
+	return crdts[index - 1];
 };
 
 exports.getAllStatus = function() {
 	return crdts;
+};
+
+exports.getOperations = function(index) {
+	return crdts[index - 1].operations;
 };
 
 exports.insertContentInNewBlock = function(crdt, content, index) {
