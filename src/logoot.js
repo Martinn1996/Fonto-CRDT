@@ -137,7 +137,7 @@ class Node {
 
 	/**
 	 * Retrieves the path to this node
-	 * @return {[Integer]} path to get to this node
+	 * @return {Array.<number>} path to get to this node
 	 */
 	getPath() {
 		if (!this.parent) return [];
@@ -160,7 +160,7 @@ class Node {
 
 	/**
 	 * Find child node and potentially build it
-	 * @param {[Integer]} path to find the child
+	 * @param {Array.<number>} path to find the child
 	 * @param {boolean} build whether to build or just search
 	 * @param {Node} NodeType node type to build
 	 * @return {Node} of the child
@@ -345,8 +345,8 @@ function parseOperation(operation) {
 
 /**
  * Checks whether position a and b are equal
- * @param {[Integer]} a
- * @param {[Integer]} b
+ * @param {Array.<number>} a
+ * @param {Array.<number>} b
  * @return {boolean} whether a and b are equal
  */
 function arePositionsEqual(a, b) {
@@ -590,7 +590,7 @@ Logoot.prototype.insert = function(value, index) {
  * Inserts the character into the tree on index
  * @param {string} value to insert
  * @param {Integer} index for insertion
- * @return {[Integer]} path to the newly created node
+ * @return {Array.<number>} path to the newly created node
  */
 Logoot.prototype._insert = function(value, index) {
 	index = Math.min(index, this.length());
@@ -658,9 +658,9 @@ Logoot.prototype._generateNewIdentifier = function(prevInt, nextInt) {
 
 /**
  * Generates the position between the prevPos and nextPos
- * @param {[Integer]} prevPos position of left neighbor
- * @param {[Integer]} nextPos position of right neighbor
- * @return {[Integer]} generated position
+ * @param {Array.<number>} prevPos position of left neighbor
+ * @param {Array.<number>} nextPos position of right neighbor
+ * @return {Array.<number>} generated position
  */
 Logoot.prototype._generatePositionBetween = function(prevPos, nextPos) {
 	const newPos = [];
