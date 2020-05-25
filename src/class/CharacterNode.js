@@ -1,4 +1,5 @@
 const Node = require('./Node');
+
 /**
  * Character nodes for characters in the tree
  */

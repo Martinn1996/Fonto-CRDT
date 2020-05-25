@@ -39,7 +39,6 @@
     "ejs": "^3.1.2",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
-    "inherits": "^2.0.4",
     "nanobus": "^4.4.0",
     "quill-cursors": "^3.0.0",
     "randomstring": "^1.1.5",

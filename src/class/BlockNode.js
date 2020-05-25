@@ -1,6 +1,9 @@
 const Node = require('./Node');
 const generateCode = require('../util/generateCode');
 
+/**
+ * Block nodes for blocks in the tree
+ */
 class BlockNode extends Node {
 	/**
 	 * Constructor for creating block nodes
