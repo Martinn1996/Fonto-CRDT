@@ -23,10 +23,10 @@ exports.createCRDT = function() {
 
 	tempCrdt.logoot.on('operation', op => {
 		if (tempCrdt.offline === 0) {
-			crdts.forEach(function(e, idx) {
-				// if (idx !== e.index) {
-				    e.logoot.receive(op);
-				// }
+			crdts.forEach(function(e) {
+				if (tempCrdt.insertBlock !== e.index) {
+					e.logoot.receive(op);
+				}
 			});
 		} else {
 			tempCrdt.operations.push(op);
