@@ -3,247 +3,18 @@ const inherits = require('inherits');
 
 const Identifier = require('./identifier');
 
+const BlockNode = require('./class/BlockNode');
+const CharacterNode = require('./class/CharacterNode');
+const Node = require('./class/Node');
+
 const generateString = require('./util/generateCode');
+const createNodeFromType = require('./util/createNodeFromType');
 // eslint-disable-next-line no-use-before-define
 inherits(Logoot, EventEmitter);
 
 const MIN = 0;
 const MAX = Number.MAX_SAFE_INTEGER;
 const BASE = Math.pow(2, 8);
-
-/**
- * Node class for the tree
- */
-class Node {
-	constructor(id) {
-		this.id = id;
-		this.children = [];
-		this.parent = null;
-		this.size = 1;
-		this.empty = false;
-		this.type = 'Node';
-	}
-
-	/**
-	 * Searches for the child
-	 * @param {Node} child node to find
-	 * @return {Integer} index of the node
-	 */
-	_leftmostSearch(child) {
-		let L = 0;
-		let R = this.children.length;
-		let M;
-		while (L < R) {
-			M = Math.floor((L + R) / 2);
-			if (Node.compare(this.children[M].id, child.id) < 0) {
-				L = M + 1;
-			} else {
-				R = M;
-			}
-		}
-		return L;
-	}
-
-	/**
-	 * Finds the child node
-	 * @param {Node} child to find
-	 * @return {Integer} the index of the child
-	 */
-	_exactSearch(child) {
-		let L = 0;
-		let R = this.children.length - 1;
-		let M;
-		while (L <= R) {
-			M = Math.floor((L + R) / 2);
-			const comp = Node.compare(this.children[M].id, child.id);
-			if (comp < 0) {
-				L = M + 1;
-			} else if (comp > 0) {
-				R = M - 1;
-			} else {
-				return M;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Adjusts the size of the parent
-	 * @param {Integer} amount to increment the size with
-	 */
-	adjustSize(amount) {
-		this.size += amount;
-		if (this.parent) this.parent.adjustSize(amount);
-	}
-
-	/**
-	 * Adds the child to this node
-	 * @param {Node} child to add to this node
-	 * @return {Node} returns the child
-	 */
-	addChild(child) {
-		child.parent = this;
-		const index = this._leftmostSearch(child);
-
-		this.children.splice(index, 0, child);
-		this.adjustSize(child.size);
-
-		return child;
-	}
-
-	/**
-	 * Removes the child from this node
-	 * @param {Node} child to remove from this node
-	 * @return {Node} returns the removed child
-	 */
-	removeChild(child) {
-		const index = this._exactSearch(child);
-
-		if (index === null) return;
-
-		this.children.splice(index, 1);
-		this.adjustSize(child.size);
-
-		return child;
-	}
-
-	/**
-	 * Setter for the empty attribute
-	 * @param {boolean} bool whether the node is empty
-	 */
-	setEmpty(bool = true) {
-		if (bool === this.empty) return;
-
-		this.empty = bool;
-
-		if (bool) {
-			this.adjustSize(-1);
-		} else {
-			this.adjustSize(1);
-		}
-	}
-
-	/**
-	 * Removes the node from the tree when it has no children
-	 */
-	trimEmpty() {
-		if (!this.parent) return;
-
-		if (this.empty && this.children.length === 0) {
-			this.parent.removeChild(this);
-			this.parent.trimEmpty();
-		}
-	}
-
-	/**
-	 * Retrieves the path to this node
-	 * @return {Array.<number>} path to get to this node
-	 */
-	getPath() {
-		if (!this.parent) return [];
-
-		return this.parent.getPath().concat([this.id]);
-	}
-
-	/**
-	 * Returns the children by id
-	 * @param {Integer} id of the child to find
-	 * @return {Node} child with the corresponding id
-	 */
-	getChildById(id) {
-		const index = this._exactSearch({ id });
-
-		if (index === null) return null;
-
-		return this.children[index];
-	}
-
-	/**
-	 * Find child node and potentially build it
-	 * @param {Array.<number>} path to find the child
-	 * @param {boolean} build whether to build or just search
-	 * @param {Node} NodeType node type to build
-	 * @return {Node} of the child
-	 */
-	getChildByPath(path, build, NodeType) {
-		let current = this;
-		let next = null;
-
-		path.every(id => {
-			next = current.getChildById(id);
-
-			if (!next && !build) {
-				current = null;
-				return false;
-			}
-
-			if (!next && build) {
-				next = NodeType ? new NodeType(id) : new Node(id);
-
-				current.addChild(next);
-				next.setEmpty(true);
-			}
-
-			current = next;
-			return true;
-		});
-
-		return current;
-	}
-
-	/**
-	 * Returns the order of the node in the tree
-	 * @return {Integer} the order
-	 */
-	getOrder() {
-		if (!this.parent) return -1;
-
-		let order = this.parent.getOrder();
-
-		if (!this.parent.empty) order += 1;
-
-		for (const child of this.parent.children) {
-			if (Node.compare(child.id, this.id) === 0) break;
-			order += child.size;
-		}
-
-		return order;
-	}
-
-	/**
-	 * Find child with corresponding index
-	 * @param {Integer} index of the child
-	 * @return {Node}
-	 */
-	getChildByOrder(index) {
-		if (index === 0 && !this.empty) return this;
-
-		let left = this.empty ? 0 : 1;
-		let right = left;
-
-		for (const child of this.children) {
-			right += child.size;
-			if (left <= index && right > index) {
-				return child.getChildByOrder(index - left);
-			}
-			left = right;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Apply callback function for whole tree starting from this node
-	 * @param {function(_): _} fn callback function
-	 */
-	walk(fn) {
-		fn(this);
-
-		this.children.forEach(child => {
-			child.walk(fn);
-		});
-	}
-}
 
 /**
  * Logoot instance
@@ -269,58 +40,6 @@ function Logoot(site, state, bias) {
 	this._root.addChild(new Node(new Identifier(BASE, null, null)));
 
 	if (state) this.setState(state);
-}
-
-/**
- * Block node for blocks in the tree
- */
-class BlockNode extends Node {
-	/**
-	 * Constructor for creating block nodes
-	 * @param {*} id for Logoot
-	 * @param {*} blockId for refering to blocks
-	 */
-	constructor(id, blockId) {
-		super(id);
-
-		super.type = 'Block';
-		this.blockId = blockId;
-		this.empty = false;
-		this.logoot = new Logoot(blockId);
-	}
-}
-
-/**
- * Character nodes for characters in the tree
- */
-class CharacterNode extends Node {
-	/**
-	 * Constructor for creating character nodes
-	 * @param {*} id for Logoot
-	 * @param {*} value to save
-	 */
-	constructor(id, value) {
-		super(id);
-
-		super.type = 'Character';
-		this.value = value || null;
-	}
-}
-
-/**
- * Returns the parsed node type
- * @param {string} nodeType to parse
- * @return {Node} parsed node type
- */
-function createNodeFromType(nodeType) {
-	switch (nodeType) {
-		case 'Character':
-			return CharacterNode;
-		case 'Block':
-			return BlockNode;
-		default:
-			return Node;
-	}
 }
 
 /**
@@ -435,11 +154,11 @@ Logoot.prototype._receiveInsertBlock = function(operation) {
 		return;
 	}
 
-	const existingNode = this._root.getChildByPath(operation.position, false, BlockNode);
+	const existingNode = this._root.getChildByPath(operation.position, false, BlockNode, Logoot);
 
 	if (existingNode) return;
 
-	const node = this._root.getChildByPath(operation.position, true, BlockNode);
+	const node = this._root.getChildByPath(operation.position, true, BlockNode, Logoot);
 	const blockId = operation.blockId;
 	node.blockId = blockId;
 	node.setEmpty(false);
@@ -819,7 +538,7 @@ Logoot.prototype.setState = function(state) {
 	 */
 	function parseNode(n, parent) {
 		const NodeType = createNodeFromType(n.type);
-		const node = new NodeType(parseId(n.id), n.value);
+		const node = new NodeType(parseId(n.id), n.value, Logoot);
 		node.parent = parent;
 		node.children = n.children.map(c => parseNode(c, node));
 		node.size = n.size;
@@ -854,7 +573,7 @@ Logoot.prototype.insertBlock = function(index, id) {
 
 	const position = this._generatePositionBetween(prevPos, nextPos);
 
-	const node = this._root.getChildByPath(position, true, BlockNode);
+	const node = this._root.getChildByPath(position, true, BlockNode, Logoot);
 	node.setEmpty(false);
 	const blockId = id ? id : generateString(5);
 	node.blockId = blockId;
