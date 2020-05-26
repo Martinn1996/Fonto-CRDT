@@ -34,6 +34,8 @@ $('#trigger-online').on('click', () => {
 		opsToReceive.forEach(op => {
 			receiveOperation(op);
 		});
+		opsToSend = [];
+		opsToReceive = [];
 	}
 });
 
