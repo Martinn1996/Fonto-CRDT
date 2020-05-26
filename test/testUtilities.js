@@ -2,14 +2,6 @@ const Logoot = require('../src/logoot');
 
 let crdts = [];
 
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-exports.sleep = async function(ms) {
-	sleep(ms);
-};
-
 // TODO: Delays with setTimeOut?? Or is there a better way?
 // Delays not working at the moment :'(
 exports.getCRDTs = function() {
@@ -32,21 +24,11 @@ exports.createCRDT = function() {
 
 	tempCrdt.logoot.on('operation', op => {
 		if (tempCrdt.offline === 0) {
-			if (tempCrdt.delay <= 0) {
-				crdts.forEach(function(e) {
-					if (tempCrdt.index !== e.index) {
-						e.logoot.receive(op);
-					}
-				});
-			} else {
-				crdts.forEach(function(e) {
-					if (tempCrdt.index !== e.index) {
-						setTimeout(() => {
-							e.logoot.receive(op);
-						}, tempCrdt.delay);
-					}
-				});
-			}
+			crdts.forEach(function(e) {
+				if (tempCrdt.index !== e.index) {
+					e.logoot.receive(op);
+				}
+			});
 		} else {
 			tempCrdt.operations.push(op);
 		}
@@ -109,6 +91,30 @@ exports.insertContentInNewBlock = function(crdt, content, index) {
 
 exports.reset = function() {
 	crdts = [];
+};
+
+exports.shuffle = function(array) {
+	array.forEach(e => {
+		console.log(e.value);
+	});
+
+	console.log('--------------------------SHUFFLE----------------------------------');
+	let m = array.length;
+
+	// While there remain elements to shuffle…
+	while (m > 0) {
+		// Pick a remaining element…
+		const i = Math.floor(Math.random() * m--);
+
+		// And swap it with the current element.
+		const t = array[m];
+		array[m] = array[i];
+		array[i] = t;
+	}
+	array.forEach(e => {
+		console.log(e.value);
+	});
+	console.log('--------------------------END----------------------------------');
 };
 
 module.exports = this;

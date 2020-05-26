@@ -34,13 +34,40 @@ describe('utilitiesTest', () => {
 		assert.deepEqual(util.crdt(1).getState(), util.crdt(2).getState());
 	});
 
-	// it('test delays when inserting text', () => {
-	// 	const block = util.crdt(2).insertBlock(0);
-	// 	util.setDelay(2, 1);
-	// 	util.crdt(1).insertContentInBlock('zonder delay', 0, block.blockId);
-	// 	util.crdt(2).insertContentInBlock('met delay', 0, block.blockId);
+	it('test random ordering operations', () => {
+		const blockId = util.insertContentInNewBlock(util.crdt(1), 'Blok1', 0);
 
-	// 	assert.equal(util.crdt(1).value(), 'zonder delay met delay\n\n');
+		util.setAllOffline();
+
+		util.crdt(1).insertContentInBlock('BeginB1 ', 0, blockId);
+		util.crdt(2).insertContentInBlock(' EindB1', 6, blockId);
+
+		util.shuffle(util.getOperations(1));
+		util.shuffle(util.getOperations(2));
+
+		util.setAllOnline();
+		assert.equal(util.crdt(1).value(), util.crdt(2).value());
+		assert.deepEqual(util.crdt(1).getState(), util.crdt(2).getState());
+	});
+
+	// it('test random ordering operations multiple inserts', () => {
+	// 	const blockId = util.insertContentInNewBlock(util.crdt(2), 'blok2', 0);
+
+	// 	util.setAllOffline();
+
+	// 	util.crdt(1).insertContentInBlock('c1o1', 0, blockId);
+	// 	util.crdt(1).insertContentInBlock('c1o2', 0, blockId);
+	// 	util.crdt(1).insertContentInBlock('c1o3', 0, blockId);
+	// 	util.crdt(1).insertContentInBlock('c1o4', 0, blockId);
+	// 	util.crdt(2).insertContentInBlock('c2o1', 0, blockId);
+	// 	util.crdt(2).insertContentInBlock('c2o2', 0, blockId);
+	// 	util.crdt(2).insertContentInBlock('c2o3', 0, blockId);
+	// 	util.crdt(2).insertContentInBlock('c2o4', 0, blockId);
+
+	// 	util.shuffle(util.getOperations(1));
+	// 	util.shuffle(util.getOperations(2));
+
+	// 	util.setAllOnline();
 	// 	assert.equal(util.crdt(1).value(), util.crdt(2).value());
 	// 	assert.deepEqual(util.crdt(1).getState(), util.crdt(2).getState());
 	// });
