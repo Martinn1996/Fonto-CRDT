@@ -5,6 +5,7 @@ const Identifier = require('./identifier');
 const BlockNode = require('./class/BlockNode');
 const CharacterNode = require('./class/CharacterNode');
 const Node = require('./class/Node');
+const SplitNode = require('./class/SplitNode');
 
 const generateString = require('./util/generateCode');
 const createNodeFromType = require('./util/createNodeFromType');
@@ -703,12 +704,43 @@ class Logoot extends EventEmitter {
 		if (index > block.logoot.value().length || index < 0) {
 			throw Error('Index out of range');
 		}
+
+		// Insert special node
+		index = Math.min(index, block.logoot.length());
+		const prev = block.logoot._root.getChildByOrder(index);
+		const next = block.logoot._root.getChildByOrder(index + 1);
+
+		const prevPos = prev.getPath();
+		const nextPos = next.getPath();
+		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
+		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
+		// Adjust blocks
 		const blockIndex = block.getOrder();
 		const newBlock = this.insertBlock(blockIndex + 1);
-		const content = block.logoot.value().substring(index, block.logoot.value().length);
-		this.deleteContentInBlock(index, content.length, block.blockId);
-		this.insertContentInBlock(content, 0, newBlock.blockId);
+		newBlock.logoot.setState(block.logoot.getState());
+		console.log('DELETE from left block');
+		block.logoot._setEmpty(split.getOrder(), block.logoot.length());
+		console.log('DELETE from right block');
+		newBlock.logoot._setEmpty(0, split.getOrder());
+		block.logoot._root.trimEmpty();
+		newBlock.logoot._root.trimEmpty();
+		
+		console.log('left block value: ', block.logoot.value());
+		console.log('right block value: ', newBlock.logoot.value());
+		// const content = block.logoot.value().substring(index, block.logoot.value().length);
+		// this.deleteContentInBlock(index, content.length, block.blockId);
+		// this.insertContentInBlock(content, 0, newBlock.blockId);
 		return newBlock;
+	}
+
+	_setEmpty(left, right) {
+		console.log(left, right);
+		for (let i = left; i < right; i++) {
+			const node = this._root.getChildByOrder(left + 1);
+			if (!node) continue;
+			node.setEmpty(true);
+			node.trimEmpty();
+		}
 	}
 }
 
