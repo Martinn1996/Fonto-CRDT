@@ -714,30 +714,26 @@ class Logoot extends EventEmitter {
 		const nextPos = next.getPath();
 		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
 		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
+		split.empty = false;
+
 		// Adjust blocks
 		const blockIndex = block.getOrder();
 		const newBlock = this.insertBlock(blockIndex + 1);
 		newBlock.logoot.setState(block.logoot.getState());
-		console.log('DELETE from left block');
+
 		block.logoot._setEmpty(split.getOrder(), block.logoot.length());
-		console.log('DELETE from right block');
 		newBlock.logoot._setEmpty(0, split.getOrder());
+
 		block.logoot._root.trimEmpty();
 		newBlock.logoot._root.trimEmpty();
-		
-		console.log('left block value: ', block.logoot.value());
-		console.log('right block value: ', newBlock.logoot.value());
-		// const content = block.logoot.value().substring(index, block.logoot.value().length);
-		// this.deleteContentInBlock(index, content.length, block.blockId);
-		// this.insertContentInBlock(content, 0, newBlock.blockId);
+
 		return newBlock;
 	}
 
 	_setEmpty(left, right) {
-		console.log(left, right);
-		for (let i = left; i < right; i++) {
-			const node = this._root.getChildByOrder(left + 1);
-			if (!node) continue;
+		for (let i = right; i > left; i--) {
+			const node = this._root.getChildByOrder(i);
+
 			node.setEmpty(true);
 			node.trimEmpty();
 		}
