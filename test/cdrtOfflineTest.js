@@ -89,18 +89,63 @@ describe('Offline Support', () => {
 	});
 
 	it('should converge when one editor splits a paragraph and the other one insert character in the paragraph', () => {
-		const blockId = insertContentInNewBlock(crdt1, '12', 0);
+		const blockId = insertContentInNewBlock(crdt1, 'hello', 0);
 		ops2.forEach(op => {
 			crdt2.receive(op);
 		});
 
-		crdt1.splitBlock(blockId, 1);
-		crdt2.insertContentInBlock('!', 2, blockId);
+		crdt1.splitBlock(blockId, 3);
+		crdt2.insertContentInBlock('!', 5, blockId);
 
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 
-		assert.equal(crdt1.value(), '1\n\n2!\n\n');
+		assert.equal(crdt1.value(), 'hel\n\nlo!\n\n');
+		assert.equal(crdt2.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should converge when one editor splits a paragraph and the other one deletes a character in the paragraph', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'hello', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		crdt1.splitBlock(blockId, 3);
+		crdt2.deleteContentInBlock(5, 1, blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		assert.equal(crdt1.value(), 'hel\n\nl\n\n');
+		assert.equal(crdt2.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should converge when one editor splits a paragraph twice and the other one insert character in the paragraph', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'hello hai hoi', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		crdt1.splitBlock(blockId, 10);
+		crdt2.insertContentInBlock('!', 13, blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		ops1 = [];
+		ops2 = [];
+
+		assert.equal(crdt1.value(), 'hello hai \n\nhoi!\n\n');
+
+		crdt1.splitBlock(blockId, 6);
+		crdt2.insertContentInBlock('?', 10, blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		assert.equal(crdt1.value(), 'hello \n\nhai ?\n\nhoi!\n\n');
 		assert.equal(crdt2.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});

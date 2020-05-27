@@ -11,8 +11,8 @@ const socket = new WebSocket(host);
 socket.onopen = function(_) {};
 
 let online = true;
-const opsToSend = [];
-const opsToReceive = [];
+let opsToSend = [];
+let opsToReceive = [];
 
 function receiveOperation(op) {
 	const cursor = getCursor();
@@ -27,6 +27,7 @@ $('#trigger-online').on('click', () => {
 	online = !online;
 	$('#trigger-online').html(online ? 'Go offline' : 'Go online');
 	$('#network-status').html(online ? 'Online' : 'Offline');
+
 	if (online) {
 		opsToSend.forEach(op => {
 			socket.send(JSON.stringify(op));
@@ -60,7 +61,8 @@ const supportedOps = [
 	'deleteBlock',
 	'deleteInBlock',
 	'moveBlock',
-	'changeBlockId'
+	'changeBlockId',
+	'splitBlock'
 ];
 l1.on('operation', op => {
 	if (initialized && supportedOps.includes(op.type)) {
