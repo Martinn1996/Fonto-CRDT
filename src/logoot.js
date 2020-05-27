@@ -167,6 +167,20 @@ class Logoot extends EventEmitter {
 		}
 	}
 
+	blockValue() {
+		const arr = [];
+
+		this._root.walk(node => {
+			if (!node.empty) {
+				if (node.logoot) {
+					arr.push({ blockId: node.blockId, value: node.logoot.value() });
+				}
+			}
+		});
+
+		return arr;
+	}
+
 	/**
 	 * Builds the same node as the received inserted node
 	 * @param {JSON} operation to perform
@@ -578,7 +592,7 @@ class Logoot extends EventEmitter {
 			return node;
 		}
 		this._root = parseNode(parsed.root, null);
-		this._deleteQueue = parsed.deleteQueue;
+		this._deleteQueue = parsed.deleteQueue ? parsed.deleteQueue : [];
 	}
 
 	/**
