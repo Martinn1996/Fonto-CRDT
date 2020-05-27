@@ -322,6 +322,33 @@ class Logoot extends EventEmitter {
 	_receiveDeleteInBlock(operation) {
 		const block = this._searchBlock(operation.blockId);
 		const node = block.logoot._root.getChildByPath(operation.position, false, CharacterNode);
+
+		// Check for references
+		if (!node) {
+			const tempNode = block.logoot._root.getChildByPath(operation.position, true, CharacterNode);
+			tempNode.setEmpty(false);
+			tempNode.value = '|';
+			const tempPrevNode = block.logoot._root.getChildByOrder(tempNode.getOrder());
+			if (tempPrevNode instanceof SplitNode) {
+				const tempBlock = this._searchBlock(tempPrevNode.reference);
+				const deleteNode = tempBlock.logoot._root.getChildByPath(operation.position, false, CharacterNode);
+
+				deleteNode.setEmpty(true);
+				deleteNode.trimEmpty();
+			} else if (
+				!this._deleteQueue.some(op => {
+					return arePositionsEqual(op.position, operation.position);
+				})
+			) {
+				this._deleteQueue.push(operation);
+			}
+
+			tempNode.setEmpty(true);
+			tempNode.trimEmpty();
+
+			return;
+		}
+
 		if (node && !node.empty) {
 			const index = node.getOrder();
 			const value = node.value;
@@ -385,13 +412,16 @@ class Logoot extends EventEmitter {
 		const existingNode = logoot._root.getChildByPath(operation.position, false, SplitNode);
 		if (existingNode) return;
 
+		// Find block
 		const newBlock = this._searchBlock(operation.reference);
 		newBlock.logoot.setState(block.logoot.getState());
 
+		// Create split node
 		const node = logoot._root.getChildByPath(operation.position, true, SplitNode);
 		node.setEmpty(false);
 		node.reference = operation.reference;
 
+		// Remove remaining
 		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length());
 		newBlock.logoot._setEmpty(0, node.getOrder());
 
@@ -799,7 +829,7 @@ class Logoot extends EventEmitter {
 		this.emit('operation', {
 			type: 'splitBlock',
 			blockId: blockId,
-			position: split.getPath(),
+			position: position,
 			reference: split.reference
 		});
 

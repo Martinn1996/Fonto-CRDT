@@ -101,7 +101,7 @@ describe('Offline Support', () => {
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), 'hel\n\nlo!\n\n');
-		assert.equal(crdt2.value(), crdt2.value());
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
@@ -111,14 +111,17 @@ describe('Offline Support', () => {
 			crdt2.receive(op);
 		});
 
+		ops1 = [];
+		ops2 = [];
+
 		crdt1.splitBlock(blockId, 3);
-		crdt2.deleteContentInBlock(5, 1, blockId);
+		crdt2.deleteContentInBlock(4, 1, blockId);
 
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), 'hel\n\nl\n\n');
-		assert.equal(crdt2.value(), crdt2.value());
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
@@ -146,7 +149,7 @@ describe('Offline Support', () => {
 		ops2.forEach(op => crdt2.receive(op));
 
 		assert.equal(crdt1.value(), 'hello \n\nhai ?\n\nhoi!\n\n');
-		assert.equal(crdt2.value(), crdt2.value());
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
