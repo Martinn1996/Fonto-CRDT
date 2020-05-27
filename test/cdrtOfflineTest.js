@@ -97,14 +97,11 @@ describe('Offline Support', () => {
 		crdt1.splitBlock(blockId, 1);
 		crdt2.insertContentInBlock('!', 2, blockId);
 
-		console.log('FROM HERE -------------------');
-		console.log(crdt2.getState());
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
-		// console.log(crdt1.getState());
 
-		// assert.equal(crdt1.value(), '1\n\n2!\n\n');
-		// assert.equal(crdt2.value(), crdt2.value());
-		// assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
+		assert.equal(crdt1.value(), '1\n\n2!\n\n');
+		assert.equal(crdt2.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });

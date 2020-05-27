@@ -242,25 +242,30 @@ class Logoot extends EventEmitter {
 		const node = logoot._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
+		let index = node.getOrder();
 
-		// console.log(operation.position);
+		let blockId = block.blockId;
 
-		// console.log()
+		const prevNode = logoot._root.getChildByOrder(node.getOrder());
+		// Check for references
+		if (prevNode instanceof SplitNode) {
+			const newBlock = this._searchBlock(prevNode.reference);
+			const newNode = newBlock.logoot._root.getChildByPath(operation.position, true, CharacterNode);
+			newNode.value = operation.value;
+			newNode.setEmpty(false);
 
-		// console.log(' -1: ', logoot._root.getChildByOrder(node.getOrder() - 1));
-		// console.log(' +0: ', logoot._root.getChildByOrder(node.getOrder()));
-		// console.log(' +1: ', logoot._root.getChildByOrder(node.getOrder() + 1));
+			// Delete node
+			node.setEmpty(true);
+			node.trimEmpty();
 
-		// // Check for references
-		// if (logoot._root.getChildByOrder(node.getOrder())) {
+			index = newNode.getOrder();
+			blockId = newBlock.blockId;
+		}
 
-		// 	console.log('CALLED!', logoot._root.getChildByOrder(node.getOrder()));
-		// }
-		const index = node.getOrder();
 		this.emit('insertInBlock', {
 			value: node.value,
 			index: index,
-			blockId: block.blockId
+			blockId: blockId
 		});
 	}
 
