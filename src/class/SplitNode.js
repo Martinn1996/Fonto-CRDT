@@ -6,12 +6,14 @@ const Node = require('./Node');
 class SplitNode extends Node {
 	/**
 	 * Constructor for creating split nodes
-	 * @param {*} id for Logoot
+	 * @param {Integer} id for Logoot
+	 * @param {string} reference blockId to refer to
 	 */
-	constructor(id) {
+	constructor(id, reference) {
 		super(id);
 		super.type = 'Split';
-		super.empty = true;
+
+		this.reference = reference;
 	}
 }
 

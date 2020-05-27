@@ -158,7 +158,11 @@ class Logoot extends EventEmitter {
 				this._receiveMoveBlock(operation);
 				break;
 			case 'changeBlockId':
+				// TODO: Rename to _receiveChangeBlockId
 				this._changeBlockId(operation);
+				break;
+			case 'splitBlock':
+				this._receiveSplitBlock(operation);
 				break;
 		}
 	}
@@ -178,6 +182,7 @@ class Logoot extends EventEmitter {
 		const existingNode = this._root.getChildByPath(operation.position, false, CharacterNode);
 		if (existingNode) return;
 		const node = this._root.getChildByPath(operation.position, true, CharacterNode);
+
 		node.value = operation.value;
 		node.setEmpty(false);
 		const index = node.getOrder();
@@ -233,9 +238,24 @@ class Logoot extends EventEmitter {
 		}
 		const existingNode = logoot._root.getChildByPath(operation.position, false, CharacterNode);
 		if (existingNode) return;
+
 		const node = logoot._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
+
+		// console.log(operation.position);
+
+		// console.log()
+
+		// console.log(' -1: ', logoot._root.getChildByOrder(node.getOrder() - 1));
+		// console.log(' +0: ', logoot._root.getChildByOrder(node.getOrder()));
+		// console.log(' +1: ', logoot._root.getChildByOrder(node.getOrder() + 1));
+
+		// // Check for references
+		// if (logoot._root.getChildByOrder(node.getOrder())) {
+
+		// 	console.log('CALLED!', logoot._root.getChildByOrder(node.getOrder()));
+		// }
 		const index = node.getOrder();
 		this.emit('insertInBlock', {
 			value: node.value,
@@ -326,6 +346,41 @@ class Logoot extends EventEmitter {
 			throw Error(`Could not find block of blockId: ${operation.oldBlockId}`);
 		}
 		block.blockId = operation.newBlockId;
+	}
+
+	/**
+	 * Split block
+	 * @param {JSON} operation to perform
+	 */
+	_receiveSplitBlock(operation) {
+		const block = this._searchBlock(operation.blockId);
+		const logoot = block.logoot;
+		const deleteQueueIndex = logoot._deleteQueue.findIndex(op => {
+			return arePositionsEqual(op.position, operation.position);
+		});
+		if (deleteQueueIndex > -1) {
+			logoot._deleteQueue.splice(deleteQueueIndex, 1);
+			return;
+		}
+
+		const existingNode = logoot._root.getChildByPath(operation.position, false, SplitNode);
+		if (existingNode) return;
+
+		const newBlock = this._searchBlock(operation.reference);
+		newBlock.logoot.setState(block.logoot.getState());
+
+		const node = logoot._root.getChildByPath(operation.position, true, SplitNode);
+		node.setEmpty(false);
+		node.reference = operation.reference;
+
+		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length());
+		newBlock.logoot._setEmpty(0, node.getOrder());
+
+		this.emit('splitBlock', {
+			blockId: block.blockId,
+			location: node.getPath(),
+			reference: node.reference
+		});
 	}
 
 	/**
@@ -705,6 +760,11 @@ class Logoot extends EventEmitter {
 			throw Error('Index out of range');
 		}
 
+		// Adjust blocks
+		const blockIndex = block.getOrder();
+		const newBlock = this.insertBlock(blockIndex + 1);
+		newBlock.logoot.setState(block.logoot.getState());
+
 		// Insert special node
 		index = Math.min(index, block.logoot.length());
 		const prev = block.logoot._root.getChildByOrder(index);
@@ -714,18 +774,18 @@ class Logoot extends EventEmitter {
 		const nextPos = next.getPath();
 		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
 		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
-		split.empty = false;
+		split.setEmpty(false);
+		split.reference = newBlock.blockId;
 
-		// Adjust blocks
-		const blockIndex = block.getOrder();
-		const newBlock = this.insertBlock(blockIndex + 1);
-		newBlock.logoot.setState(block.logoot.getState());
+		this.emit('operation', {
+			type: 'splitBlock',
+			blockId: blockId,
+			position: split.getPath(),
+			reference: split.reference
+		});
 
-		block.logoot._setEmpty(split.getOrder(), block.logoot.length());
+		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length());
 		newBlock.logoot._setEmpty(0, split.getOrder());
-
-		block.logoot._root.trimEmpty();
-		newBlock.logoot._root.trimEmpty();
 
 		return newBlock;
 	}

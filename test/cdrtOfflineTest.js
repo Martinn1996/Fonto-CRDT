@@ -2,6 +2,19 @@ const assert = require('chai').assert;
 const Logoot = require('../src/logoot');
 
 describe('Offline Support', () => {
+	/**
+	 * Function to create a new block and insert text
+	 * @param {*} crdt which inserts
+	 * @param {*} value to insert
+	 * @param {*} index of block
+	 * @return {*} id of block
+	 */
+	function insertContentInNewBlock(crdt, value, index) {
+		const block = crdt.insertBlock(index);
+		crdt.insertContentInBlock(value, 0, block.blockId);
+		return block.blockId;
+	}
+
 	let crdt1, crdt2, ops1, ops2;
 
 	beforeEach(() => {
@@ -73,5 +86,25 @@ describe('Offline Support', () => {
 		assert.equal(crdt1.value(), 'ing');
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
+	});
+
+	it('should converge when one editor splits a paragraph and the other one insert character in the paragraph', () => {
+		const blockId = insertContentInNewBlock(crdt1, '12', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		crdt1.splitBlock(blockId, 1);
+		crdt2.insertContentInBlock('!', 2, blockId);
+
+		console.log('FROM HERE -------------------');
+		console.log(crdt2.getState());
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		// console.log(crdt1.getState());
+
+		// assert.equal(crdt1.value(), '1\n\n2!\n\n');
+		// assert.equal(crdt2.value(), crdt2.value());
+		// assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 });
