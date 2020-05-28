@@ -152,4 +152,26 @@ describe('Offline Support', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should converge when both editors perform a split in a paragraph on different positions', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'hello hai hoi', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		ops2 = [];
+
+		crdt1.splitBlock(blockId, 10);
+		crdt2.splitBlock(blockId, 6);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		ops1 = [];
+		ops2 = [];
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.length(), 3);
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 });

@@ -40,10 +40,10 @@ describe('split Block', () => {
 	});
 
 	it('should add 1 block with text and split it in 2 blocks with multiple users', () => {
-		const blockId = insertContentInNewBlock(crdt1, 'block1block2', 0);
-		crdt2.splitBlock(blockId, 6);
+		const blockId = insertContentInNewBlock(crdt1, 'hoi', 0);
+		crdt2.splitBlock(blockId, 2);
 
-		assert.equal(crdt1.value(), 'block1\n\nblock2\n\n');
+		assert.equal(crdt1.value(), 'ho\n\ni\n\n');
 		assert.equal(crdt1.length(), 2);
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.equal(crdt1.getState(), crdt2.getState());

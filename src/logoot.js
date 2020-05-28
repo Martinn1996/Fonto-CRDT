@@ -256,30 +256,14 @@ class Logoot extends EventEmitter {
 		const node = logoot._root.getChildByPath(operation.position, true, CharacterNode);
 		node.value = operation.value;
 		node.setEmpty(false);
-		let index = node.getOrder();
 
-		let blockId = block.blockId;
-
-		const prevNode = logoot._root.getChildByOrder(node.getOrder());
-		// Check for references
-		if (prevNode instanceof SplitNode) {
-			const newBlock = this._searchBlock(prevNode.reference);
-			const newNode = newBlock.logoot._root.getChildByPath(operation.position, true, CharacterNode);
-			newNode.value = operation.value;
-			newNode.setEmpty(false);
-
-			// Delete node
-			node.setEmpty(true);
-			node.trimEmpty();
-
-			index = newNode.getOrder();
-			blockId = newBlock.blockId;
-		}
+		// Move node when splitNode is encountered
+		const item = this._moveInsertOnSplitNode(node, block, CharacterNode);
 
 		this.emit('insertInBlock', {
-			value: node.value,
-			index: index,
-			blockId: blockId
+			value: item.node.value,
+			index: item.node.getOrder(),
+			blockId: item.block.blockId
 		});
 	}
 
@@ -325,17 +309,17 @@ class Logoot extends EventEmitter {
 
 		// Check for references
 		if (!node) {
-			const tempNode = block.logoot._root.getChildByPath(operation.position, true, CharacterNode);
+			// Create temp node to find previous
+			const tempNode = block.logoot._root.getChildByPath(
+				operation.position,
+				true,
+				CharacterNode
+			);
 			tempNode.setEmpty(false);
 			tempNode.value = '|';
-			const tempPrevNode = block.logoot._root.getChildByOrder(tempNode.getOrder());
-			if (tempPrevNode instanceof SplitNode) {
-				const tempBlock = this._searchBlock(tempPrevNode.reference);
-				const deleteNode = tempBlock.logoot._root.getChildByPath(operation.position, false, CharacterNode);
 
-				deleteNode.setEmpty(true);
-				deleteNode.trimEmpty();
-			} else if (
+			if (
+				!this._moveDeleteOnSplitNode(tempNode, block, CharacterNode) &&
 				!this._deleteQueue.some(op => {
 					return arePositionsEqual(op.position, operation.position);
 				})
@@ -399,34 +383,42 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveSplitBlock(operation) {
-		const block = this._searchBlock(operation.blockId);
-		const logoot = block.logoot;
-		const deleteQueueIndex = logoot._deleteQueue.findIndex(op => {
+		let block = this._searchBlock(operation.blockId);
+		const deleteQueueIndex = block.logoot._deleteQueue.findIndex(op => {
 			return arePositionsEqual(op.position, operation.position);
 		});
 		if (deleteQueueIndex > -1) {
-			logoot._deleteQueue.splice(deleteQueueIndex, 1);
+			block.logoot._deleteQueue.splice(deleteQueueIndex, 1);
 			return;
 		}
 
-		const existingNode = logoot._root.getChildByPath(operation.position, false, SplitNode);
+		const existingNode = block.logoot._root.getChildByPath(
+			operation.position,
+			false,
+			SplitNode
+		);
 		if (existingNode) return;
+
+		// Create split node
+		let node = block.logoot._root.getChildByPath(operation.position, true, SplitNode);
+		node.setEmpty(false);
+		node.reference = operation.reference;
+
+		// Move node when splitNode is encountered
+		const item = this._moveInsertOnSplitNode(node, block, SplitNode);
+		node = item.node;
+		block = item.block;
 
 		// Find block
 		const newBlock = this._searchBlock(operation.reference);
 		newBlock.logoot.setState(block.logoot.getState());
 
-		// Create split node
-		const node = logoot._root.getChildByPath(operation.position, true, SplitNode);
-		node.setEmpty(false);
-		node.reference = operation.reference;
-
 		// Remove remaining
 		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length());
-		newBlock.logoot._setEmpty(0, node.getOrder());
+		newBlock.logoot._setEmpty(0, node.getOrder() + 1);
 
 		this.emit('splitBlock', {
-			blockId: block.blockId,
+			blockId: newBlock.blockId,
 			location: node.getPath(),
 			reference: node.reference
 		});
@@ -811,8 +803,6 @@ class Logoot extends EventEmitter {
 
 		// Adjust blocks
 		const blockIndex = block.getOrder();
-		const newBlock = this.insertBlock(blockIndex + 1);
-		newBlock.logoot.setState(block.logoot.getState());
 
 		// Insert special node
 		index = Math.min(index, block.logoot.length());
@@ -824,6 +814,9 @@ class Logoot extends EventEmitter {
 		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
 		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
 		split.setEmpty(false);
+
+		const newBlock = this.insertBlock(blockIndex + 1);
+		newBlock.logoot.setState(block.logoot.getState());
 		split.reference = newBlock.blockId;
 
 		this.emit('operation', {
@@ -834,7 +827,7 @@ class Logoot extends EventEmitter {
 		});
 
 		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length());
-		newBlock.logoot._setEmpty(0, split.getOrder());
+		newBlock.logoot._setEmpty(0, split.getOrder() + 1);
 
 		return newBlock;
 	}
@@ -846,6 +839,55 @@ class Logoot extends EventEmitter {
 			node.setEmpty(true);
 			node.trimEmpty();
 		}
+	}
+
+	_moveInsertOnSplitNode(node, block, type) {
+		if (this._afterSplitNode(node, block)) {
+			const newBlock = this._searchBlock(node.referTo);
+			const newNode = newBlock.logoot._root.getChildByPath(node.getPath(), true, type);
+			newNode.setEmpty(false);
+
+			if (node.value) {
+				newNode.value = node.value;
+			}
+
+			if (node.referTo) {
+				newNode.reference = node.reference;
+			}
+
+			// Remove node
+			node.setEmpty(true);
+			node.trimEmpty();
+
+			return { node: newNode, block: newBlock };
+		}
+
+		return { node: node, block: block };
+	}
+
+	_moveDeleteOnSplitNode(node, block, type) {
+		if (this._afterSplitNode(node, block)) {
+			const refBlock = this._searchBlock(node.referTo);
+			const deleteNode = refBlock.logoot._root.getChildByPath(node.getPath(), false, type);
+			deleteNode.setEmpty(false);
+
+			// Remove node
+			deleteNode.setEmpty(true);
+			deleteNode.trimEmpty();
+
+			node.setEmpty(true);
+			node.trimEmpty();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	_afterSplitNode(node, block) {
+		const prevNode = block.logoot._root.getChildByOrder(node.getOrder());
+		node.referTo = prevNode.reference;
+		return prevNode instanceof SplitNode;
 	}
 }
 
