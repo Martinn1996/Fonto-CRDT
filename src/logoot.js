@@ -89,7 +89,8 @@ function getStateLogoot(node) {
 		empty: node.empty,
 		type: node.type,
 		value: node.value,
-		children: node.children.map(getStateLogoot)
+		children: node.children.map(getStateLogoot),
+		references: node.references
 	};
 
 	if (node.type === 'Block') {
@@ -296,6 +297,20 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveDeleteBlock(operation) {
+		const block = this._searchBlock(operation.blockId);
+
+		if (!block) {
+			console.error(`Could not find block of blockId: ${operation.blockId}`);
+			return;
+		}
+
+		const references = this._getReferences(block);
+		const differences = references.filter(x => !operation.references.includes(x)).concat(operation.references.filter(x => !references.includes(x)));
+
+		for (const id of differences) {
+			this.deleteBlock(id);
+		}
+
 		this._deleteBlock(operation.blockId);
 	}
 
@@ -316,7 +331,6 @@ class Logoot extends EventEmitter {
 				CharacterNode
 			);
 			tempNode.setEmpty(false);
-			tempNode.value = '|';
 
 			if (
 				!this._moveDeleteOnSplitNode(tempNode, block, CharacterNode) &&
@@ -384,6 +398,13 @@ class Logoot extends EventEmitter {
 	 */
 	_receiveSplitBlock(operation) {
 		let block = this._searchBlock(operation.blockId);
+
+		if (!block) {
+			// throw Error(`Could not find block of blockId: ${operation.blockId}`);
+			console.error(`Could not find block of blockId: ${operation.blockId}`);
+			return;
+		}
+
 		const deleteQueueIndex = block.logoot._deleteQueue.findIndex(op => {
 			return arePositionsEqual(op.position, operation.position);
 		});
@@ -441,7 +462,6 @@ class Logoot extends EventEmitter {
 	 * @param {Integer} index for insertion
 	 * @return {Array.<number>} path to the newly created node
 	 */
-
 	_insert(value, index) {
 		index = Math.min(index, this.length());
 		const prev = this._root.getChildByOrder(index);
@@ -695,6 +715,28 @@ class Logoot extends EventEmitter {
 	}
 
 	/**
+	 * Breadth-first search for references of blocks
+	 * @param {BlockNode} block for searching references
+	 * @return {BlockNode} block node with corresponding id
+	 */
+	_getReferences(block) {
+		const queue = [];
+		const references = [];
+		queue.push(block.logoot._root);
+		while (queue.length > 0) {
+			const node = queue.shift();
+			if (node instanceof SplitNode) {
+				references.push(node.reference);
+			}
+			for (const child of node.children) {
+				queue.push(child);
+			}
+		}
+
+		return references;
+	}
+
+	/**
 	 * Moves the block to the index
 	 * @param {string} blockId to perfom on
 	 * @param {Integer} index of the position of the new block
@@ -713,11 +755,12 @@ class Logoot extends EventEmitter {
 			newBlockId: newBlock.blockId
 		});
 		this.deleteBlock(blockId);
+
 		this.emit('operation', {
 			type: 'changeBlockId',
 			position: [],
 			oldId: newBlock.blockId,
-			newBlockId: blockId
+			newBlockId: blockId,
 		});
 		newBlock.blockId = blockId;
 	}
@@ -725,16 +768,20 @@ class Logoot extends EventEmitter {
 	/**
 	 * Deletes the block in the tree
 	 * @param {string} blockId id for block
+	 * @return {Array<string>} contained references in the deleted block
 	 */
 	_deleteBlock(blockId) {
 		const block = this._searchBlock(blockId);
 		if (!block) {
 			console.error(`There does not exist a block of id ${blockId}`);
-			return;
+			return null;
 		}
+		const references = this._getReferences(block);
 		block.logoot = null;
 		block.setEmpty(true);
 		block.trimEmpty();
+
+		return references;
 	}
 
 	/**
@@ -742,11 +789,12 @@ class Logoot extends EventEmitter {
 	 * @param {string} blockId id for block
 	 */
 	deleteBlock(blockId) {
-		this._deleteBlock(blockId);
+		const references = this._deleteBlock(blockId);
 		this.emit('operation', {
 			type: 'deleteBlock',
 			position: [new Identifier(0, this.site, this.clock++)],
-			blockId: blockId
+			blockId: blockId,
+			references: references
 		});
 	}
 
@@ -823,7 +871,9 @@ class Logoot extends EventEmitter {
 			type: 'splitBlock',
 			blockId: blockId,
 			position: position,
-			reference: split.reference
+			reference: split.reference,
+			blockPosition: block.getPath(),
+			blockReferences: block.references
 		});
 
 		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length());
@@ -832,6 +882,11 @@ class Logoot extends EventEmitter {
 		return newBlock;
 	}
 
+	/**
+	 * Removes the nodes from left boundary to right boundary
+	 * @param {Integer} left boundary
+	 * @param {Integer} right boundary
+	 */
 	_setEmpty(left, right) {
 		for (let i = right; i > left; i--) {
 			const node = this._root.getChildByOrder(i);
@@ -841,6 +896,13 @@ class Logoot extends EventEmitter {
 		}
 	}
 
+	/**
+	 * Inserts the node in referenced block if there is a split node before
+	 * @param {Node} node to insert
+	 * @param {BlockNode} block where node will be inserted
+	 * @param {NodeType} type of node to insert
+	 * @return {JSON} tuple of node and block
+	 */
 	_moveInsertOnSplitNode(node, block, type) {
 		if (this._afterSplitNode(node, block)) {
 			const newBlock = this._searchBlock(node.referTo);
@@ -865,6 +927,13 @@ class Logoot extends EventEmitter {
 		return { node: node, block: block };
 	}
 
+	/**
+	 * Deletes the node when there is a split node before it
+	 * @param {Node} node to delete
+	 * @param {BlockNode} block to delete the node from
+	 * @param {nodeType} type of the node to delete
+	 * @return {boolean} whether it is deleted when it has a split node
+	 */
 	_moveDeleteOnSplitNode(node, block, type) {
 		if (this._afterSplitNode(node, block)) {
 			const refBlock = this._searchBlock(node.referTo);
@@ -884,6 +953,12 @@ class Logoot extends EventEmitter {
 		return false;
 	}
 
+	/**
+	 * Checks whether the node contains a split node in front of the node
+	 * @param {Node} node to check
+	 * @param {BlockNode} block to check
+	 * @return {boolean} whether there is a split node before the current node
+	 */
 	_afterSplitNode(node, block) {
 		const prevNode = block.logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
