@@ -89,13 +89,16 @@ function getStateLogoot(node) {
 		empty: node.empty,
 		type: node.type,
 		value: node.value,
-		children: node.children.map(getStateLogoot),
-		references: node.references
+		children: node.children.map(getStateLogoot)
 	};
 
 	if (node.type === 'Block') {
 		res['logoot'] = node.logoot ? getStateLogoot(node.logoot._root) : null;
 		res['blockId'] = node.blockId;
+	}
+
+	if (node.type === 'Split') {
+		res['reference'] = node.reference;
 	}
 
 	return res;
@@ -304,6 +307,7 @@ class Logoot extends EventEmitter {
 			return;
 		}
 
+		// This goes wrong with move
 		const references = this._getReferences(block);
 		const differences = references.filter(x => !operation.references.includes(x)).concat(operation.references.filter(x => !references.includes(x)));
 
@@ -374,7 +378,7 @@ class Logoot extends EventEmitter {
 		const oldBlock = this._searchBlock(operation.oldBlockId);
 		const newBlock = this._searchBlock(operation.newBlockId);
 		if (!oldBlock || !newBlock) {
-			throw Error('One of the blocks is not defined');
+			throw Error('One of the blocks is not defined for moving');
 		}
 		newBlock.logoot = oldBlock.logoot;
 	}
@@ -385,10 +389,12 @@ class Logoot extends EventEmitter {
 	 */
 
 	_changeBlockId(operation) {
+		this._deleteBlock(operation.newBlockId);
 		const block = this._searchBlock(operation.oldId);
 		if (!block) {
-			throw Error(`Could not find block of blockId: ${operation.oldBlockId}`);
+			throw Error(`Could not find block of blockId for changing: ${operation.oldBlockId}`);
 		}
+
 		block.blockId = operation.newBlockId;
 	}
 
@@ -401,7 +407,11 @@ class Logoot extends EventEmitter {
 
 		if (!block) {
 			// throw Error(`Could not find block of blockId: ${operation.blockId}`);
-			console.error(`Could not find block of blockId: ${operation.blockId}`);
+			console.error(
+				`Could not find block of blockId for the receive split function: ${
+					operation.blockId
+				}`
+			);
 			return;
 		}
 
@@ -631,6 +641,10 @@ class Logoot extends EventEmitter {
 				node.logoot = new Logoot(node.blockId);
 				node.logoot.setState(JSON.stringify({ root: n.logoot }));
 			}
+
+			if (n.type === 'Split') {
+				node.reference = n.reference;
+			}
 			return node;
 		}
 		this._root = parseNode(parsed.root, null);
@@ -746,6 +760,7 @@ class Logoot extends EventEmitter {
 		if (!block) {
 			throw Error(`Could not find block of id: ${blockId}`);
 		}
+
 		const newBlock = this.insertBlock(index);
 		newBlock.logoot = block.logoot;
 		this.emit('operation', {
@@ -754,13 +769,13 @@ class Logoot extends EventEmitter {
 			oldBlockId: blockId,
 			newBlockId: newBlock.blockId
 		});
-		this.deleteBlock(blockId);
 
+		this._deleteBlock(blockId);
 		this.emit('operation', {
 			type: 'changeBlockId',
 			position: [],
 			oldId: newBlock.blockId,
-			newBlockId: blockId,
+			newBlockId: blockId
 		});
 		newBlock.blockId = blockId;
 	}
@@ -776,10 +791,11 @@ class Logoot extends EventEmitter {
 			console.error(`There does not exist a block of id ${blockId}`);
 			return null;
 		}
+
 		const references = this._getReferences(block);
-		block.logoot = null;
+		// block.logoot = null;
 		block.setEmpty(true);
-		block.trimEmpty();
+		// block.trimEmpty();
 
 		return references;
 	}
@@ -790,6 +806,7 @@ class Logoot extends EventEmitter {
 	 */
 	deleteBlock(blockId) {
 		const references = this._deleteBlock(blockId);
+
 		this.emit('operation', {
 			type: 'deleteBlock',
 			position: [new Identifier(0, this.site, this.clock++)],

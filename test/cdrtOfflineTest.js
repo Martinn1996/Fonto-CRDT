@@ -183,7 +183,7 @@ describe('Offline Support', () => {
 
 		ops2 = [];
 
-		const blockId2 = crdt1.splitBlock(blockId, 4);
+		crdt1.splitBlock(blockId, 4);
 		const blockId3 = crdt2.splitBlock(blockId, 2);
 
 		ops1.forEach(op => crdt1.receive(op));
@@ -192,15 +192,62 @@ describe('Offline Support', () => {
 		ops1 = [];
 		ops2 = [];
 
-		crdt1.deleteBlock(blockId2);
+		crdt1.deleteBlock(blockId3);
 
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 
-		console.log(crdt1.getState());
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.length(), 3);
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should converge when both editors perform a split in a paragraph and move one paragraph', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'a b c', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		ops2 = [];
+
+		const blockId2 = crdt1.splitBlock(blockId, 4);
+		crdt1.moveBlock(blockId, 2);
+
+		const blockId3 = crdt2.splitBlock(blockId, 2);
+
+		ops1.forEach(op => crdt1.receive(op));
+
+		ops2.forEach(op => crdt2.receive(op));
+
+		ops1 = [];
+		ops2 = [];
 
 		assert.equal(crdt1.value(), crdt2.value());
-		// assert.equal(crdt1.length(), 2);
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should converge when both editors perform a split in a paragraph and combine delete and move operation', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'abc', 0);
+		ops2.forEach(op => {
+			crdt2.receive(op);
+		});
+
+		ops2 = [];
+
+		const blockId2 = crdt1.splitBlock(blockId, 2);
+		crdt1.moveBlock(blockId, 2);
+		crdt1.deleteBlock(blockId);
+
+		const blockId3 = crdt2.splitBlock(blockId, 1);
+		console.log(crdt1.getState());
+		ops1.forEach(op => crdt1.receive(op));
+		console.log(crdt1.getState());
+		ops2.forEach(op => crdt2.receive(op));
+
+		ops1 = [];
+		ops2 = [];
+
+		// assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
