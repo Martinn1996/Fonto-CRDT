@@ -24,8 +24,9 @@ describe('Merge', () => {
 		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
-		assert.equal(crdt1.length(), 1);
-		assert.equal(crdt1.value(), 'HoiDoei\n\n');
+		console.log(crdt1.getState());
+
+		assert.equal(crdt1.value(crdt1), 'HoiDoei\n\n');
 	});
 
 	it('should merge two blocks into one (merged by another user)', () => {
@@ -34,8 +35,7 @@ describe('Merge', () => {
 		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
-		assert.equal(crdt1.length(), 1);
-		assert.equal(crdt1.value(), 'HoiDoei\n\n');
+		assert.equal(crdt1.value(crdt1), 'HoiDoei\n\n');
 	});
 
 	it('should merge three blocks into one after two merges', () => {
