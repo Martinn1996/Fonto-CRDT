@@ -210,10 +210,10 @@ describe('Offline Support', () => {
 
 		ops2 = [];
 
-		const blockId2 = crdt1.splitBlock(blockId, 4);
+		crdt1.splitBlock(blockId, 4);
 		crdt1.moveBlock(blockId, 2);
 
-		const blockId3 = crdt2.splitBlock(blockId, 2);
+		crdt2.splitBlock(blockId, 2);
 
 		ops1.forEach(op => crdt1.receive(op));
 
@@ -234,10 +234,10 @@ describe('Offline Support', () => {
 
 		ops2 = [];
 
-		const blockId2 = crdt1.splitBlock(blockId, 2);
+		crdt1.splitBlock(blockId, 2);
 		crdt1.deleteBlock(blockId);
 
-		const blockId3 = crdt2.splitBlock(blockId, 1);
+		crdt2.splitBlock(blockId, 1);
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 

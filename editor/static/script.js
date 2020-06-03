@@ -15,10 +15,13 @@ let opsToSend = [];
 let opsToReceive = [];
 
 function receiveOperation(op) {
+	/* eslint-disable no-use-before-define */
 	const cursor = getCursor();
 	l1.receive(op);
+	/* eslint-disable no-use-before-define */
 	render(l1.blockValue());
 	if (cursor) {
+		/* eslint-disable no-use-before-define */
 		setCursor(cursor);
 	}
 }
@@ -45,6 +48,7 @@ socket.onmessage = function(event) {
 	const data = JSON.parse(event.data);
 	if (data.assignSocketId) {
 		l1.setState(data.initialValue);
+		/* eslint-disable no-use-before-define */
 		render(l1.blockValue());
 		initialized = true;
 	} else if (online) {
