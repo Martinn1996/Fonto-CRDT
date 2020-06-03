@@ -398,13 +398,7 @@ class Logoot extends EventEmitter {
 		let block = this._searchAllBlock(operation.blockId);
 
 		if (!block) {
-			// throw Error(`Could not find block of blockId: ${operation.blockId}`);
-			console.error(
-				`Could not find block of blockId for the receive split function: ${
-					operation.blockId
-				}`
-			);
-			return;
+			throw Error(`Could not find block of blockId: ${operation.blockId}`);
 		}
 
 		const deleteQueueIndex = block.logoot._deleteQueue.findIndex(op => {
@@ -680,8 +674,7 @@ class Logoot extends EventEmitter {
 			node = this._searchAllBlock(blockId);
 		}
 		if (node === null) {
-			console.error(`Block not found! Insertion in block: ${blockId} cancelled.`);
-			return;
+			throw Error(`Block not found! Insertion in block: ${blockId} cancelled.`);
 		}
 		content.split('').forEach((value, i) => {
 			const position = node.logoot._insert(value, index + i);
@@ -742,28 +735,6 @@ class Logoot extends EventEmitter {
 	}
 
 	/**
-	 * Breadth-first search for references of blocks
-	 * @param {BlockNode} block for searching references
-	 * @return {Array<string>} block node with corresponding id
-	 */
-	_getReferences(block) {
-		const queue = [];
-		const references = [];
-		queue.push(block.logoot._root);
-		while (queue.length > 0) {
-			const node = queue.shift();
-			if (node instanceof SplitNode) {
-				references.push(node.reference);
-			}
-			for (const child of node.children) {
-				queue.push(child);
-			}
-		}
-
-		return references;
-	}
-
-	/**
 	 * Moves the block to the index
 	 * @param {string} blockId to perfom on
 	 * @param {Integer} index of the position of the new block
@@ -804,12 +775,7 @@ class Logoot extends EventEmitter {
 			return;
 		}
 
-		const references = this._getReferences(block);
 		block.setEmpty(true);
-		if (references.length === 0) {
-			block.logoot = null;
-			block.trimEmpty();
-		}
 	}
 
 	/**

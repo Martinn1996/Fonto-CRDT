@@ -127,4 +127,12 @@ describe('InsertBlock', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should not be able to insert in a non existing block', () => {
+		const errorFunction = () => {
+			crdt1.insertContentInBlock('ik ging naar de h&m om kleren te kopen', 0, '11111');
+		};
+
+		assert.throws(errorFunction, Error);
+	});
 });

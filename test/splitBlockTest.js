@@ -111,4 +111,23 @@ describe('split Block', () => {
 
 		assert.throws(errorFunction, Error);
 	});
+
+	it('should not be able split a not existing block', () => {
+		const errorFunction = () => {
+			insertContentInNewBlock(crdt1, '1234', 0);
+			crdt2.splitBlock('11111', 7);
+		};
+
+		assert.throws(errorFunction, Error);
+	});
+
+	it('should not be able to receive split a not existing block', () => {
+		const errorFunction = () => {
+			const operation = {};
+			operation.blockId = '11111';
+			crdt1._receiveSplitBlock(operation);
+		};
+
+		assert.throws(errorFunction, Error);
+	});
 });
