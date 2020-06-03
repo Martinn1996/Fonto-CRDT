@@ -203,18 +203,38 @@ class Node {
 	 * @param {Integer} index of the child
 	 * @return {Node}
 	 */
-	getChildByOrder(index) {
-		if (index === 0 && !this.empty) return this;
+	// getChildByOrder(index) {
+	// 	if (index === 0 && !this.empty) return this;
 
-		let left = this.empty ? 0 : 1;
-		let right = left;
+	// 	let left = this.empty ? 0 : 1;
+	// 	let right = left;
 
-		for (const child of this.children) {
-			right += child.size;
-			if (left <= index && right > index) {
-				return child.getChildByOrder(index - left);
+	// 	for (const child of this.children) {
+	// 		right += child.size;
+	// 		if (left <= index && right > index) {
+	// 			return child.getChildByOrder(index - left);
+	// 		}
+	// 		left = right;
+	// 	}
+
+	// 	return null;
+	// }
+
+	getChildByOrder(i) {
+		let index = 0;
+		const stack = [];
+		stack.push(this);
+
+		while (stack.length > 0) {
+			stack.forEach(c => console.log(c.value));
+			const node = stack.pop();
+			if (!node.empty && index === i) {
+				return node;
 			}
-			left = right;
+			if (!node.empty) {
+				index++;
+			}
+			node.children.forEach(c => stack.push(c));
 		}
 
 		return null;
