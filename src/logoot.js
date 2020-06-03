@@ -171,6 +171,10 @@ class Logoot extends EventEmitter {
 		}
 	}
 
+	/**
+	 * Returns the value of the block
+	 * @return {Array.<string>} value of the block
+	 */
 	blockValue() {
 		const arr = [];
 
