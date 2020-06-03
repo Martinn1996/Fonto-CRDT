@@ -82,7 +82,6 @@ describe('InsertBlock', () => {
 		insertContentInNewBlock(crdt1, 'a', 0);
 		insertContentInNewBlock(crdt1, 'c', 1);
 		insertContentInNewBlock(crdt1, 'b', 1);
-
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
@@ -127,5 +126,13 @@ describe('InsertBlock', () => {
 		assert.equal(crdt2.value(), 'ik ging naar de bijenkorf om kleren te kopen\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
+	it('should not be able to insert in a non existing block', () => {
+		const errorFunction = () => {
+			crdt1.insertContentInBlock('ik ging naar de h&m om kleren te kopen', 0, '11111');
+		};
+
+		assert.throws(errorFunction, Error);
 	});
 });
