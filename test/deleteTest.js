@@ -22,7 +22,7 @@ describe('Delete', () => {
 		});
 
 		// Sets initial value
-		crdt1.setValue(testString);
+		crdt1.insert(testString, 0);
 	});
 
 	// Unit testing
@@ -36,7 +36,6 @@ describe('Delete', () => {
 
 	it('should delete one character 1', () => {
 		crdt1.delete(0);
-		console.log(crdt1.value());
 		assert.equal(crdt1.value(), testString.substring(1, testString.length));
 		assert.equal(crdt2.value(), testString.substring(1, testString.length));
 		assert.deepEqual(crdt1.getState(), crdt2.getState());

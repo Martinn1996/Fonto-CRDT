@@ -222,22 +222,20 @@ class Node {
 
 	getChildByOrder(i) {
 		let index = 0;
-		const stack = [];
-		stack.push(this);
-
-		while (stack.length > 0) {
-			stack.forEach(c => console.log(c.value));
-			const node = stack.pop();
+		const dfs = node => {
 			if (!node.empty && index === i) {
 				return node;
 			}
 			if (!node.empty) {
 				index++;
 			}
-			node.children.forEach(c => stack.push(c));
-		}
+			for (const child of node.children) {
+				const res = dfs(child);
+				if (res) return res;
+			}
+		};
 
-		return null;
+		return dfs(this);
 	}
 
 	/**
