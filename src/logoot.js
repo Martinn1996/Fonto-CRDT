@@ -307,14 +307,6 @@ class Logoot extends EventEmitter {
 			return;
 		}
 
-		// // This goes wrong with move
-		// const references = this._getReferences(block);
-		// const differences = references.filter(x => !operation.references.includes(x)).concat(operation.references.filter(x => !references.includes(x)));
-
-		// for (const id of differences) {
-		// 	this.deleteBlock(id);
-		// }
-
 		this._deleteBlock(operation.blockId);
 	}
 
@@ -752,7 +744,7 @@ class Logoot extends EventEmitter {
 	/**
 	 * Breadth-first search for references of blocks
 	 * @param {BlockNode} block for searching references
-	 * @return {BlockNode} block node with corresponding id
+	 * @return {Array<string>} block node with corresponding id
 	 */
 	_getReferences(block) {
 		const queue = [];
@@ -804,21 +796,20 @@ class Logoot extends EventEmitter {
 	/**
 	 * Deletes the block in the tree
 	 * @param {string} blockId id for block
-	 * @return {Array<string>} contained references in the deleted block
 	 */
 	_deleteBlock(blockId) {
 		const block = this._searchBlock(blockId);
 		if (!block) {
 			console.error(`There does not exist a block of id ${blockId}`);
-			return null;
+			return;
 		}
 
 		const references = this._getReferences(block);
-		// block.logoot = null;
 		block.setEmpty(true);
-		// block.trimEmpty();
-
-		return references;
+		if (references.length === 0) {
+			block.logoot = null;
+			block.trimEmpty();
+		}
 	}
 
 	/**
@@ -826,13 +817,12 @@ class Logoot extends EventEmitter {
 	 * @param {string} blockId id for block
 	 */
 	deleteBlock(blockId) {
-		const references = this._deleteBlock(blockId);
+		this._deleteBlock(blockId);
 
 		this.emit('operation', {
 			type: 'deleteBlock',
 			position: [new Identifier(0, this.site, this.clock++)],
-			blockId: blockId,
-			references: references
+			blockId: blockId
 		});
 	}
 
