@@ -12,6 +12,7 @@ app.use(express.static('editor/static'));
 
 const Logoot = require('../src/logoot');
 const l1 = new Logoot('site1');
+l1.insertBlock(0);
 
 app.get('/', (_, res) => {
 	const editor = fs.readFileSync('./editor/static/editor.html');
