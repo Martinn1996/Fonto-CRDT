@@ -220,22 +220,42 @@ class Node {
 	// 	return null;
 	// }
 
-	getChildByOrder(i) {
+	getChildByOrder(i, logoot) {
 		let index = 0;
 		const dfs = node => {
-			if (!node.empty && index === i) {
+			if (!node.empty && index === i && node.type !== 'Merge') {
 				return node;
 			}
-			if (!node.empty) {
+			if (!node.empty && node.type && node.type !== 'Merge') {
 				index++;
 			}
+
 			for (const child of node.children) {
-				const res = dfs(child);
+				if (child.type === 'Merge') {
+					const block = logoot._searchAllBlock(child.referenceId);
+					console.log('found merge node');
+					console.log('insert index = ' + i);
+					console.log('currently at node: ' + index);
+					console.log(block.logoot.length());
+					if ((i - index) < block.logoot.length()) {
+						console.log('insert in 2nd block');
+						console.log(block.logoot.value());
+						//return dfs(block, logoot);
+						console.log(i - index);
+						//const rNode = block.logoot._root.getChildByOrder((i - index + 1), logoot)
+						//console.log(rNode.value);
+						return {ref: child, block: block, index: (i - index + 1)};
+					}
+					index += block.logoot.length();
+				}
+
+				const res = dfs(child, logoot);
+
 				if (res) return res;
 			}
 		};
 
-		return dfs(this);
+		return dfs(this, logoot);
 	}
 
 	/**
