@@ -65,6 +65,7 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.insertContentInBlock('Doei', 1, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 5, block1.blockId);
+		console.log(crdt1.getState());
 		assert.equal(crdt1.value(), 'HoiDonewei\n\n');
 	});
 
