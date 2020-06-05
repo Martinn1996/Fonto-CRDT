@@ -26,9 +26,7 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.insertContentInBlock('2', 1, block2.blockId);
 		crdt1.insertContentInBlock('3', 0, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
-		crdt1.mergeBlocks(block2.blockId, block3.blockId);
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
+        crdt1.mergeBlocks(block2.blockId, block3.blockId);
 	});
 
 	it('merge 2 blocks and insert on index 1', () => {
@@ -39,8 +37,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 1, block1.blockId);
 		assert.equal(crdt1.value(), 'HnewoiDoei\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 2', () => {
@@ -51,8 +47,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 2, block1.blockId);
 		assert.equal(crdt1.value(), 'HonewiDoei\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 3', () => {
@@ -63,8 +57,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 3, block1.blockId);
 		assert.equal(crdt1.value(), 'HoinewDoei\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 4', () => {
@@ -76,7 +68,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.insertContentInBlock('new', 4, block1.blockId);
 		assert.equal(crdt1.value(), 'HoiDnewoei\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 5', () => {
@@ -87,8 +78,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 5, block1.blockId);
 		assert.equal(crdt1.value(), 'HoiDonewei\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 6', () => {
@@ -99,8 +88,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 6, block1.blockId);
 		assert.equal(crdt1.value(), 'HoiDoenewi\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('merge 2 blocks and insert on index 7', () => {
@@ -111,8 +98,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 7, block1.blockId);
 		assert.equal(crdt1.value(), 'HoiDoeinew\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });
 
@@ -152,7 +137,6 @@ describe('Simple merge tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('should merge two blocks into one (merged by another user)', () => {
@@ -163,7 +147,6 @@ describe('Simple merge tests', () => {
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('should merge three blocks into one after two merges', () => {
@@ -177,7 +160,6 @@ describe('Simple merge tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei!\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
 	it('should throw an error when a block does not exist', () => {
