@@ -337,7 +337,7 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveDeleteBlock(operation) {
-		const block = this._searchAllBlock(operation.blockId);
+		const block = this._deleteBlock(operation.blockId);
 
 		if (!block) {
 			console.error(`Could not find block of blockId: ${operation.blockId}`);
@@ -404,12 +404,13 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveMoveBlock(operation) {
-		const oldBlock = this._searchBlock(operation.oldBlockId);
-		const newBlock = this._searchBlock(operation.newBlockId);
+		const oldBlock = this._searchAllBlock(operation.oldBlockId);
+		const newBlock = this._searchAllBlock(operation.newBlockId);
 		if (!oldBlock || !newBlock) {
 			throw Error('One of the blocks is not defined for moving');
 		}
 		newBlock.logoot = oldBlock.logoot;
+		newBlock.merged = oldBlock.merged;
 	}
 
 	/**
@@ -840,6 +841,7 @@ class Logoot extends EventEmitter {
 
 		const newBlock = this.insertBlock(index);
 		newBlock.logoot = block.logoot;
+		newBlock.merged = block.merged;
 		this.emit('operation', {
 			type: 'moveBlock',
 			position: [],
@@ -923,7 +925,7 @@ class Logoot extends EventEmitter {
 			const node = block.logoot._root.getChildByOrder(index + 1, this);
 
 			if (node.block) {
-				this.deleteContentInBlock(node.index - 1, length, node.block.blockId);
+				this.deleteContentInBlock(node.index - 1, length - i, node.block.blockId);
 				return;
 			}
 

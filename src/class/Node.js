@@ -223,10 +223,10 @@ class Node {
 	getChildByOrder(i, logoot) {
 		let index = 0;
 		const dfs = node => {
-			if (!node.empty && index === i && node.type !== 'Merge') {
+			if (!node.empty && index === i && node.type !== 'Merge' && !node.merged) {
 				return node;
 			}
-			if (!node.empty && node.type && node.type !== 'Merge') {
+			if (!node.empty && node.type && node.type !== 'Merge' && !node.merged) {
 				index++;
 			}
 

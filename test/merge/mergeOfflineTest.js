@@ -220,4 +220,31 @@ describe('Offline Support merge', () => {
 		ops1 = [];
 		ops2 = [];
 	});
+
+	it('should converge when 2 replicas merge blocks in different order', () => {
+		const block1 = crdt1.insertBlock(0);
+		const block2 = crdt1.insertBlock(1);
+		const block3 = crdt1.insertBlock(2);
+		crdt1.insertContentInBlock('1', 0, block1.blockId);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		crdt1.insertContentInBlock('3', 0, block3.blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		crdt1.mergeBlocks(block1.blockId, block3.blockId);
+		crdt2.mergeBlocks(block2.blockId, block3.blockId);
+		crdt2.mergeBlocks(block1.blockId, block2.blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
 });
