@@ -293,4 +293,19 @@ describe('merge blocks + delete tests', () => {
 		assert.equal(crdt2.value(), 'text1text2\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
+
+	it('should converge after someone merges 2 blocks and then splits in first merged block', () => {
+		const block1 = crdt1.insertBlock(0);
+		const block2 = crdt1.insertBlock(1);
+
+		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
+		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
+
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		crdt1.splitBlock(block1.blockId, 2);
+
+		assert.equal(crdt1.value(), 'Ho\n\niDoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
+	});
 });
