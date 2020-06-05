@@ -203,22 +203,22 @@ class Node {
 	 * @param {Integer} index of the child
 	 * @return {Node}
 	 */
-	// getChildByOrder(index) {
-	// 	if (index === 0 && !this.empty) return this;
+	getChildByOrderLocal(index) {
+		if (index === 0 && !this.empty) return this;
 
-	// 	let left = this.empty ? 0 : 1;
-	// 	let right = left;
+		let left = this.empty ? 0 : 1;
+		let right = left;
 
-	// 	for (const child of this.children) {
-	// 		right += child.size;
-	// 		if (left <= index && right > index) {
-	// 			return child.getChildByOrder(index - left);
-	// 		}
-	// 		left = right;
-	// 	}
+		for (const child of this.children) {
+			right += child.size;
+			if (left <= index && right > index) {
+				return child.getChildByOrderLocal(index - left);
+			}
+			left = right;
+		}
 
-	// 	return null;
-	// }
+		return null;
+	}
 
 	getChildByOrder(i, logoot) {
 		let index = 0;

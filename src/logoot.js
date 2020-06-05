@@ -490,23 +490,23 @@ class Logoot extends EventEmitter {
 		});
 	}
 
-	_insertMergeNode(index, referenceId, logoot) {
+	_insertMergeNode(index, referenceId) {
 		index = Math.min(index, this.length());
-		const prev = this._root.getChildByOrder(index, logoot);
-		const next = this._root.getChildByOrder(index + 1, logoot);
-		let prevPos = null;
-		let nextPos = null;
+		const prev = this._root.getChildByOrderLocal(index);
+		const next = this._root.getChildByOrderLocal(index + 1);
+		const prevPos = prev.getPath();
+		const nextPos = next.getPath();
 
-		if (prev.block) {
-			prevPos = prev.ref.getPath();
-		} else {
-			prevPos = prev.getPath();
-		}
-		if (next.block) {
-			nextPos = next.ref.getPath();
-		} else {
-			nextPos = next.getPath();
-		}
+		// if (prev.block) {
+		// 	prevPos = prev.ref.getPath();
+		// } else {
+		// 	prevPos = prev.getPath();
+		// }
+		// if (next.block) {
+		// 	nextPos = next.ref.getPath();
+		// } else {
+		// 	nextPos = next.getPath();
+		// }
 		const position = this._generatePositionBetween(prevPos, nextPos);
 		const node = this._root.getChildByPath(position, true, MergeNode);
 		node.referenceId = referenceId;
@@ -946,10 +946,12 @@ class Logoot extends EventEmitter {
 	 */
 	splitBlock(blockId, index) {
 		const block = this._searchAllBlock(blockId);
+
 		if (!block) {
 			throw Error('BlockId does not exist');
 		}
-		if (index > block.logoot.value().length || index < 0) {
+
+		if (index > block.logoot._getTotalSize(this) || index < 0) {
 			throw Error('Index out of range');
 		}
 
@@ -957,33 +959,57 @@ class Logoot extends EventEmitter {
 		const blockIndex = block.getOrder();
 
 		// Insert special node
-		index = Math.min(index, block.logoot.length());
-		const prev = block.logoot._root.getChildByOrder(index, this);
-		const next = block.logoot._root.getChildByOrder(index + 1, this);
+		// index = Math.min(index, block.logoot.length());
+		// const prev = block.logoot._root.getChildByOrder(index, this);
+		// const next = block.logoot._root.getChildByOrder(index + 1, this);
 
-		const prevPos = prev.getPath();
-		const nextPos = next.getPath();
-		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
-		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
-		split.setEmpty(false);
+		// const prevPos = prev.getPath();
+		// const nextPos = next.getPath();
+		let prev = block.logoot._root.getChildByOrder(index, this);
 
-		const newBlock = this.insertBlock(blockIndex + 1);
-		newBlock.logoot.setState(block.logoot.getState());
-		split.reference = newBlock.blockId;
+		if (prev === undefined) {
+			prev = block.logoot._root.getChildByOrder(this.length(), this);
+		}
 
-		this.emit('operation', {
-			type: 'splitBlock',
-			blockId: blockId,
-			position: position,
-			reference: split.reference,
-			blockPosition: block.getPath(),
-			blockReferences: block.references
-		});
+		if (prev.block) {
+			this.splitBlock(prev.block.blockId, prev.index);
+		} else {
+			index = Math.min(index, block.logoot.length());
+			prev = block.logoot._root.getChildByOrder(index, this);
 
-		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
-		newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
+			let next = block.logoot._root.getChildByOrder(index + 1, this);
 
-		return newBlock;
+
+			if (next.ref) {
+				next = next.ref;
+			}
+
+			const prevPos = prev.getPath();
+			const nextPos = next.getPath();
+
+			let position = null;
+			position = block.logoot._generatePositionBetween(prevPos, nextPos);
+			const split = block.logoot._root.getChildByPath(position, true, SplitNode);
+			split.setEmpty(false);
+
+			const newBlock = this.insertBlock(blockIndex + 1);
+			newBlock.logoot.setState(block.logoot.getState());
+			split.reference = newBlock.blockId;
+
+			this.emit('operation', {
+				type: 'splitBlock',
+				blockId: blockId,
+				position: position,
+				reference: split.reference,
+				blockPosition: block.getPath(),
+				blockReferences: block.references
+			});
+
+			block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
+			newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
+
+			return newBlock;
+		}
 	}
 
 	/**
@@ -1068,6 +1094,25 @@ class Logoot extends EventEmitter {
 		const prevNode = block.logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
 		return prevNode instanceof SplitNode;
+	}
+
+	_getTotalSize(logoot) {
+		const queue = [];
+		queue.push(this._root);
+
+		let length = this.length();
+		while (queue.length > 0) {
+			const node = queue.shift();
+			if (node instanceof MergeNode && !node.empty) {
+				const block = logoot._searchBlock(node.referenceId);
+
+				length += block.logoot._getTotalSize(logoot) - 1;
+			}
+			for (const child of node.children) {
+				queue.push(child);
+			}
+		}
+		return length;
 	}
 }
 
