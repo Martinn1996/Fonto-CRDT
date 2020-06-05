@@ -523,10 +523,8 @@ class Logoot extends EventEmitter {
 		if (prev === undefined) {
 			prev = this._root.getChildByOrder(this.length(), logoot);
 		}
-		// console.log(prev);
-		// const next = this._root.getChildByOrder(index + 1, logoot);
+
 		if (prev.block) {
-			// prev.block.logoot.insertContentInBlock(value, prev.index, logoot);
 			logoot.insertContentInBlock(value, prev.index, prev.block.blockId);
 		} else {
 			index = Math.min(index, this.length());
@@ -914,8 +912,6 @@ class Logoot extends EventEmitter {
 		const block = this._searchAllBlock(blockId);
 		for (let i = 0; i < length; i++) {
 			const node = block.logoot._root.getChildByOrder(index + 1, this);
-			// console.log('-----------------------NODE----------------------');
-			// console.log(node);
 
 			if (node.block) {
 				this.deleteContentInBlock(node.index - 1, length, node.block.blockId);
