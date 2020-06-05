@@ -524,13 +524,13 @@ class Logoot extends EventEmitter {
 	_insert(value, index, logoot) {
 		let prev = this._root.getChildByOrder(index, logoot);
 		if (prev === undefined) {
-			prev = this._root.getChildByOrder(this.length(), logoot);
+			prev = this._root.getChildByOrder(this._getTotalSize(logoot), logoot);
 		}
 
 		if (prev.block) {
 			logoot.insertContentInBlock(value, prev.index, prev.block.blockId);
 		} else {
-			index = Math.min(index, this.length());
+			index = Math.min(index, this._getTotalSize(logoot));
 			prev = this._root.getChildByOrder(index, logoot);
 			let next = this._root.getChildByOrder(index + 1, logoot);
 
@@ -978,7 +978,6 @@ class Logoot extends EventEmitter {
 			prev = block.logoot._root.getChildByOrder(index, this);
 
 			let next = block.logoot._root.getChildByOrder(index + 1, this);
-
 
 			if (next.ref) {
 				next = next.ref;
