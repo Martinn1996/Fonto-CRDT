@@ -212,8 +212,8 @@ class Logoot extends EventEmitter {
 
 		this._root.walk(node => {
 			if (!node.empty) {
-				if (node.logoot) {
-					arr.push({ blockId: node.blockId, value: node.logoot.value() });
+				if (node.logoot && !node.merged) {
+					arr.push({ blockId: node.blockId, value: node.logoot.value(this) });
 				}
 			}
 		});
