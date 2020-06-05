@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const Logoot = require('../src/logoot');
+const Logoot = require('../../src/logoot');
 
 describe('Delete Block', () => {
 	let crdt1;
