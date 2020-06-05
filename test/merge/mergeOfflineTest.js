@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const Logoot = require('../src/logoot');
+const Logoot = require('../../src/logoot');
 
 describe('Offline Support merge', () => {
 	let crdt1, crdt2, ops1, ops2;
