@@ -197,4 +197,27 @@ describe('Offline Support merge', () => {
 
 		assert.equal(crdt1.value(), crdt2.value());
 	});
+
+	it('should converge when 2 replicas create blocks offline and merge offline', () => {
+		const block1 = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('1', 0, block1.blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+
+		const block2 = crdt1.insertBlock(1);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+		const block3 = crdt2.insertBlock(1);
+		crdt2.insertContentInBlock('3', 0, block3.blockId);
+
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		crdt2.mergeBlocks(block1.blockId, block3.blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+	});
 });

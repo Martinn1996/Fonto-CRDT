@@ -481,6 +481,7 @@ class Logoot extends EventEmitter {
 	 * Inserts the value into the tree on index
 	 * @param {string} value to insert
 	 * @param {Integer} index for insertion
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	insert(value, index, logoot) {
 		value.split('').forEach((character, i) => {
@@ -517,20 +518,19 @@ class Logoot extends EventEmitter {
 	 * @param {string} value to insert
 	 * @param {Integer} index for insertion
 	 * @return {Array.<number>} path to the newly created node
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	_insert(value, index, logoot) {
 		let prev = this._root.getChildByOrder(index, logoot);
 		if (prev === undefined) {
 			prev = this._root.getChildByOrder(this.length(), logoot);
 		}
-		// console.log(prev);
-		// const next = this._root.getChildByOrder(index + 1, logoot);
+
 		if (prev.block) {
-			// prev.block.logoot.insertContentInBlock(value, prev.index, logoot);
 			logoot.insertContentInBlock(value, prev.index, prev.block.blockId);
 		} else {
 			index = Math.min(index, this.length());
-			const prev = this._root.getChildByOrder(index, logoot);
+			prev = this._root.getChildByOrder(index, logoot);
 			let next = this._root.getChildByOrder(index + 1, logoot);
 
 			if (next.ref) {
@@ -599,6 +599,7 @@ class Logoot extends EventEmitter {
 	 * Deletes from index 'length' nodes
 	 * @param {Integer} index
 	 * @param {Integer} length
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	delete(index, length = 1, logoot) {
 		for (let i = 0; i < length; i++) {
@@ -609,6 +610,7 @@ class Logoot extends EventEmitter {
 	/**
 	 * Deletes the node on index
 	 * @param {Integer} index
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	_delete(index, logoot) {
 		const node = this._root.getChildByOrder(index + 1, logoot);
@@ -623,6 +625,7 @@ class Logoot extends EventEmitter {
 
 	/**
 	 * Construct a string from the sequence
+	 * @param {Node} root the root of this Logoot
 	 * @return {string} value of the tree
 	 */
 	value(root = this) {
@@ -657,6 +660,7 @@ class Logoot extends EventEmitter {
 	 * @param {string} value to write
 	 * @param {Integer} start index to delete
 	 * @param {Integer} length of deletion
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	replaceRange(value, start, length, logoot) {
 		this.delete(start, length, logoot);
@@ -892,7 +896,6 @@ class Logoot extends EventEmitter {
 		// insert merge node
 		const node = block1.logoot._insertMergeNode(block1.logoot.length(), blockId2, this);
 
-		// node.adjustSize(block2.logoot.length() - 1);
 		// set block2 to invisible
 		block2.setMerged();
 
@@ -914,8 +917,6 @@ class Logoot extends EventEmitter {
 		const block = this._searchAllBlock(blockId);
 		for (let i = 0; i < length; i++) {
 			const node = block.logoot._root.getChildByOrder(index + 1, this);
-			// console.log('-----------------------NODE----------------------');
-			// console.log(node);
 
 			if (node.block) {
 				this.deleteContentInBlock(node.index - 1, length, node.block.blockId);
@@ -985,6 +986,7 @@ class Logoot extends EventEmitter {
 	 * Removes the nodes from left boundary to right boundary
 	 * @param {Integer} left boundary
 	 * @param {Integer} right boundary
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
 	_setEmpty(left, right, logoot) {
 		for (let i = right; i > left; i--) {
