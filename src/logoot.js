@@ -146,7 +146,7 @@ class Logoot extends EventEmitter {
 		if (!operation.parsed) operation = parseOperation(operation);
 		switch (operation.type) {
 			case 'mergeBlocks':
-				this.receiveMerge(operation);
+				this._receiveMerge(operation);
 				break;
 			case 'insert':
 				this._receiveInsert(operation);
@@ -179,7 +179,7 @@ class Logoot extends EventEmitter {
 		}
 	}
 
-	receiveMerge(operation) {
+	_receiveMerge(operation) {
 		const blockId1 = operation.blockId1;
 		const blockId2 = operation.blockId2;
 		const block1 = this._searchBlock(blockId1);
