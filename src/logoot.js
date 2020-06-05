@@ -96,6 +96,7 @@ function getStateLogoot(node) {
 	if (node.type === 'Block') {
 		res['logoot'] = node.logoot ? getStateLogoot(node.logoot._root) : null;
 		res['blockId'] = node.blockId;
+		res['merged'] = node.merged;
 	}
 	if (node.type === 'Merge') {
 		res['referenceId'] = node.referenceId;
@@ -712,8 +713,11 @@ class Logoot extends EventEmitter {
 				node.blockId = n.blockId;
 				node.logoot = new Logoot(node.blockId);
 				node.logoot.setState(JSON.stringify({ root: n.logoot }));
+				node.merged = n.merged;
 			}
-
+			if (n.type === 'Merge') {
+				node.referenceId = n.referenceId;
+			}
 			if (n.type === 'Split') {
 				node.reference = n.reference;
 			}
