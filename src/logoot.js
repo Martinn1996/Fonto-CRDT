@@ -491,6 +491,11 @@ class Logoot extends EventEmitter {
 		});
 	}
 
+	/**
+	 * 
+	 * @param {Integer} index where mergeNode will be inserted
+	 * @param {String} referenceId of the node to which the mergeNode references
+	 */
 	_insertMergeNode(index, referenceId) {
 		index = Math.min(index, this.length());
 		const prev = this._root.getChildByOrderLocal(index);
@@ -498,16 +503,6 @@ class Logoot extends EventEmitter {
 		const prevPos = prev.getPath();
 		const nextPos = next.getPath();
 
-		// if (prev.block) {
-		// 	prevPos = prev.ref.getPath();
-		// } else {
-		// 	prevPos = prev.getPath();
-		// }
-		// if (next.block) {
-		// 	nextPos = next.ref.getPath();
-		// } else {
-		// 	nextPos = next.getPath();
-		// }
 		const position = this._generatePositionBetween(prevPos, nextPos);
 		const node = this._root.getChildByPath(position, true, MergeNode);
 		node.referenceId = referenceId;
@@ -1097,6 +1092,11 @@ class Logoot extends EventEmitter {
 		return prevNode instanceof SplitNode;
 	}
 
+	/**
+	 * gets the size of a Logoot instance including merged blocks
+	 * @param {Logoot} logoot of the entire CRDT
+	 * @return {Integer} size of the block
+	 */
 	_getTotalSize(logoot) {
 		const queue = [];
 		queue.push(this._root);

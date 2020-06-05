@@ -17,7 +17,7 @@ describe('Offline Support merge', () => {
 		});
 	});
 
-	it('tesgrgf', () => {
+	it('should converge after replica 1 merges block 1 and 2 and replica 2 merges block 2 and 3', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(1);
 		const block3 = crdt1.insertBlock(2);
@@ -153,7 +153,7 @@ describe('Offline Support merge', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
-	it('shoucld converge after 2 replicas edit text where 1 is merged and 1 not', () => {
+	it('should converge after 2 replicas edit text where 1 is merged and 1 not', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(1);
 

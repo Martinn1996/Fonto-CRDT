@@ -199,7 +199,7 @@ class Node {
 	}
 
 	/**
-	 * Find child with corresponding index
+	 * Find child (excluding merged blocks) with corresponding index
 	 * @param {Integer} index of the child
 	 * @return {Node}
 	 */
@@ -220,6 +220,12 @@ class Node {
 		return null;
 	}
 
+	/**
+	 * Find child (including merged blocks) with corresponding index
+	 * @param {Integer} i is index of the child
+	 * @param {Logoot} logoot of the entire CRDT
+	 * @return {Node}
+	 */
 	getChildByOrder(i, logoot) {
 		let index = 0;
 		const dfs = node => {

@@ -22,7 +22,7 @@ class BlockNode extends Node {
 	}
 
 	setMerged() {
-		if (true === this.merged) return;
+		if (this.merged) return;
 
 		this.merged = true;
 
