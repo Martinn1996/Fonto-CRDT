@@ -3,8 +3,19 @@ const Logoot = require('../src/logoot');
 
 describe('merge blocks + insertion tests', () => {
 	let crdt1;
+	let crdt2;
+
 	beforeEach(() => {
 		crdt1 = new Logoot('1');
+		crdt2 = new Logoot('2');
+
+		crdt1.on('operation', op => {
+			crdt2.receive(op);
+		});
+
+		crdt2.on('operation', op => {
+			crdt1.receive(op);
+		});
 	});
 
 	it('merge nested', () => {
@@ -56,6 +67,7 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 4, block1.blockId);
 		assert.equal(crdt1.value(), 'HoiDnewoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
 	});
 
 	it('merge 2 blocks and insert on index 5', () => {
@@ -65,7 +77,6 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.insertContentInBlock('Doei', 1, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt1.insertContentInBlock('new', 5, block1.blockId);
-		console.log(crdt1.getState());
 		assert.equal(crdt1.value(), 'HoiDonewei\n\n');
 	});
 
@@ -114,7 +125,7 @@ describe('Simple merge tests', () => {
 		crdt1.insertContentInBlock('Doei', 1, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei\n\n');
-		// assert.equal(crdt2.value(), 'HoiDoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
@@ -125,6 +136,7 @@ describe('Simple merge tests', () => {
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
 	});
 
 	it('should merge two blocks into one (merged by another user)', () => {
@@ -134,6 +146,7 @@ describe('Simple merge tests', () => {
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
 	});
 
 	it('should merge three blocks into one after two merges', () => {
@@ -146,6 +159,7 @@ describe('Simple merge tests', () => {
 		crdt1.mergeBlocks(block2.blockId, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'HoiDoei!\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
 	});
 
 	it('should throw an error when a block does not exist', () => {

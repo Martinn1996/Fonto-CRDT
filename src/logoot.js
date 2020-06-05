@@ -526,7 +526,6 @@ class Logoot extends EventEmitter {
 		// console.log(prev);
 		// const next = this._root.getChildByOrder(index + 1, logoot);
 		if (prev.block) {
-			console.log(prev);
 			// prev.block.logoot.insertContentInBlock(value, prev.index, logoot);
 			logoot.insertContentInBlock(value, prev.index, prev.block.blockId);
 		} else {
@@ -761,12 +760,15 @@ class Logoot extends EventEmitter {
 		}
 		content.split('').forEach((value, i) => {
 			const position = node.logoot._insert(value, index + i, this);
-			this.emit('operation', {
-				type: 'insertInBlock',
-				position: position,
-				value: value,
-				blockId: blockId
-			});
+
+			if (position) {
+				this.emit('operation', {
+					type: 'insertInBlock',
+					position: position,
+					value: value,
+					blockId: blockId
+				});
+			}
 		});
 	}
 
