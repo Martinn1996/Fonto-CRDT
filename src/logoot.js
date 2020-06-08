@@ -250,6 +250,7 @@ class Logoot extends EventEmitter {
 	/**
 	 * Builds the same block node as the received inserted block node
 	 * @param {JSON} operation to perform
+	 * @return {Node} node that is inserted
 	 */
 	_receiveInsertBlock(operation) {
 		const deleteQueueIndex = this._deleteQueue.findIndex(op => {
@@ -508,6 +509,7 @@ class Logoot extends EventEmitter {
 	 *
 	 * @param {Integer} index where mergeNode will be inserted
 	 * @param {string} referenceId of the node to which the mergeNode references
+	 * @return {MergeNode} MergeNode that is inserted
 	 */
 	_insertMergeNode(index, referenceId) {
 		index = Math.min(index, this.length());
