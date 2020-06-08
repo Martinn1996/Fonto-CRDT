@@ -66,7 +66,8 @@ const supportedOps = [
 	'deleteInBlock',
 	'moveBlock',
 	'changeBlockId',
-	'splitBlock'
+	'splitBlock',
+	'mergeBlocks'
 ];
 l1.on('operation', op => {
 	if (initialized && supportedOps.includes(op.type)) {

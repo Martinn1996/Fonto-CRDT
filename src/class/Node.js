@@ -199,11 +199,11 @@ class Node {
 	}
 
 	/**
-	 * Find child with corresponding index
+	 * Find child (excluding merged blocks) with corresponding index
 	 * @param {Integer} index of the child
 	 * @return {Node}
 	 */
-	getChildByOrder(index) {
+	getChildByOrderLocal(index) {
 		if (index === 0 && !this.empty) return this;
 
 		let left = this.empty ? 0 : 1;
@@ -212,12 +212,46 @@ class Node {
 		for (const child of this.children) {
 			right += child.size;
 			if (left <= index && right > index) {
-				return child.getChildByOrder(index - left);
+				return child.getChildByOrderLocal(index - left);
 			}
 			left = right;
 		}
 
 		return null;
+	}
+
+	/**
+	 * Find child (including merged blocks) with corresponding index
+	 * @param {Integer} i is index of the child
+	 * @param {Logoot} logoot of the entire CRDT
+	 * @return {Node}
+	 */
+	getChildByOrder(i, logoot) {
+		let index = 0;
+		const dfs = node => {
+			if (!node.empty && index === i && node.type !== 'Merge' && !node.merged) {
+				return node;
+			}
+			if (!node.empty && node.type && node.type !== 'Merge' && !node.merged) {
+				index++;
+			}
+
+			for (const child of node.children) {
+				if (child.type === 'Merge') {
+					const block = logoot._searchAllBlock(child.referenceId);
+					if (i - index < block.logoot.length()) {
+						return { ref: child, block: block, index: i - index + 1 };
+					}
+					index += block.logoot.length();
+				}
+
+				const res = dfs(child, logoot);
+
+				if (res) return res;
+			}
+		};
+
+		return dfs(this, logoot);
 	}
 
 	/**

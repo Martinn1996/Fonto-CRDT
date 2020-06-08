@@ -4,6 +4,7 @@ const Identifier = require('./identifier');
 
 const BlockNode = require('./class/BlockNode');
 const CharacterNode = require('./class/CharacterNode');
+const MergeNode = require('./class/MergeNode');
 const Node = require('./class/Node');
 const SplitNode = require('./class/SplitNode');
 
@@ -95,6 +96,10 @@ function getStateLogoot(node) {
 	if (node.type === 'Block') {
 		res['logoot'] = node.logoot ? getStateLogoot(node.logoot._root) : null;
 		res['blockId'] = node.blockId;
+		res['merged'] = node.merged;
+	}
+	if (node.type === 'Merge') {
+		res['referenceId'] = node.referenceId;
 	}
 
 	if (node.type === 'Split') {
@@ -140,6 +145,9 @@ class Logoot extends EventEmitter {
 	receive(operation) {
 		if (!operation.parsed) operation = parseOperation(operation);
 		switch (operation.type) {
+			case 'mergeBlocks':
+				this._receiveMerge(operation);
+				break;
 			case 'insert':
 				this._receiveInsert(operation);
 				break;
@@ -171,6 +179,31 @@ class Logoot extends EventEmitter {
 		}
 	}
 
+	_receiveMerge(operation) {
+		const blockId1 = operation.blockId1;
+		const blockId2 = operation.blockId2;
+		const block1 = this._searchBlock(blockId1);
+		const block2 = this._searchAllBlock(blockId2);
+		if (!block1) {
+			throw Error('BlockId does not exist');
+		}
+
+		const logoot = block1.logoot;
+		const deleteQueueIndex = logoot._deleteQueue.findIndex(op => {
+			return arePositionsEqual(op.position, operation.position);
+		});
+		if (deleteQueueIndex > -1) {
+			logoot._deleteQueue.splice(deleteQueueIndex, 1);
+			return;
+		}
+		const existingNode = logoot._root.getChildByPath(operation.position, false, MergeNode);
+		if (existingNode) return;
+		const node = logoot._root.getChildByPath(operation.position, true, MergeNode);
+		node.referenceId = blockId2;
+
+		node.setEmpty(false);
+		block2.setMerged();
+	}
 	/**
 	 * Returns the value of the block
 	 * @return {Array.<string>} value of the block
@@ -180,8 +213,8 @@ class Logoot extends EventEmitter {
 
 		this._root.walk(node => {
 			if (!node.empty) {
-				if (node.logoot) {
-					arr.push({ blockId: node.blockId, value: node.logoot.value() });
+				if (node.logoot && !node.merged) {
+					arr.push({ blockId: node.blockId, value: node.logoot.value(this) });
 				}
 			}
 		});
@@ -304,7 +337,7 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveDeleteBlock(operation) {
-		const block = this._searchAllBlock(operation.blockId);
+		const block = this._deleteBlock(operation.blockId);
 
 		if (!block) {
 			console.error(`Could not find block of blockId: ${operation.blockId}`);
@@ -371,12 +404,13 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveMoveBlock(operation) {
-		const oldBlock = this._searchBlock(operation.oldBlockId);
-		const newBlock = this._searchBlock(operation.newBlockId);
+		const oldBlock = this._searchAllBlock(operation.oldBlockId);
+		const newBlock = this._searchAllBlock(operation.newBlockId);
 		if (!oldBlock || !newBlock) {
 			throw Error('One of the blocks is not defined for moving');
 		}
 		newBlock.logoot = oldBlock.logoot;
+		newBlock.merged = oldBlock.merged;
 	}
 
 	/**
@@ -435,8 +469,8 @@ class Logoot extends EventEmitter {
 		newBlock.logoot.setState(block.logoot.getState());
 
 		// Remove remaining
-		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length());
-		newBlock.logoot._setEmpty(0, node.getOrder() + 1);
+		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length(), this);
+		newBlock.logoot._setEmpty(0, node.getOrder() + 1, this);
 
 		this.emit('splitBlock', {
 			blockId: newBlock.blockId,
@@ -449,11 +483,31 @@ class Logoot extends EventEmitter {
 	 * Inserts the value into the tree on index
 	 * @param {string} value to insert
 	 * @param {Integer} index for insertion
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	insert(value, index) {
+	insert(value, index, logoot) {
 		value.split('').forEach((character, i) => {
-			this._insert(character, index + i);
+			this._insert(character, index + i, logoot);
 		});
+	}
+
+	/**
+	 * 
+	 * @param {Integer} index where mergeNode will be inserted
+	 * @param {String} referenceId of the node to which the mergeNode references
+	 */
+	_insertMergeNode(index, referenceId) {
+		index = Math.min(index, this.length());
+		const prev = this._root.getChildByOrderLocal(index);
+		const next = this._root.getChildByOrderLocal(index + 1);
+		const prevPos = prev.getPath();
+		const nextPos = next.getPath();
+
+		const position = this._generatePositionBetween(prevPos, nextPos);
+		const node = this._root.getChildByPath(position, true, MergeNode);
+		node.referenceId = referenceId;
+		node.setEmpty(false);
+		return node;
 	}
 
 	/**
@@ -461,23 +515,39 @@ class Logoot extends EventEmitter {
 	 * @param {string} value to insert
 	 * @param {Integer} index for insertion
 	 * @return {Array.<number>} path to the newly created node
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	_insert(value, index) {
-		index = Math.min(index, this.length());
-		const prev = this._root.getChildByOrder(index);
-		const next = this._root.getChildByOrder(index + 1);
-		const prevPos = prev.getPath();
-		const nextPos = next.getPath();
-		const position = this._generatePositionBetween(prevPos, nextPos);
-		const node = this._root.getChildByPath(position, true, CharacterNode);
-		node.value = value;
-		node.setEmpty(false);
-		this.emit('operation', {
-			type: 'insert',
-			position: position,
-			value: value
-		});
-		return node.getPath();
+	_insert(value, index, logoot) {
+		let prev = this._root.getChildByOrder(index, logoot);
+		if (prev === undefined) {
+			prev = this._root.getChildByOrder(this._getTotalSize(logoot), logoot);
+		}
+
+		if (prev.block) {
+			logoot.insertContentInBlock(value, prev.index, prev.block.blockId);
+		} else {
+			index = Math.min(index, this._getTotalSize(logoot));
+			prev = this._root.getChildByOrder(index, logoot);
+			let next = this._root.getChildByOrder(index + 1, logoot);
+
+			if (next.ref) {
+				next = next.ref;
+			}
+
+			const prevPos = prev.getPath();
+			const nextPos = next.getPath();
+			let position = null;
+			position = this._generatePositionBetween(prevPos, nextPos);
+			const node = this._root.getChildByPath(position, true, CharacterNode);
+			node.value = value;
+			node.setEmpty(false);
+			this.emit('operation', {
+				type: 'insert',
+				position: position,
+				value: value
+			});
+			return node.getPath();
+		}
 	}
 
 	/**
@@ -526,19 +596,21 @@ class Logoot extends EventEmitter {
 	 * Deletes from index 'length' nodes
 	 * @param {Integer} index
 	 * @param {Integer} length
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	delete(index, length = 1) {
+	delete(index, length = 1, logoot) {
 		for (let i = 0; i < length; i++) {
-			this._delete(index);
+			this._delete(index, logoot);
 		}
 	}
 
 	/**
 	 * Deletes the node on index
 	 * @param {Integer} index
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	_delete(index) {
-		const node = this._root.getChildByOrder(index + 1);
+	_delete(index, logoot) {
+		const node = this._root.getChildByOrder(index + 1, logoot);
 		if (!node || node.id.site === null) return;
 		node.setEmpty(true);
 		node.trimEmpty();
@@ -550,14 +622,20 @@ class Logoot extends EventEmitter {
 
 	/**
 	 * Construct a string from the sequence
+	 * @param {Node} root the root of this Logoot
 	 * @return {string} value of the tree
 	 */
-	value() {
+	value(root = this) {
 		const arr = [];
 		this._root.walk(node => {
-			if (!node.empty) {
+			if (!node.empty && !node.merged) {
 				if (node.logoot) {
-					arr.push(`${node.logoot.value()}\n\n`);
+					arr.push(`${node.logoot.value(root)}\n\n`);
+				} else if (node.type === 'Merge') {
+					const block = root._searchBlock(node.referenceId);
+					if (block) {
+						arr.push(block.logoot.value(root));
+					}
 				} else {
 					arr.push(node.value);
 				}
@@ -579,10 +657,11 @@ class Logoot extends EventEmitter {
 	 * @param {string} value to write
 	 * @param {Integer} start index to delete
 	 * @param {Integer} length of deletion
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	replaceRange(value, start, length) {
-		this.delete(start, length);
-		this.insert(value, start);
+	replaceRange(value, start, length, logoot) {
+		this.delete(start, length, logoot);
+		this.insert(value, start, logoot);
 	}
 
 	/**
@@ -630,8 +709,11 @@ class Logoot extends EventEmitter {
 				node.blockId = n.blockId;
 				node.logoot = new Logoot(node.blockId);
 				node.logoot.setState(JSON.stringify({ root: n.logoot }));
+				node.merged = n.merged;
 			}
-
+			if (n.type === 'Merge') {
+				node.referenceId = n.referenceId;
+			}
 			if (n.type === 'Split') {
 				node.reference = n.reference;
 			}
@@ -649,8 +731,8 @@ class Logoot extends EventEmitter {
 	 */
 	insertBlock(index, id) {
 		index = Math.min(index, this.length());
-		const prev = this._root.getChildByOrder(index);
-		const next = this._root.getChildByOrder(index + 1);
+		const prev = this._root.getChildByOrder(index, this);
+		const next = this._root.getChildByOrder(index + 1, this);
 		const prevPos = prev.getPath();
 		const nextPos = next.getPath();
 		const position = this._generatePositionBetween(prevPos, nextPos);
@@ -681,13 +763,16 @@ class Logoot extends EventEmitter {
 			throw Error(`Block not found! Insertion in block: ${blockId} cancelled.`);
 		}
 		content.split('').forEach((value, i) => {
-			const position = node.logoot._insert(value, index + i);
-			this.emit('operation', {
-				type: 'insertInBlock',
-				position: position,
-				value: value,
-				blockId: blockId
-			});
+			const position = node.logoot._insert(value, index + i, this);
+
+			if (position) {
+				this.emit('operation', {
+					type: 'insertInBlock',
+					position: position,
+					value: value,
+					blockId: blockId
+				});
+			}
 		});
 	}
 
@@ -751,6 +836,7 @@ class Logoot extends EventEmitter {
 
 		const newBlock = this.insertBlock(index);
 		newBlock.logoot = block.logoot;
+		newBlock.merged = block.merged;
 		this.emit('operation', {
 			type: 'moveBlock',
 			position: [],
@@ -807,8 +893,19 @@ class Logoot extends EventEmitter {
 		if (!block1 || !block2) {
 			throw Error('BlockId does not exist');
 		}
-		this.insertContentInBlock(block2.logoot.value(), block1.logoot.value().length, blockId1);
-		this.deleteBlock(blockId2);
+
+		// insert merge node
+		const node = block1.logoot._insertMergeNode(block1.logoot.length(), blockId2, this);
+
+		// set block2 to invisible
+		block2.setMerged();
+
+		this.emit('operation', {
+			type: 'mergeBlocks',
+			position: node.getPath(),
+			blockId1: blockId1,
+			blockId2: blockId2
+		});
 	}
 
 	/**
@@ -820,7 +917,13 @@ class Logoot extends EventEmitter {
 	deleteContentInBlock(index, length = 1, blockId) {
 		const block = this._searchAllBlock(blockId);
 		for (let i = 0; i < length; i++) {
-			const node = block.logoot._root.getChildByOrder(index + 1);
+			const node = block.logoot._root.getChildByOrder(index + 1, this);
+
+			if (node.block) {
+				this.deleteContentInBlock(node.index - 1, length - i, node.block.blockId);
+				return;
+			}
+
 			if (!node || node.id.site === null) continue;
 			node.setEmpty(true);
 			node.trimEmpty();
@@ -840,10 +943,12 @@ class Logoot extends EventEmitter {
 	 */
 	splitBlock(blockId, index) {
 		const block = this._searchAllBlock(blockId);
+
 		if (!block) {
 			throw Error('BlockId does not exist');
 		}
-		if (index > block.logoot.value().length || index < 0) {
+
+		if (index > block.logoot._getTotalSize(this) || index < 0) {
 			throw Error('Index out of range');
 		}
 
@@ -851,43 +956,67 @@ class Logoot extends EventEmitter {
 		const blockIndex = block.getOrder();
 
 		// Insert special node
-		index = Math.min(index, block.logoot.length());
-		const prev = block.logoot._root.getChildByOrder(index);
-		const next = block.logoot._root.getChildByOrder(index + 1);
+		// index = Math.min(index, block.logoot.length());
+		// const prev = block.logoot._root.getChildByOrder(index, this);
+		// const next = block.logoot._root.getChildByOrder(index + 1, this);
 
-		const prevPos = prev.getPath();
-		const nextPos = next.getPath();
-		const position = block.logoot._generatePositionBetween(prevPos, nextPos);
-		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
-		split.setEmpty(false);
+		// const prevPos = prev.getPath();
+		// const nextPos = next.getPath();
+		let prev = block.logoot._root.getChildByOrder(index, this);
 
-		const newBlock = this.insertBlock(blockIndex + 1);
-		newBlock.logoot.setState(block.logoot.getState());
-		split.reference = newBlock.blockId;
+		if (prev === undefined) {
+			prev = block.logoot._root.getChildByOrder(this.length(), this);
+		}
 
-		this.emit('operation', {
-			type: 'splitBlock',
-			blockId: blockId,
-			position: position,
-			reference: split.reference,
-			blockPosition: block.getPath(),
-			blockReferences: block.references
-		});
+		if (prev.block) {
+			this.splitBlock(prev.block.blockId, prev.index);
+		} else {
+			index = Math.min(index, block.logoot.length());
+			prev = block.logoot._root.getChildByOrder(index, this);
 
-		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length());
-		newBlock.logoot._setEmpty(0, split.getOrder() + 1);
+			let next = block.logoot._root.getChildByOrder(index + 1, this);
 
-		return newBlock;
+			if (next.ref) {
+				next = next.ref;
+			}
+
+			const prevPos = prev.getPath();
+			const nextPos = next.getPath();
+
+			let position = null;
+			position = block.logoot._generatePositionBetween(prevPos, nextPos);
+			const split = block.logoot._root.getChildByPath(position, true, SplitNode);
+			split.setEmpty(false);
+
+			const newBlock = this.insertBlock(blockIndex + 1);
+			newBlock.logoot.setState(block.logoot.getState());
+			split.reference = newBlock.blockId;
+
+			this.emit('operation', {
+				type: 'splitBlock',
+				blockId: blockId,
+				position: position,
+				reference: split.reference,
+				blockPosition: block.getPath(),
+				blockReferences: block.references
+			});
+
+			block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
+			newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
+
+			return newBlock;
+		}
 	}
 
 	/**
 	 * Removes the nodes from left boundary to right boundary
 	 * @param {Integer} left boundary
 	 * @param {Integer} right boundary
+	 * @param {Logoot} logoot the logoot instance for blocks
 	 */
-	_setEmpty(left, right) {
+	_setEmpty(left, right, logoot) {
 		for (let i = right; i > left; i--) {
-			const node = this._root.getChildByOrder(i);
+			const node = this._root.getChildByOrder(i, logoot);
 
 			node.setEmpty(true);
 			node.trimEmpty();
@@ -961,6 +1090,30 @@ class Logoot extends EventEmitter {
 		const prevNode = block.logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
 		return prevNode instanceof SplitNode;
+	}
+
+	/**
+	 * gets the size of a Logoot instance including merged blocks
+	 * @param {Logoot} logoot of the entire CRDT
+	 * @return {Integer} size of the block
+	 */
+	_getTotalSize(logoot) {
+		const queue = [];
+		queue.push(this._root);
+
+		let length = this.length();
+		while (queue.length > 0) {
+			const node = queue.shift();
+			if (node instanceof MergeNode && !node.empty) {
+				const block = logoot._searchBlock(node.referenceId);
+
+				length += block.logoot._getTotalSize(logoot) - 1;
+			}
+			for (const child of node.children) {
+				queue.push(child);
+			}
+		}
+		return length;
 	}
 }
 
