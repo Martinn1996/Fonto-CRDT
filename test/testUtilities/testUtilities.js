@@ -94,11 +94,6 @@ exports.reset = function() {
 };
 
 exports.shuffle = function(array) {
-	array.forEach(e => {
-		console.log(e.value);
-	});
-
-	console.log('--------------------------SHUFFLE----------------------------------');
 	let m = array.length;
 
 	// While there remain elements to shuffle…
@@ -111,10 +106,6 @@ exports.shuffle = function(array) {
 		array[m] = array[i];
 		array[i] = t;
 	}
-	array.forEach(e => {
-		console.log(e.value);
-	});
-	console.log('--------------------------END----------------------------------');
 };
 
 module.exports = this;
