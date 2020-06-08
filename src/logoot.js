@@ -408,14 +408,6 @@ class Logoot extends EventEmitter {
 	_receiveMoveBlock(operation) {
 		const oldBlock = this._searchAllBlock(operation.blockId);
 
-		// Code to check for Last-writer-wins
-		// const currentId = oldBlock.getPath().slice(-1)[0];
-		// const operationId = operation.position.slice(-1)[0];
-
-		// if (operationId.isFirst(currentId) <= 0) {
-		// 	return;
-		// }
-
 		const logoot = oldBlock.logoot;
 
 		oldBlock.setEmpty(true);
