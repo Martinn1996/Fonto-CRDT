@@ -406,6 +406,8 @@ class Logoot extends EventEmitter {
 	 */
 	_receiveMoveBlock(operation) {
 		const oldBlock = this._searchAllBlock(operation.blockId);
+
+		// Code to check for Last-writer-wins
 		// const currentId = oldBlock.getPath().slice(-1)[0];
 		// const operationId = operation.position.slice(-1)[0];
 
@@ -414,7 +416,9 @@ class Logoot extends EventEmitter {
 		// }
 
 		const logoot = oldBlock.logoot;
+
 		oldBlock.setEmpty(true);
+		oldBlock.trimEmpty();
 		oldBlock.blockId = null;
 
 		const node = this._receiveInsertBlock(operation);
@@ -851,10 +855,12 @@ class Logoot extends EventEmitter {
 		const newBlock = this._insertBlock(index);
 		newBlock.logoot = block.logoot;
 		newBlock.merged = block.merged;
-
 		newBlock.blockId = blockId;
+
 		block.setEmpty(true);
+		block.trimEmpty();
 		block.blockId = null;
+
 		this.emit('operation', {
 			type: 'moveBlock',
 			position: newBlock.getPath(),
