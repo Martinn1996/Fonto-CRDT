@@ -275,6 +275,7 @@ class Logoot extends EventEmitter {
 			blockId: blockId,
 			index: index
 		});
+		return node;
 	}
 
 	/**
@@ -404,13 +405,14 @@ class Logoot extends EventEmitter {
 	 * @param {JSON} operation to perform
 	 */
 	_receiveMoveBlock(operation) {
-		const oldBlock = this._searchAllBlock(operation.oldBlockId);
-		const newBlock = this._searchAllBlock(operation.newBlockId);
-		if (!oldBlock || !newBlock) {
-			throw Error('One of the blocks is not defined for moving');
-		}
-		newBlock.logoot = oldBlock.logoot;
-		newBlock.merged = oldBlock.merged;
+		const oldBlock = this._searchAllBlock(operation.blockId);
+		const logoot = oldBlock.logoot;
+		oldBlock.setEmpty(true);
+		oldBlock.blockId = null;
+
+		const node = this._receiveInsertBlock(operation);
+		node.logoot = logoot;
+		node.merged = oldBlock.merged;
 	}
 
 	/**
@@ -492,9 +494,9 @@ class Logoot extends EventEmitter {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {Integer} index where mergeNode will be inserted
-	 * @param {String} referenceId of the node to which the mergeNode references
+	 * @param {string} referenceId of the node to which the mergeNode references
 	 */
 	_insertMergeNode(index, referenceId) {
 		index = Math.min(index, this.length());
@@ -723,13 +725,7 @@ class Logoot extends EventEmitter {
 		this._deleteQueue = parsed.deleteQueue ? parsed.deleteQueue : [];
 	}
 
-	/**
-	 * New insertion for characters
-	 * @param {Integer} index index of the block
-	 * @param {string} id optional id of the block
-	 * @return {string} blockId
-	 */
-	insertBlock(index, id) {
+	_insertBlock(index, id) {
 		index = Math.min(index, this.length());
 		const prev = this._root.getChildByOrder(index, this);
 		const next = this._root.getChildByOrder(index + 1, this);
@@ -740,10 +736,21 @@ class Logoot extends EventEmitter {
 		node.setEmpty(false);
 		const blockId = id ? id : generateString(5);
 		node.blockId = blockId;
+
+		return node;
+	}
+	/**
+	 * New insertion for characters
+	 * @param {Integer} index index of the block
+	 * @param {string} id optional id of the block
+	 * @return {string} blockId
+	 */
+	insertBlock(index, id) {
+		const node = this._insertBlock(index, id);
 		this.emit('operation', {
 			type: 'insertBlock',
-			position: position,
-			blockId: blockId
+			position: node.getPath(),
+			blockId: node.blockId
 		});
 		return node;
 	}
@@ -834,24 +841,18 @@ class Logoot extends EventEmitter {
 			throw Error(`Could not find block of id: ${blockId}`);
 		}
 
-		const newBlock = this.insertBlock(index);
+		const newBlock = this._insertBlock(index);
 		newBlock.logoot = block.logoot;
 		newBlock.merged = block.merged;
+
+		newBlock.blockId = blockId;
+		block.setEmpty(true);
+		block.blockId = null;
 		this.emit('operation', {
 			type: 'moveBlock',
-			position: [],
-			oldBlockId: blockId,
-			newBlockId: newBlock.blockId
+			position: newBlock.getPath(),
+			blockId: blockId
 		});
-
-		this._deleteBlock(blockId);
-		this.emit('operation', {
-			type: 'changeBlockId',
-			position: [],
-			oldId: newBlock.blockId,
-			newBlockId: blockId
-		});
-		newBlock.blockId = blockId;
 	}
 
 	/**
