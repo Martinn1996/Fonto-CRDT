@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const Logoot = require('../src/logoot');
+const Logoot = require('../../src/logoot');
 
 describe('split Block', () => {
 	let crdt1;
@@ -33,9 +33,17 @@ describe('split Block', () => {
 
 	it('should add 1 block with text and split it in 2 blocks', () => {
 		const blockId = insertContentInNewBlock(crdt1, 'block1block2', 0);
-		crdt2.splitBlock(blockId, 6);
+		crdt1.splitBlock(blockId, 6);
 
 		assert.equal(crdt1.value(), 'block1\n\nblock2\n\n');
+		assert.equal(crdt1.length(), 2);
+	});
+
+	it('should add 1 block with text and split it in 2 blocks with multiple users', () => {
+		const blockId = insertContentInNewBlock(crdt1, 'hoi', 0);
+		crdt2.splitBlock(blockId, 2);
+
+		assert.equal(crdt1.value(), 'ho\n\ni\n\n');
 		assert.equal(crdt1.length(), 2);
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.equal(crdt1.getState(), crdt2.getState());
@@ -99,6 +107,25 @@ describe('split Block', () => {
 		const errorFunction = () => {
 			const blockId = insertContentInNewBlock(crdt1, '1234', 0);
 			crdt2.splitBlock(blockId, 7);
+		};
+
+		assert.throws(errorFunction, Error);
+	});
+
+	it('should not be able split a not existing block', () => {
+		const errorFunction = () => {
+			insertContentInNewBlock(crdt1, '1234', 0);
+			crdt2.splitBlock('11111', 7);
+		};
+
+		assert.throws(errorFunction, Error);
+	});
+
+	it('should not be able to receive split a not existing block', () => {
+		const errorFunction = () => {
+			const operation = {};
+			operation.blockId = '11111';
+			crdt1._receiveSplitBlock(operation);
 		};
 
 		assert.throws(errorFunction, Error);
