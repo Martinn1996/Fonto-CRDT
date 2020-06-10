@@ -28,16 +28,16 @@ describe('Move Block', () => {
 		assert.equal(crdt1.value(), '2\n\n1\n\n3\n\n');
 	});
 
-	it('should move a block multiple times', () => {
-		const block = crdt1.insertBlock(0);
-		crdt1.insertContentInBlock('1', 0, block.blockId);
-		const block2 = crdt1.insertBlock(1);
-		crdt1.insertContentInBlock('2', 0, block2.blockId);
-		const block3 = crdt1.insertBlock(2);
-		crdt1.insertContentInBlock('3', 0, block3.blockId);
+	it('should move a block multiple times 1', () => {
+		const blockId1 = crdt1.insertBlock(0).blockId;
+		crdt1.insertContentInBlock('1', 0, blockId1);
+		const blockId2 = crdt1.insertBlock(1).blockId;
+		crdt1.insertContentInBlock('2', 0, blockId2);
+		const blockId3 = crdt1.insertBlock(2).blockId;
+		crdt1.insertContentInBlock('3', 0, blockId3);
 
-		crdt1.moveBlock(block.blockId, 2);
-		crdt1.moveBlock(block.blockId, 4);
+		crdt1.moveBlock(blockId1, 2);
+		crdt1.moveBlock(blockId1, 4);
 		assert.equal(crdt1.value(), '2\n\n3\n\n1\n\n');
 	});
 
@@ -66,15 +66,15 @@ describe('Move Block', () => {
 	});
 
 	it('should move a block multiple times on different crdts', () => {
-		const block = crdt1.insertBlock(0);
-		crdt1.insertContentInBlock('1', 0, block.blockId);
-		const block2 = crdt1.insertBlock(1);
-		crdt1.insertContentInBlock('2', 0, block2.blockId);
-		const block3 = crdt1.insertBlock(2);
-		crdt1.insertContentInBlock('3', 0, block3.blockId);
+		const blockId1 = crdt1.insertBlock(0).blockId;
+		crdt1.insertContentInBlock('1', 0, blockId1);
+		const blockId2 = crdt1.insertBlock(1).blockId;
+		crdt1.insertContentInBlock('2', 0, blockId2);
+		const blockId3 = crdt1.insertBlock(2).blockId;
+		crdt1.insertContentInBlock('3', 0, blockId3);
 
-		crdt1.moveBlock(block.blockId, 2);
-		crdt2.moveBlock(block.blockId, 4);
+		crdt1.moveBlock(blockId1, 2);
+		crdt2.moveBlock(blockId1, 4);
 		assert.equal(crdt1.value(), '2\n\n3\n\n1\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
