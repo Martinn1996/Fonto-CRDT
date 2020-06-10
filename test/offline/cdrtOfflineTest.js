@@ -334,7 +334,6 @@ describe('Offline Support', () => {
 
 			ops1.forEach(op => crdt1.receive(op));
 			ops2.forEach(op => crdt2.receive(op));
-
 			assert.equal(crdt1.value(), 'abc\n\n');
 			assert.equal(crdt1.value(), crdt2.value());
 			assert.deepEqual(crdt1.getState(), crdt2.getState());
