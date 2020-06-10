@@ -10,6 +10,10 @@ exports.getCRDTs = () => {
 	return crdts;
 };
 
+/**
+ * Function to simulate delays
+ * @param {Integer} ms time to wait
+ */
 exports.wait = ms => {
 	const start = new Date().getTime();
 	let end = start;
