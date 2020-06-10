@@ -428,7 +428,7 @@ class Logoot extends EventEmitter {
 			return;
 		}
 		const logoot = oldBlock.logoot;
-		const status = oldBlock.empty;
+		const isEmptyBlock = oldBlock.empty;
 		oldBlock.setEmpty(true);
 		oldBlock.trimEmpty();
 		oldBlock.blockId = null;
@@ -437,7 +437,7 @@ class Logoot extends EventEmitter {
 		node.timestamp = operation.timestamp;
 		node.logoot = logoot;
 		node.merged = oldBlock.merged;
-		node.setEmpty(status);
+		node.setEmpty(isEmptyBlock);
 	}
 
 	/**
