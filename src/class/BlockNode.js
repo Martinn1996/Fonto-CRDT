@@ -17,6 +17,7 @@ class BlockNode extends Node {
 		super.type = 'Block';
 		this.blockId = blockId;
 		this.merged = false;
+		this.mergedTimestamp = {};
 		this.empty = false;
 		this.logoot = new LogootConstructor(blockId ? blockId : generateCode(5));
 	}

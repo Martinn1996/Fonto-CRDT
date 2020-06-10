@@ -1,28 +1,39 @@
 const Logoot = require('../../src/logoot');
-const generateString = require('../../src/util/generateCode')
+const generateString = require('../../src/util/generateCode');
 let crdts = [];
 
 /**
  * returns all CRDT instances with their status
  * @return {Array <CRDT>} an array containing all CRDT instances with their status
  */
-exports.getCRDTs = function() {
+exports.getCRDTs = () => {
 	return crdts;
 };
 
+/**
+ * Function to simulate delays
+ * @param {Integer} ms time to wait
+ */
+exports.wait = ms => {
+	const start = new Date().getTime();
+	let end = start;
+	while (end < start + ms) {
+		end = new Date().getTime();
+	}
+};
 /**
  * returns a CRDT on given index (index starts at 1)
  * @param {Integer} index index of the CRDT to return (starts at 1)
  * @return {CRDT} a CRDT on given index (index starts at 1)
  */
-exports.crdt = function(index) {
+exports.crdt = index => {
 	return crdts[index - 1].logoot;
 };
 
 /**
  * creates a new CRDT with index = number of current CRDTs + 1
  */
-exports.createCRDT = function() {
+exports.createCRDT = () => {
 	const tempCrdt = {
 		logoot: new Logoot(generateString(5)),
 		offline: 0,
@@ -48,7 +59,7 @@ exports.createCRDT = function() {
  * Sets a CRDT on given index (index starts at 1) offline
  * @param {Integer} index index of the CRDT to return (starts at 1)
  */
-exports.setOffline = function(index) {
+exports.setOffline = index => {
 	crdts[index - 1].offline = 1;
 };
 
@@ -56,7 +67,7 @@ exports.setOffline = function(index) {
  * Sets a CRDT on given index (index starts at 1) online
  * @param {Integer} index index of the CRDT to return (starts at 1)
  */
-exports.setOnline = function(index) {
+exports.setOnline = index => {
 	crdts[index - 1].offline = 0;
 	crdts[index - 1].operations.forEach(op =>
 		crdts.forEach(function(e) {
@@ -70,14 +81,14 @@ exports.setOnline = function(index) {
 /**
  * Sets all CRDTs offline
  */
-exports.setAllOffline = function() {
+exports.setAllOffline = () => {
 	crdts.forEach(element => (element.offline = 1));
 };
 
 /**
  * Sets all CRDTs online
  */
-exports.setAllOnline = function() {
+exports.setAllOnline = () => {
 	crdts.forEach(element => (element.offline = 0));
 	crdts.forEach(element =>
 		element.operations.forEach(op =>
@@ -94,7 +105,7 @@ exports.setAllOnline = function() {
  * @param {Integer} index index of the CRDT to return (starts at 1)
  * @return {CRDT} returns the status of the CRDT on given index (index starts at 1)
  */
-exports.getStatus = function(index) {
+exports.getStatus = index => {
 	return crdts[index - 1];
 };
 
@@ -103,7 +114,7 @@ exports.getStatus = function(index) {
  * @param {Integer} index index of the CRDT to return (starts at 1)
  * @return {Array <Operation>} Array with all stored operations of the CRDT on given index (index starts at 1)
  */
-exports.getOperations = function(index) {
+exports.getOperations = index => {
 	return crdts[index - 1].operations;
 };
 
@@ -114,7 +125,7 @@ exports.getOperations = function(index) {
  * @param {Integer} index index to create block
  * @return {string} The blockId of the newly inserted block
  */
-exports.insertContentInNewBlock = function(crdt, content, index) {
+exports.insertContentInNewBlock = (crdt, content, index) => {
 	const block = crdt.insertBlock(index);
 	crdt.insertContentInBlock(content, 0, block.blockId);
 	return block.blockId;
@@ -123,7 +134,7 @@ exports.insertContentInNewBlock = function(crdt, content, index) {
 /**
  * Resets all CRDTs
  */
-exports.reset = function() {
+exports.reset = () => {
 	crdts = [];
 };
 
@@ -131,7 +142,7 @@ exports.reset = function() {
  * Shuffles all instances in an array (can be used to shuffle operation order)
  * @param {Array <Object>} array the array to shuffle
  */
-exports.shuffle = function(array) {
+exports.shuffle = array => {
 	let m = array.length;
 
 	// While there remain elements to shuffle…
