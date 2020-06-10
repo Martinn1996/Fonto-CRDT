@@ -1,6 +1,12 @@
 const assert = require('chai').assert;
 const Logoot = require('../../src/logoot');
-
+function wait(ms) {
+	const start = new Date().getTime();
+	let end = start;
+	while (end < start + ms) {
+		end = new Date().getTime();
+	}
+}
 describe('Offline Support move', () => {
 	let crdt1, crdt2, ops1, ops2;
 
@@ -32,16 +38,14 @@ describe('Offline Support move', () => {
 		ops2 = [];
 
 		crdt1.moveBlock(blockId1, 2);
-		setTimeout(() => {
-			crdt2.moveBlock(blockId1, 3);
-			ops1.forEach(op => crdt1.receive(op));
-			ops2.forEach(op => crdt2.receive(op));
-			ops1 = [];
-			ops2 = [];
-			console.log(crdt1.value());
-			assert.equal(crdt1.value(), crdt2.value());
-			assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
-		}, 1);
+		wait(10);
+		crdt2.moveBlock(blockId1, 3);
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 
 	it('should converge after replica 2 replicas move to same index', () => {
@@ -59,13 +63,11 @@ describe('Offline Support move', () => {
 		ops2 = [];
 
 		crdt1.moveBlock(blockId1, 3);
-
 		crdt2.moveBlock(blockId1, 3);
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 		ops1 = [];
 		ops2 = [];
-
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
