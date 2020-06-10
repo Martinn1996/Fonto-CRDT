@@ -97,6 +97,7 @@ function getStateLogoot(node) {
 		res['logoot'] = node.logoot ? getStateLogoot(node.logoot._root) : null;
 		res['blockId'] = node.blockId;
 		res['merged'] = node.merged;
+		res['timestamp'] = node.timestamp;
 	}
 	if (node.type === 'Merge') {
 		res['referenceId'] = node.referenceId;
@@ -269,6 +270,7 @@ class Logoot extends EventEmitter {
 		if (existingNode) return;
 		const node = this._root.getChildByPath(operation.position, true, BlockNode, Logoot);
 		const blockId = operation.blockId;
+		node.timestamp = operation.timestamp;
 		node.blockId = blockId;
 		node.setEmpty(false);
 		const index = node.getOrder();
@@ -407,7 +409,9 @@ class Logoot extends EventEmitter {
 	 */
 	_receiveMoveBlock(operation) {
 		const oldBlock = this._searchAllBlock(operation.blockId);
-
+		if (operation.timestamp < oldBlock.timestamp) {
+			return;
+		}
 		const logoot = oldBlock.logoot;
 
 		oldBlock.setEmpty(true);
@@ -415,6 +419,7 @@ class Logoot extends EventEmitter {
 		oldBlock.blockId = null;
 
 		const node = this._receiveInsertBlock(operation);
+		node.timestamp = operation.timestamp;
 		node.logoot = logoot;
 		node.merged = oldBlock.merged;
 	}
@@ -717,6 +722,7 @@ class Logoot extends EventEmitter {
 				node.logoot = new Logoot(node.blockId);
 				node.logoot.setState(JSON.stringify({ root: n.logoot }));
 				node.merged = n.merged;
+				node.timestamp = n.timestamp;
 			}
 			if (n.type === 'Merge') {
 				node.referenceId = n.referenceId;
@@ -741,6 +747,7 @@ class Logoot extends EventEmitter {
 		node.setEmpty(false);
 		const blockId = id ? id : generateString(5);
 		node.blockId = blockId;
+		node.timestamp = new Date().getTime();
 
 		return node;
 	}
@@ -755,7 +762,8 @@ class Logoot extends EventEmitter {
 		this.emit('operation', {
 			type: 'insertBlock',
 			position: node.getPath(),
-			blockId: node.blockId
+			blockId: node.blockId,
+			timestamp: node.timestamp
 		});
 		return node;
 	}
@@ -858,6 +866,7 @@ class Logoot extends EventEmitter {
 		this.emit('operation', {
 			type: 'moveBlock',
 			position: newBlock.getPath(),
+			timestamp: newBlock.timestamp,
 			blockId: blockId
 		});
 	}
