@@ -99,6 +99,7 @@ function getStateLogoot(node) {
 		res['blockId'] = node.blockId;
 		res['merged'] = node.merged;
 		res['timestamp'] = node.timestamp;
+		res['mergedTimestamp'] = node.mergedTimestamp;
 	}
 	if (node.type === 'Merge') {
 		res['referenceId'] = node.referenceId;
@@ -201,8 +202,9 @@ class Logoot extends EventEmitter {
 		const existingNode = logoot._root.getChildByPath(operation.position, false, MergeNode);
 		if (existingNode) return;
 		const node = logoot._root.getChildByPath(operation.position, true, MergeNode);
+		console.log(operation.mergedTimestamp);
+		node.mergedTimestamp = operation.mergedTimestamp;
 		node.referenceId = blockId2;
-
 		node.setEmpty(false);
 		block2.setMerged();
 	}
@@ -914,13 +916,19 @@ class Logoot extends EventEmitter {
 
 		// insert merge node
 		const node = block1.logoot._insertMergeNode(block1.logoot.length(), blockId2, this);
-
 		// set block2 to invisible
 		block2.setMerged();
+		block1.mergedTimestamp = {
+			timestamp: new Date().getTime(),
+			site: this.site,
+			blockId: blockId1,
+			mergeNodePath: node.getPath()
+		};
 
 		this.emit('operation', {
 			type: 'mergeBlocks',
 			position: node.getPath(),
+			mergedTimestamp: block1.mergedTimestamp,
 			blockId1: blockId1,
 			blockId2: blockId2
 		});
