@@ -10,6 +10,7 @@ const SplitNode = require('./class/SplitNode');
 
 const generateString = require('./util/generateCode');
 const createNodeFromType = require('./util/createNodeFromType');
+const isLastWriter = require('./util/isLastWriter');
 
 const MIN = 0;
 const MAX = Number.MAX_SAFE_INTEGER;
@@ -409,7 +410,7 @@ class Logoot extends EventEmitter {
 	 */
 	_receiveMoveBlock(operation) {
 		const oldBlock = this._searchAllBlock(operation.blockId);
-		if (operation.timestamp < oldBlock.timestamp) {
+		if (isLastWriter(operation.timestamp, oldBlock.timestamp)) {
 			return;
 		}
 		const logoot = oldBlock.logoot;
@@ -747,7 +748,7 @@ class Logoot extends EventEmitter {
 		node.setEmpty(false);
 		const blockId = id ? id : generateString(5);
 		node.blockId = blockId;
-		node.timestamp = new Date().getTime();
+		node.timestamp = { timestamp: new Date().getTime(), site: this.site };
 
 		return node;
 	}
