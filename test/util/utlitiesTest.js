@@ -1,4 +1,4 @@
-const util = require('../test/testUtilities');
+const util = require('../../test/util/testUtilities');
 const assert = require('chai').assert;
 
 describe('utilitiesTest', () => {

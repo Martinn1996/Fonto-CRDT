@@ -1,5 +1,5 @@
-const Logoot = require('../src/logoot');
-
+const Logoot = require('../../src/logoot');
+const generateString = require('../../src/util/generateCode')
 let crdts = [];
 
 // TODO: Delays with setTimeOut?? Or is there a better way?
@@ -14,7 +14,7 @@ exports.crdt = function(index) {
 
 exports.createCRDT = function() {
 	const tempCrdt = {
-		logoot: new Logoot(),
+		logoot: new Logoot(generateString(5)),
 		offline: 0,
 		delay: 0,
 		operations: [],
@@ -65,10 +65,6 @@ exports.setAllOnline = function() {
 			})
 		)
 	);
-};
-
-exports.setDelay = function(index, delay) {
-	crdts[index - 1].delay = delay;
 };
 
 exports.getStatus = function(index) {
