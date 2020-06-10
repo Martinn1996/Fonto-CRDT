@@ -236,8 +236,11 @@ describe('Offline Support merge', () => {
 		ops2 = [];
 
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block3.blockId);
+		wait(10);
 		crdt2.mergeBlocks(block2.blockId, block3.blockId);
+		wait(10);
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
 
 		ops1.forEach(op => crdt1.receive(op));
@@ -308,6 +311,7 @@ describe('Offline Support merge', () => {
 		ops2 = [];
 
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt2.insertContentInBlock('dit is lastig', 2, block2.blockId);
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
 
@@ -316,7 +320,6 @@ describe('Offline Support merge', () => {
 		ops1 = [];
 		ops2 = [];
 
-		console.log(crdt1.value());
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});

@@ -195,7 +195,9 @@ class Logoot extends EventEmitter {
 				return;
 			}
 			const pathToDelete = block2.mergedTimestamp.mergeNodePath;
-			const mergeNode = block1.logoot._root.getChildByPath(pathToDelete, false, MergeNode);
+			const mergeNode = this._searchAllBlock(
+				block2.mergedTimestamp.blockId
+			).logoot._root.getChildByPath(pathToDelete, false, MergeNode);
 			if (mergeNode) {
 				mergeNode.setEmpty(true);
 				mergeNode.trimEmpty();
@@ -426,7 +428,7 @@ class Logoot extends EventEmitter {
 			return;
 		}
 		const logoot = oldBlock.logoot;
-
+		const status = oldBlock.empty;
 		oldBlock.setEmpty(true);
 		oldBlock.trimEmpty();
 		oldBlock.blockId = null;
@@ -435,6 +437,7 @@ class Logoot extends EventEmitter {
 		node.timestamp = operation.timestamp;
 		node.logoot = logoot;
 		node.merged = oldBlock.merged;
+		node.setEmpty(status);
 	}
 
 	/**

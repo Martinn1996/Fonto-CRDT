@@ -1,5 +1,5 @@
 const Logoot = require('../../src/logoot');
-const generateString = require('../../src/util/generateCode')
+const generateString = require('../../src/util/generateCode');
 let crdts = [];
 
 /**
@@ -16,7 +16,7 @@ exports.wait = ms => {
 	while (end < start + ms) {
 		end = new Date().getTime();
 	}
-}
+};
 /**
  * returns a CRDT on given index (index starts at 1)
  * @param {Integer} index index of the CRDT to return (starts at 1)
@@ -138,7 +138,7 @@ exports.reset = () => {
  * Shuffles all instances in an array (can be used to shuffle operation order)
  * @param {Array <Object>} array the array to shuffle
  */
-exports.shuffle = (array) => {
+exports.shuffle = array => {
 	let m = array.length;
 
 	// While there remain elements to shuffle…
