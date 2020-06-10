@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
 const Logoot = require('../../src/logoot');
+const { wait } = require('../util/testUtilities');
 
 describe('Offline Support', () => {
 	/**
@@ -279,6 +280,7 @@ describe('Offline Support', () => {
 			ops2 = [];
 
 			crdt1.mergeBlocks(blockId1, blockId2);
+			wait(10);
 			crdt2.mergeBlocks(blockId1, blockId2);
 
 			ops1.forEach(op => crdt1.receive(op));
