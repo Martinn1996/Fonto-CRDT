@@ -190,6 +190,15 @@ class Logoot extends EventEmitter {
 		if (!block1) {
 			throw Error('BlockId does not exist');
 		}
+		if (block2.merged) {
+			if (operation.mergedTimestamp.timestamp < block2.mergedTimestamp.timestamp) {
+				return;
+			}
+			const pathToDelete = block2.mergedTimestamp.mergeNodePath;
+			const mergeNode = block1.logoot._root.getChildByPath(pathToDelete, false, MergeNode);
+			mergeNode.setEmpty(true);
+			mergeNode.trimEmpty();
+		}
 
 		const logoot = block1.logoot;
 		const deleteQueueIndex = logoot._deleteQueue.findIndex(op => {
@@ -202,8 +211,7 @@ class Logoot extends EventEmitter {
 		const existingNode = logoot._root.getChildByPath(operation.position, false, MergeNode);
 		if (existingNode) return;
 		const node = logoot._root.getChildByPath(operation.position, true, MergeNode);
-		console.log(operation.mergedTimestamp);
-		node.mergedTimestamp = operation.mergedTimestamp;
+		block2.mergedTimestamp = operation.mergedTimestamp;
 		node.referenceId = blockId2;
 		node.setEmpty(false);
 		block2.setMerged();
@@ -918,7 +926,7 @@ class Logoot extends EventEmitter {
 		const node = block1.logoot._insertMergeNode(block1.logoot.length(), blockId2, this);
 		// set block2 to invisible
 		block2.setMerged();
-		block1.mergedTimestamp = {
+		block2.mergedTimestamp = {
 			timestamp: new Date().getTime(),
 			site: this.site,
 			blockId: blockId1,
@@ -928,7 +936,7 @@ class Logoot extends EventEmitter {
 		this.emit('operation', {
 			type: 'mergeBlocks',
 			position: node.getPath(),
-			mergedTimestamp: block1.mergedTimestamp,
+			mergedTimestamp: block2.mergedTimestamp,
 			blockId1: blockId1,
 			blockId2: blockId2
 		});

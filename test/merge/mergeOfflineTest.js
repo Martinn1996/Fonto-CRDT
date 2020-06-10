@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
 const Logoot = require('../../src/logoot');
+const { wait } = require('../util/testUtilities');
 
 describe('Offline Support merge', () => {
 	let crdt1, crdt2, ops1, ops2;
@@ -260,6 +261,7 @@ describe('Offline Support merge', () => {
 		ops2 = [];
 
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt2.mergeBlocks(block1.blockId, block2.blockId);
 
 		ops1.forEach(op => crdt1.receive(op));
@@ -267,7 +269,7 @@ describe('Offline Support merge', () => {
 		ops1 = [];
 		ops2 = [];
 
-		assert.equal(crdt1.value(), '12');
+		assert.equal(crdt1.value(), '12\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 });

@@ -10,6 +10,13 @@ exports.getCRDTs = () => {
 	return crdts;
 };
 
+exports.wait = ms => {
+	const start = new Date().getTime();
+	let end = start;
+	while (end < start + ms) {
+		end = new Date().getTime();
+	}
+}
 /**
  * returns a CRDT on given index (index starts at 1)
  * @param {Integer} index index of the CRDT to return (starts at 1)
