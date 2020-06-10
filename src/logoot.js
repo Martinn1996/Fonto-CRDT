@@ -195,7 +195,9 @@ class Logoot extends EventEmitter {
 				return;
 			}
 			const pathToDelete = block2.mergedTimestamp.mergeNodePath;
-			const mergeNode = block1.logoot._root.getChildByPath(pathToDelete, false, MergeNode);
+			const mergeNode = this._searchAllBlock(
+				block2.mergedTimestamp.blockId
+			).logoot._root.getChildByPath(pathToDelete, false, MergeNode);
 			if (mergeNode) {
 				mergeNode.setEmpty(true);
 				mergeNode.trimEmpty();

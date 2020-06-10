@@ -325,8 +325,11 @@ describe('Offline Support', () => {
 			ops2 = [];
 
 			crdt1.mergeBlocks(blockId1, blockId2);
+			wait(10);
 			crdt1.mergeBlocks(blockId1, blockId3);
+			wait(10);
 			crdt2.mergeBlocks(blockId2, blockId3);
+			wait(10);
 			crdt2.mergeBlocks(blockId1, blockId2);
 
 			ops1.forEach(op => crdt1.receive(op));
