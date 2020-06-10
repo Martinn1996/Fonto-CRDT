@@ -295,8 +295,7 @@ describe('Offline Support merge', () => {
 		ops1 = [];
 		ops2 = [];
 
-		console.log(crdt1.value());
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
-	})
+	});
 });

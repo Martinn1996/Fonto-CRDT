@@ -1,4 +1,4 @@
-const assert = require('chai').assert;
+// const assert = require('chai').assert;
 const Logoot = require('../../src/logoot');
 
 describe('Merge and Split Block Integration', () => {
