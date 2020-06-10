@@ -191,7 +191,7 @@ class Logoot extends EventEmitter {
 			throw Error('BlockId does not exist');
 		}
 		if (block2.merged) {
-			if (operation.mergedTimestamp.timestamp < block2.mergedTimestamp.timestamp) {
+			if (isLastWriter(operation.mergedTimestamp, block2.mergedTimestamp)) {
 				return;
 			}
 			const pathToDelete = block2.mergedTimestamp.mergeNodePath;
