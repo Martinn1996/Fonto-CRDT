@@ -3,6 +3,7 @@ const express = require('express');
 // const http = require('http');
 
 const fs = require('fs');
+const ejs = require('ejs');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -17,6 +18,11 @@ l1.insertBlock(0);
 app.get('/', (_, res) => {
 	const editor = fs.readFileSync('./editor/static/editor.html');
 	res.end(editor);
+});
+
+app.get('/crdt-tree', (_, res) => {
+	const html = fs.readFileSync('./editor/static/tree.ejs', 'utf8');
+	res.end(ejs.render(html, { tree: JSON.stringify(JSON.parse(l1.getState()), null, 4) }));
 });
 
 const server = app.listen(port, () => console.log(`App listening on localhost:3000`));
