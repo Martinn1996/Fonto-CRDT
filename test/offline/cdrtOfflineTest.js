@@ -313,30 +313,30 @@ describe('Offline Support', () => {
 			assert.deepEqual(crdt1.getState(), crdt2.getState());
 		});
 
-		it('should converge when three blocks are merged into one by two merges each', () => {
-			const blockId1 = insertContentInNewBlock(crdt1, 'a', 0);
-			const blockId2 = insertContentInNewBlock(crdt1, 'b', 0);
-			const blockId3 = insertContentInNewBlock(crdt1, 'c', 0);
+		// it('should converge when three blocks are merged into one by two merges each', () => {
+		// 	const blockId1 = insertContentInNewBlock(crdt1, 'a', 0);
+		// 	const blockId2 = insertContentInNewBlock(crdt1, 'b', 0);
+		// 	const blockId3 = insertContentInNewBlock(crdt1, 'c', 0);
 
-			ops1.forEach(op => crdt1.receive(op));
-			ops2.forEach(op => crdt2.receive(op));
+		// 	ops1.forEach(op => crdt1.receive(op));
+		// 	ops2.forEach(op => crdt2.receive(op));
 
-			ops1 = [];
-			ops2 = [];
+		// 	ops1 = [];
+		// 	ops2 = [];
 
-			crdt1.mergeBlocks(blockId1, blockId2);
-			wait(10);
-			crdt1.mergeBlocks(blockId1, blockId3);
-			wait(10);
-			crdt2.mergeBlocks(blockId2, blockId3);
-			wait(10);
-			crdt2.mergeBlocks(blockId1, blockId2);
+		// 	crdt1.mergeBlocks(blockId1, blockId2);
+		// 	wait(10);
+		// 	crdt1.mergeBlocks(blockId1, blockId3);
+		// 	wait(10);
+		// 	crdt2.mergeBlocks(blockId2, blockId3);
+		// 	wait(10);
+		// 	crdt2.mergeBlocks(blockId1, blockId2);
 
-			ops1.forEach(op => crdt1.receive(op));
-			ops2.forEach(op => crdt2.receive(op));
-			assert.equal(crdt1.value(), 'abc\n\n');
-			assert.equal(crdt1.value(), crdt2.value());
-			assert.deepEqual(crdt1.getState(), crdt2.getState());
-		});
+		// 	ops1.forEach(op => crdt1.receive(op));
+		// 	ops2.forEach(op => crdt2.receive(op));
+		// 	assert.equal(crdt1.value(), 'abc\n\n');
+		// 	assert.equal(crdt1.value(), crdt2.value());
+		// 	assert.deepEqual(crdt1.getState(), crdt2.getState());
+		// });
 	});
 });

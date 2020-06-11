@@ -29,6 +29,21 @@ describe('Simple merge tests', () => {
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
 	});
 
+	it('should merge 3 simple blocks', () => {
+		const block1 = crdt1.insertBlock(0);
+		const block2 = crdt1.insertBlock(1);
+		const block3 = crdt1.insertBlock(0);
+		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
+		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
+		crdt1.insertContentInBlock('Cas', 0, block3.blockId);
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		crdt1.mergeBlocks(block1.blockId, block3.blockId);
+
+		assert.equal(crdt1.value(), 'HoiDoeiCas\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState(), crdt2.getState());
+	});
+
 	it('should merge two blocks into one 1', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(0);
