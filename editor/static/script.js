@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 /* eslint-disable no-undef */
 const QuillCursors = require('quill-cursors');
 const ejs = require('ejs');
