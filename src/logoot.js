@@ -673,6 +673,30 @@ class Logoot extends EventEmitter {
 	}
 
 	/**
+	 * Construct a string from the sequence
+	 * @param {Node} root the root of this Logoot
+	 * @return {string} value of the tree
+	 */
+	XMLvalue(root = this) {
+		const arr = ['<div id="documentRoot">'];
+		this._root.walk(node => {
+			if (!node.empty && !node.merged) {
+				if (node.logoot) {
+					arr.push(`<p>${node.logoot.value(root)}</p>`);
+				} else if (node.type === 'Merge') {
+					const block = root._searchBlock(node.referenceId);
+					if (block) {
+						arr.push(block.logoot.value(root));
+					}
+				} else {
+					arr.push(node.value);
+				}
+			}
+		});
+		return arr.concat(['</div>']).join('');
+	}
+
+	/**
 	 * Returns the size of the root excluding the start and end node
 	 * @return {Integer} size of the root
 	 */

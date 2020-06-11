@@ -1,3 +1,16 @@
+p {
+    white-space: pre-line;
+}
+
 .row {
     padding: 5px;
+}
+
+.operation {
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+.move-input {
+    width: 200px;
 }

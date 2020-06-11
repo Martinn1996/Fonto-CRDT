@@ -4,6 +4,7 @@ const ejs = require('ejs');
 const host = location.origin.replace(/^http/, 'ws');
 const Logoot = require('../../src/logoot');
 const l1 = new Logoot('site1');
+const format = require('xml-formatter');
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -19,7 +20,7 @@ function receiveOperation(op) {
 	const cursor = getCursor();
 	l1.receive(op);
 	/* eslint-disable no-use-before-define */
-	render(l1.blockValue());
+	render(l1);
 	if (cursor) {
 		/* eslint-disable no-use-before-define */
 		setCursor(cursor);
@@ -49,7 +50,7 @@ socket.onmessage = function(event) {
 	if (data.assignSocketId) {
 		l1.setState(data.initialValue);
 		/* eslint-disable no-use-before-define */
-		render(l1.blockValue());
+		render(l1);
 		initialized = true;
 	} else if (online) {
 		receiveOperation(data);
@@ -70,6 +71,7 @@ const supportedOps = [
 	'mergeBlocks'
 ];
 l1.on('operation', op => {
+	renderParsedText(l1);
 	if (initialized && supportedOps.includes(op.type)) {
 		if (online) {
 			socket.send(JSON.stringify(op));
@@ -82,7 +84,7 @@ const html = `
 	<div id="test" class="container">
 		<div class="row">
 			<div class="col-sm">
-				<button class="insert" id="insert-0">insert block here</button>
+				<button class="insert operation" id="insert-0">insert block here</button>
 			</div>
 		</div>
 		<% for(let i = 0; i < blocks.length; i++) { %>
@@ -96,16 +98,16 @@ const html = `
 				<div id="<%= blocks[i].blockId %>"></div>
 			</div>
 			<div class="col-sm-4">
-				<button class="delete" id="delete-<%= blocks[i].blockId %>">Delete block</button>
-				<button class="split" id="split-<%= blocks[i].blockId %>">Split block</button>
-				<div><button class="move" id="move-<%= blocks[i].blockId %>">Move block</button><input id="input-<%= blocks[i].blockId %>" placeholder="Move to index"/></div>
+				<button class="delete operation" id="delete-<%= blocks[i].blockId %>">Delete block</button>
+				<button class="split operation" id="split-<%= blocks[i].blockId %>">Split block at cursor</button>
+				<div><button class="move operation" id="move-<%= blocks[i].blockId %>">Move block</button><input class="move-input" id="input-<%= blocks[i].blockId %>" placeholder="Move to index"/></div>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm">
-				<button class="insert" id="insert-<%= i + 1 %>">insert block here</button>
+				<button class="insert operation" id="insert-<%= i + 1 %>">insert block here</button>
 				<%if (i < blocks.length - 1) { %>
-					<button class="merge" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge block</button>
+					<button class="merge" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge blocks</button>
 				<% } %>
 			</div>
 		</div>
@@ -130,14 +132,29 @@ function setCursor(cursor) {
 		editor[0].editor.setSelection(cursor.cursor.index);
 	}
 }
-function render(blocks) {
+
+function renderParsedText(logoot) {
+	$('#parsed-text').html(logoot.XMLvalue());
+	try {
+		$('#parsed-xml').text(
+			format(logoot.XMLvalue(), {
+				lineSeparator: '\n'
+			})
+		);
+	} catch (_) {
+		$('#parsed-xml').text('');
+	}
+}
+
+function render(logoot) {
 	$('#editor').html(
 		ejs.render(html, {
-			blocks: blocks
+			blocks: logoot.blockValue()
 		})
 	);
+	renderParsedText(logoot);
 
-	editors = blocks.map(block => {
+	editors = logoot.blockValue().map(block => {
 		const quill = new Quill(`#${block.blockId}`, {
 			modules: {
 				cursors: true,
@@ -164,18 +181,18 @@ function render(blocks) {
 	});
 	$('.insert').on('click', e => {
 		l1.insertBlock(e.target.id.split('-')[1]);
-		render(l1.blockValue());
+		render(l1);
 	});
 
 	$('.delete').on('click', e => {
 		l1.deleteBlock(e.target.id.split('-')[1]);
-		render(l1.blockValue());
+		render(l1);
 	});
 
 	$('.merge').on('click', e => {
 		const blockIds = e.target.id.split('-');
 		l1.mergeBlocks(blockIds[1], blockIds[2]);
-		render(l1.blockValue());
+		render(l1);
 	});
 
 	$('.split').on('click', e => {
@@ -187,7 +204,7 @@ function render(blocks) {
 			return;
 		}
 		l1.splitBlock(blockId, index.index);
-		render(l1.blockValue());
+		render(l1);
 	});
 
 	$('.move').on('click', e => {
@@ -198,6 +215,6 @@ function render(blocks) {
 			return;
 		}
 		l1.moveBlock(blockId, index);
-		render(l1.blockValue());
+		render(l1);
 	});
 }
