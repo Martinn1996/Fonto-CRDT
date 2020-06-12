@@ -190,14 +190,14 @@ class Logoot extends EventEmitter {
 		const blockId2 = operation.blockId2;
 		const block1 = this._searchAllBlock(blockId1);
 		const block2 = this._searchAllBlock(blockId2);
+		// console.log('RECEIVE MERGE: ', blockId1, ' -> ', blockId2);
 		if (!block1) {
 			throw Error('BlockId does not exist');
 		}
 
-		let list = this._getAllMergeReferences(block1, this);
-
+		let list = this._getAllMergeReferences(this._getBaseBlock(block1, this), this);
 		// Only insert distinct operations
-		this._getAllMergeReferences(block2, this).forEach(op => {
+		this._getAllMergeReferences(this._getBaseBlock(block2, this), this).forEach(op => {
 			let contains = false;
 			list.forEach(op2 => {
 				if (op2.to === op.to) {
@@ -209,22 +209,24 @@ class Logoot extends EventEmitter {
 				list.push(op);
 			}
 		});
-
+	
 		const tempList = list.filter(op => op.to === blockId2);
+		const rootId = this._getBaseBlock(block1, this).blockId;
+		// console.log(list);
+		// console.log(tempList);
 
+		let overwritten = false;
 		if (tempList.length === 0) {
-			list.push({ from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp });
+			list.push({ from: rootId, to: blockId2, timestamp: operation.mergedTimestamp });
 		} else if (isLastWriter(tempList[0].timestamp, operation.mergedTimestamp)) {
 			list = list.map(op => {
 				if (op.to === tempList[0].to) {
-					return { from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp };
+					overwritten = true;
+					return { from: rootId, to: blockId2, timestamp: operation.mergedTimestamp };
 				}
 				return op;
 			});
 		}
-
-		this._removeAllMergeReferences(block1, this);
-		this._removeAllMergeReferences(block2, this);
 
 		list.sort((a, b) => {
 			if (a.timestamp.timestamp > b.timestamp.timestamp) {
@@ -235,12 +237,59 @@ class Logoot extends EventEmitter {
 			return -1;
 		});
 
+		const baseBlock1 = this._getBaseBlock(block1, this);
+		const baseBlock2 = this._getBaseBlock(block2, this);
+
+		// Needs to check for cycles
+		if (baseBlock1.blockId === baseBlock2.blockId && !overwritten) {
+			// console.log('CYCLE');
+			// Cycle detected!!!
+			let checkBlock = block1;
+
+			// List of all blockIds
+			const cycleList = [];
+			cycleList.push(checkBlock.blockId);
+			
+			while (checkBlock.blockId !== block2.blockId && checkBlock.merged) {
+				checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+				cycleList.push(checkBlock.blockId);
+			}
+
+			// Get all references which includes the blocks of the cycle
+			let newList = list.filter(op => cycleList.includes(op.to));
+
+			newList = newList.sort((a, b) => {
+				if (a.timestamp.timestamp > b.timestamp.timestamp) {
+					return 1;
+				} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
+					return 0;
+				}
+				return -1;
+			});
+
+			const toDelete = newList.pop();
+
+			// List should delete toDelete
+			if (toDelete) {
+				list = list.filter(op => {
+					return op.from !== toDelete.from && op.to !== toDelete.to;
+				});
+			}
+		}
+
+		this._removeAllMergeReferences(block1, this);
+		this._removeAllMergeReferences(block2, this);
+
 		for (const merge of list) {
 			const block = this._searchAllBlock(merge.from);
 			block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
+
+			const toBlock = this._searchAllBlock(merge.to);
+			toBlock.setMerged();
+			toBlock.mergedTimestamp = merge.timestamp;
 		}
 
-		block2.setMerged();
+		// block2.setMerged();
 	}
 
 	/**
@@ -267,18 +316,31 @@ class Logoot extends EventEmitter {
 		return array;
 	}
 
+	_getBaseBlock(block, logoot) {
+		let checkBlock = block;
+		while (checkBlock.merged) {
+			checkBlock = logoot._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+		}
+
+		return checkBlock;
+	}
+
 	/**
 	 * Removes all references starting from that block
 	 * @param {BlockNode} block to remove references from
 	 * @param {Logoot} logoot logoot
 	 */
 	_removeAllMergeReferences(block, logoot) {
-		let endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		let currentBlock = this._getBaseBlock(block, logoot);
+		let endNode = currentBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
 
 		while (endNode.type === 'Merge') {
-			const newBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
+			currentBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
 			endNode.type = 'Node';
-			endNode = newBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
+			delete endNode.referenceId;
+			currentBlock.setUnmerged();
+			currentBlock.mergedTimestamp = {};
+			endNode = currentBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
 		}
 	}
 
@@ -599,7 +661,7 @@ class Logoot extends EventEmitter {
 		const endNode = this._root.getChildById({ int: 256, site: null, clock: null });
 
 		if (endNode.type === 'Merge') {
-			const newBlock = logoot._searchAllBlock(endNode.referenceId, this);
+			const newBlock = logoot._searchAllBlock(endNode.referenceId);
 			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
 		}
 
