@@ -4,7 +4,7 @@ const Identifier = require('./identifier');
 
 const BlockNode = require('./class/BlockNode');
 const CharacterNode = require('./class/CharacterNode');
-const MergeNode = require('./class/MergeNode');
+// const MergeNode = require('./class/MergeNode');
 const Node = require('./class/Node');
 const SplitNode = require('./class/SplitNode');
 
@@ -552,7 +552,7 @@ class Logoot extends EventEmitter {
 		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length(), this);
 		newBlock.logoot._setEmpty(0, node.getOrder() + 1, this);
 
-		const endNode = block.logoot._root.getChildById({int: 256, site: null, clock: null});
+		const endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
 		endNode.type = 'Node';
 		delete endNode.referenceId;
 
@@ -582,7 +582,7 @@ class Logoot extends EventEmitter {
 	 * @return {MergeNode} MergeNode that is inserted
 	 */
 	_insertMergeNode(referenceId, logoot, timestamp) {
-		// index = Math.min(index, this.length()); 
+		// index = Math.min(index, this.length());
 		// const prev = this._root.getChildByOrderLocal(index);
 		// const next = this._root.getChildByOrderLocal(index + 1);
 		// const prevPos = prev.getPath();
@@ -1123,7 +1123,7 @@ class Logoot extends EventEmitter {
 			block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
 			newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
 
-			const endNode = block.logoot._root.getChildById({int: 256, site: null, clock: null});
+			const endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
 			endNode.type = 'Node';
 			delete endNode.referenceId;
 
@@ -1224,10 +1224,10 @@ class Logoot extends EventEmitter {
 		let length = this.length();
 
 		let blockLogoot = this;
-		let endNode = blockLogoot._root.getChildById({int: 256, site: null, clock: null});
+		let endNode = blockLogoot._root.getChildById({ int: 256, site: null, clock: null });
 		while (endNode.type === 'Merge') {
 			blockLogoot = logoot._searchAllBlock(endNode.referenceId).logoot;
-			endNode = blockLogoot._root.getChildById({int: 256, site: null, clock: null});
+			endNode = blockLogoot._root.getChildById({ int: 256, site: null, clock: null });
 			length += blockLogoot.length();
 		}
 
