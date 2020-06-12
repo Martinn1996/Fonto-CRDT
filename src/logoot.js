@@ -551,6 +551,10 @@ class Logoot extends EventEmitter {
 		block.logoot._setEmpty(node.getOrder() + 1, block.logoot.length(), this);
 		newBlock.logoot._setEmpty(0, node.getOrder() + 1, this);
 
+		const endNode = block.logoot._root.getChildById({int: 256, site: null, clock: null});
+		endNode.type = 'Node';
+		delete endNode.referenceId;
+
 		this.emit('splitBlock', {
 			blockId: newBlock.blockId,
 			location: node.getPath(),
@@ -592,6 +596,14 @@ class Logoot extends EventEmitter {
 			const newBlock = logoot._searchAllBlock(endNode.referenceId, this);
 			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
 		}
+
+		if (logoot._afterSplitNode(endNode, this)) {
+			const newBlock = logoot._searchAllBlock(endNode.referTo);
+			delete endNode.referTo;
+			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
+		}
+
+		delete endNode.referTo;
 
 		if (timestamp) {
 			const block = logoot._searchAllBlock(referenceId);
@@ -1110,6 +1122,10 @@ class Logoot extends EventEmitter {
 			block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
 			newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
 
+			const endNode = block.logoot._root.getChildById({int: 256, site: null, clock: null});
+			endNode.type = 'Node';
+			delete endNode.referenceId;
+
 			return newBlock;
 		}
 	}
@@ -1137,7 +1153,7 @@ class Logoot extends EventEmitter {
 	 * @return {JSON} tuple of node and block
 	 */
 	_moveInsertOnSplitNode(node, block, type) {
-		if (this._afterSplitNode(node, block)) {
+		if (this._afterSplitNode(node, block.logoot)) {
 			const newBlock = this._searchAllBlock(node.referTo);
 			const newNode = newBlock.logoot._root.getChildByPath(node.getPath(), true, type);
 			newNode.setEmpty(false);
@@ -1168,7 +1184,7 @@ class Logoot extends EventEmitter {
 	 * @return {boolean} whether it is deleted when it has a split node
 	 */
 	_moveDeleteOnSplitNode(node, block, type) {
-		if (this._afterSplitNode(node, block)) {
+		if (this._afterSplitNode(node, block.logoot)) {
 			const refBlock = this._searchAllBlock(node.referTo);
 			const deleteNode = refBlock.logoot._root.getChildByPath(node.getPath(), false, type);
 			deleteNode.setEmpty(false);
@@ -1189,11 +1205,11 @@ class Logoot extends EventEmitter {
 	/**
 	 * Checks whether the node contains a split node in front of the node
 	 * @param {Node} node to check
-	 * @param {BlockNode} block to check
+	 * @param {CRDT} logoot to check
 	 * @return {boolean} whether there is a split node before the current node
 	 */
-	_afterSplitNode(node, block) {
-		const prevNode = block.logoot._root.getChildByOrder(node.getOrder());
+	_afterSplitNode(node, logoot) {
+		const prevNode = logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
 		return prevNode instanceof SplitNode;
 	}
@@ -1204,21 +1220,16 @@ class Logoot extends EventEmitter {
 	 * @return {Integer} size of the block
 	 */
 	_getTotalSize(logoot) {
-		const queue = [];
-		queue.push(this._root);
-
 		let length = this.length();
-		while (queue.length > 0) {
-			const node = queue.shift();
-			if (node instanceof MergeNode && !node.empty) {
-				const block = logoot._searchBlock(node.referenceId);
 
-				length += block.logoot._getTotalSize(logoot) - 1;
-			}
-			for (const child of node.children) {
-				queue.push(child);
-			}
+		let blockLogoot = this;
+		let endNode = blockLogoot._root.getChildById({int: 256, site: null, clock: null});
+		while (endNode.type === 'Merge') {
+			blockLogoot = logoot._searchAllBlock(endNode.referenceId).logoot;
+			endNode = blockLogoot._root.getChildById({int: 256, site: null, clock: null});
+			length += blockLogoot.length();
 		}
+
 		return length;
 	}
 }
