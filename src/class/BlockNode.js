@@ -27,7 +27,7 @@ class BlockNode extends Node {
 
 		this.merged = true;
 
-		this.adjustSize(-1);
+		if (!this.empty) this.adjustSize(-1);
 	}
 }
 
