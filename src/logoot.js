@@ -237,7 +237,7 @@ class Logoot extends EventEmitter {
 
 		for (const merge of list) {
 			const block = this._searchAllBlock(merge.from);
-			block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
+			block.logoot._insertMergeNode(merge.to, this, merge.timestamp, true);
 		}
 
 		block2.setMerged();
@@ -595,18 +595,18 @@ class Logoot extends EventEmitter {
 	 * @param {timestamp} timestamp timestamp
 	 * @return {MergeNode} MergeNode that is inserted
 	 */
-	_insertMergeNode(referenceId, logoot, timestamp) {
+	_insertMergeNode(referenceId, logoot, timestamp, received = false) {
 		const endNode = this._root.getChildById({ int: 256, site: null, clock: null });
 
 		if (endNode.type === 'Merge') {
 			const newBlock = logoot._searchAllBlock(endNode.referenceId, this);
-			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
+			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received);
 		}
 
-		if (logoot._afterSplitNode(endNode, this)) {
+		if (received && logoot._afterSplitNode(endNode, this)) {
 			const newBlock = logoot._searchAllBlock(endNode.referTo);
 			delete endNode.referTo;
-			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
+			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received);
 		}
 
 		delete endNode.referTo;
