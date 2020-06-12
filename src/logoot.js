@@ -4,7 +4,6 @@ const Identifier = require('./identifier');
 
 const BlockNode = require('./class/BlockNode');
 const CharacterNode = require('./class/CharacterNode');
-// const MergeNode = require('./class/MergeNode');
 const Node = require('./class/Node');
 const SplitNode = require('./class/SplitNode');
 
@@ -582,15 +581,6 @@ class Logoot extends EventEmitter {
 	 * @return {MergeNode} MergeNode that is inserted
 	 */
 	_insertMergeNode(referenceId, logoot, timestamp) {
-		// index = Math.min(index, this.length());
-		// const prev = this._root.getChildByOrderLocal(index);
-		// const next = this._root.getChildByOrderLocal(index + 1);
-		// const prevPos = prev.getPath();
-		// const nextPos = next.getPath();
-
-		// const position = this._generatePositionBetween(prevPos, nextPos);
-		// const node = this._root.getChildByPath(position, true, MergeNode);
-
 		const endNode = this._root.getChildById({ int: 256, site: null, clock: null });
 
 		if (endNode.type === 'Merge') {
