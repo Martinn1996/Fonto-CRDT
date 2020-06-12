@@ -181,6 +181,10 @@ class Logoot extends EventEmitter {
 		}
 	}
 
+	/**
+	 * Handles the receive of a merge operation
+	 * @param {JSON} operation to perform
+	 */
 	_receiveMerge(operation) {
 		const blockId1 = operation.blockId1;
 		const blockId2 = operation.blockId2;
@@ -239,6 +243,12 @@ class Logoot extends EventEmitter {
 		block2.setMerged();
 	}
 
+	/**
+	 * Returns all the merge references
+	 * @param {BlockNode} block to look into
+	 * @param {Logoot} logoot logoot
+	 * @return {Array<Object>} list of references
+	 */
 	_getAllMergeReferences(block, logoot) {
 		const array = [];
 
@@ -257,6 +267,11 @@ class Logoot extends EventEmitter {
 		return array;
 	}
 
+	/**
+	 * Removes all references starting from that block
+	 * @param {BlockNode} block to remove references from
+	 * @param {Logoot} logoot logoot
+	 */
 	_removeAllMergeReferences(block, logoot) {
 		let endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
 
