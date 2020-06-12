@@ -483,8 +483,12 @@ class Logoot extends EventEmitter {
 
 		const node = this._receiveInsertBlock(operation);
 		node.timestamp = operation.timestamp;
+		node.mergedTimestamp = oldBlock.mergedTimestamp;
 		node.logoot = logoot;
-		node.merged = oldBlock.merged;
+		oldBlock.mergedTimestamp = {};
+
+		// node.merged = oldBlock.merged;
+		if (oldBlock.merged) node.setMerged();
 		node.setEmpty(isEmptyBlock);
 	}
 
@@ -933,12 +937,15 @@ class Logoot extends EventEmitter {
 
 		const newBlock = this._insertBlock(index);
 		newBlock.logoot = block.logoot;
-		newBlock.merged = block.merged;
+		// newBlock.merged = block.merged;
+		if (block.merged) newBlock.setMerged();
 		newBlock.blockId = blockId;
+		newBlock.mergedTimestamp = block.mergedTimestamp;
 
 		block.setEmpty(true);
 		block.trimEmpty();
 		block.blockId = null;
+		block.mergedTimestamp = {};
 
 		this.emit('operation', {
 			type: 'moveBlock',

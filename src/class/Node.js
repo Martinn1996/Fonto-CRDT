@@ -104,7 +104,7 @@ class Node {
 		this.empty = bool;
 
 		if (bool) {
-			this.adjustSize(-1);
+			if (!this.merged) this.adjustSize(-1);
 		} else {
 			this.adjustSize(1);
 		}
