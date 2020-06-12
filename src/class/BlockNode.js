@@ -29,6 +29,15 @@ class BlockNode extends Node {
 
 		if (!this.empty) this.adjustSize(-1);
 	}
+
+	setUnMerged() {
+		if (!this.merged) return;
+
+		this.merged = false;
+		this.mergedTimestamp = {};
+
+		if (!this.empty) this.adjustSize(1);
+	}
 }
 
 module.exports = BlockNode;

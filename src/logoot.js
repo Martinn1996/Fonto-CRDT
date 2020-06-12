@@ -232,23 +232,61 @@ class Logoot extends EventEmitter {
 			return -1;
 		});
 
+		const baseBlock1 = this._getBaseBlock(block1, this);
+		const baseBlock2 = this._getBaseBlock(block2, this);
+		// Needs to check for cycles
+		if (baseBlock1.blockId === baseBlock2.blockId) {
+			// Cycle detected!!!
+			let checkBlock = block1;
+
+			// List of all blockIds
+			const cycleList = [];
+			cycleList.push(checkBlock.blockId);
+			while (checkBlock.blockId !== block2.blockId) {
+				checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+				cycleList.push(checkBlock.blockId);
+			}
+
+			// Get all references which includes the blocks of the cycle
+			let newList = list.filter(op => cycleList.includes(op.to));
+
+			newList = newList.sort((a, b) => {
+				if (a.timestamp.timestamp > b.timestamp.timestamp) {
+					return 1;
+				} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
+					return 0;
+				}
+				return -1;
+			});
+
+			const toDelete = newList.pop();
+
+			// List should delete toDelete
+			if (toDelete) {
+				list = list.filter(op => {
+					return op.from !== toDelete.from && op.to !== toDelete.to;
+				});
+			}
+		}
+
 		for (const merge of list) {
 			const block = this._searchAllBlock(merge.from);
 			block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
 		}
 
-		block2.setMerged();
+		// block2.setMerged();
 	}
 
 	_getAllMergeReferences(block, logoot) {
 		const array = [];
 
 		let endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		const baseBlock = this._getBaseBlock(block, logoot);
 
 		while (endNode.type === 'Merge') {
 			const newBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
 			array.push({
-				from: block.blockId,
+				from: baseBlock.blockId,
 				to: endNode.referenceId,
 				timestamp: newBlock.mergedTimestamp
 			});
@@ -258,12 +296,29 @@ class Logoot extends EventEmitter {
 		return array;
 	}
 
+	_getBaseBlock(block, logoot) {
+		let checkBlock = block;
+		while (checkBlock.merged) {
+			checkBlock = logoot._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+		}
+
+		return checkBlock;
+	}
+
 	_removeAllMergeReferences(block, logoot) {
 		let endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		let newBlock = block;
 
 		while (endNode.type === 'Merge') {
-			const newBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
+			// if (newBlock.merged) {
+			// 	newBlock.merged = false;
+			// 	newBlock.mergedTimestamp = {};
+			// }
+			newBlock.setUnMerged();
+			newBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
 			endNode.type = 'Node';
+			delete endNode.referenceId;
+
 			endNode = newBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
 		}
 	}

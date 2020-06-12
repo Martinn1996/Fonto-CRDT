@@ -64,6 +64,29 @@ describe('Offline Support merge', () => {
 		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
 	});
 
+	it('simple cycle', () => {
+		const block1 = crdt1.insertBlock(0);
+		const block2 = crdt1.insertBlock(1);
+
+		crdt1.insertContentInBlock('1', 0, block1.blockId);
+		crdt1.insertContentInBlock('2', 0, block2.blockId);
+
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+		ops1 = [];
+		ops2 = [];
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
+		crdt2.mergeBlocks(block2.blockId, block1.blockId);
+		ops1.forEach(op => crdt1.receive(op));
+		ops2.forEach(op => crdt2.receive(op));
+
+		console.log('crdt1 value: ', crdt1.getState());
+		console.log('crdt2 value: ', crdt2.getState());
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
+	});
+
 	it('should converge after merging offline and deleting characters offline', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(1);
