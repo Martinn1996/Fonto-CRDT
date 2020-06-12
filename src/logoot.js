@@ -489,6 +489,7 @@ class Logoot extends EventEmitter {
 
 		// node.merged = oldBlock.merged;
 		if (oldBlock.merged) node.setMerged();
+		oldBlock.merged = false;
 		node.setEmpty(isEmptyBlock);
 	}
 
@@ -958,7 +959,7 @@ class Logoot extends EventEmitter {
 		block.trimEmpty();
 		block.blockId = null;
 		block.mergedTimestamp = {};
-
+		block.merged = false;
 		this.emit('operation', {
 			type: 'moveBlock',
 			position: newBlock.getPath(),
