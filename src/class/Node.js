@@ -242,7 +242,7 @@ class Node {
 					if (i - index < block.logoot.length()) {
 						return { ref: child, block: block, index: i - index + 1 };
 					}
-					index += block.logoot.length();
+					return block.logoot._root.getChildByOrder(i - index + 1, logoot);
 				}
 
 				const res = dfs(child, logoot);
