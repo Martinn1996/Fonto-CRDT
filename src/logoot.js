@@ -190,7 +190,6 @@ class Logoot extends EventEmitter {
 		const blockId2 = operation.blockId2;
 		const block1 = this._searchAllBlock(blockId1);
 		const block2 = this._searchAllBlock(blockId2);
-		// console.log('RECEIVE MERGE: ', blockId1, ' -> ', blockId2);
 		if (!block1) {
 			throw Error('BlockId does not exist');
 		}
@@ -209,23 +208,25 @@ class Logoot extends EventEmitter {
 				list.push(op);
 			}
 		});
-	
+
 		const tempList = list.filter(op => op.to === blockId2);
-		const rootId = this._getBaseBlock(block1, this).blockId;
+		// const rootId = this._getBaseBlock(block1, this).blockId;
 		// console.log(list);
 		// console.log(tempList);
 
 		let overwritten = false;
 		if (tempList.length === 0) {
-			list.push({ from: rootId, to: blockId2, timestamp: operation.mergedTimestamp });
+			list.push({ from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp });
 		} else if (isLastWriter(tempList[0].timestamp, operation.mergedTimestamp)) {
 			list = list.map(op => {
 				if (op.to === tempList[0].to) {
-					overwritten = true;
-					return { from: rootId, to: blockId2, timestamp: operation.mergedTimestamp };
+					return { from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp };
 				}
 				return op;
 			});
+			overwritten = true;
+		} else {
+			overwritten = true;
 		}
 
 		list.sort((a, b) => {
@@ -240,16 +241,17 @@ class Logoot extends EventEmitter {
 		const baseBlock1 = this._getBaseBlock(block1, this);
 		const baseBlock2 = this._getBaseBlock(block2, this);
 
+		// console.log(list);
+
 		// Needs to check for cycles
 		if (baseBlock1.blockId === baseBlock2.blockId && !overwritten) {
-			// console.log('CYCLE');
 			// Cycle detected!!!
 			let checkBlock = block1;
 
 			// List of all blockIds
 			const cycleList = [];
 			cycleList.push(checkBlock.blockId);
-			
+
 			while (checkBlock.blockId !== block2.blockId && checkBlock.merged) {
 				checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
 				cycleList.push(checkBlock.blockId);
@@ -267,7 +269,7 @@ class Logoot extends EventEmitter {
 				return -1;
 			});
 
-			const toDelete = newList.pop();
+			const toDelete = newList.shift();
 
 			// List should delete toDelete
 			if (toDelete) {
