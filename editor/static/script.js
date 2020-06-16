@@ -4,7 +4,7 @@ const QuillCursors = require('quill-cursors');
 const ejs = require('ejs');
 const host = location.origin.replace(/^http/, 'ws');
 const Logoot = require('../../src/logoot');
-const l1 = new Logoot('site1');
+let l1 = new Logoot('site1');
 const format = require('xml-formatter');
 
 Quill.register('modules/cursors', QuillCursors);
@@ -19,7 +19,12 @@ let opsToReceive = [];
 function receiveOperation(op) {
 	/* eslint-disable no-use-before-define */
 	const cursor = getCursor();
-	l1.receive(op);
+	if (op.type === 'reset') {
+		l1 = new Logoot('site1');
+		setListener();
+	} else {
+		l1.receive(op);
+	}
 	/* eslint-disable no-use-before-define */
 	render(l1);
 	if (cursor) {
@@ -27,7 +32,13 @@ function receiveOperation(op) {
 		setCursor(cursor);
 	}
 }
-
+$('#trigger-reset').on('click', () => {
+	l1 = new Logoot('site1');
+	socket.send(JSON.stringify({ type: 'reset' }));
+	setListener();
+	l1.insertBlock(0);
+	render(l1);
+});
 $('#trigger-online').on('click', () => {
 	online = !online;
 	$('#trigger-online').html(online ? 'Go offline' : 'Go online');
@@ -71,16 +82,21 @@ const supportedOps = [
 	'splitBlock',
 	'mergeBlocks'
 ];
-l1.on('operation', op => {
-	renderParsedText(l1);
-	if (initialized && supportedOps.includes(op.type)) {
-		if (online) {
-			socket.send(JSON.stringify(op));
-		} else {
-			opsToSend.push(op);
+function setListener() {
+	l1.on('operation', op => {
+		renderParsedText(l1);
+		if (initialized && supportedOps.includes(op.type)) {
+			if (online) {
+				socket.send(JSON.stringify(op));
+			} else {
+				opsToSend.push(op);
+			}
 		}
-	}
-});
+	});
+}
+
+setListener();
+
 const html = `
 	<div id="test" class="container">
 		<div class="row">

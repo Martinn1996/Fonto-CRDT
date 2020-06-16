@@ -13,7 +13,7 @@ app.use(express.static('editor/static'));
 const ops = [];
 
 const Logoot = require('../src/logoot');
-const l1 = new Logoot('site1');
+let l1 = new Logoot('site1');
 l1.insertBlock(0);
 
 app.get('/', (_, res) => {
@@ -54,9 +54,16 @@ wss.on('connection', function connection(ws) {
 	ws.send(JSON.stringify({ assignSocketId: id, initialValue: l1.getState() }));
 	ws.on('message', function incoming(message) {
 		const data = JSON.parse(message);
-		l1.receive(data);
+		if (data.type === 'reset') {
+			l1 = new Logoot('site1');
+		} else {
+			l1.receive(data);
+		}
+
 		delete data.position;
+
 		ops.push({ data: data, state: l1.getState() });
+
 		clients.forEach(function each(client, i) {
 			if (i !== index) {
 				client.client.send(message);
