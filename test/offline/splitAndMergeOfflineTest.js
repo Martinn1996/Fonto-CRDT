@@ -33,6 +33,9 @@ describe('Split and merge blocks offline', () => {
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		crdt2.splitBlock(block1.blockId, 1);
 
+		console.log('CRDT1: ', crdt1.value());
+		console.log('CRDT2: ', crdt2.value());
+
 		ops1.forEach(op => crdt1.receive(op));
 		ops2.forEach(op => crdt2.receive(op));
 

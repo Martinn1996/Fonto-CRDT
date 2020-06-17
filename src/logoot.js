@@ -194,8 +194,6 @@ class Logoot extends EventEmitter {
 			throw Error('BlockId does not exist');
 		}
 
-		console.log('INSERTING', blockId1, ' -> ', blockId2);
-
 		let list = this._getAllMergeReferences(this._getBaseBlock(block1, this), this);
 		// Only insert distinct operations
 		this._getAllMergeReferences(this._getBaseBlock(block2, this), this).forEach(op => {
@@ -259,93 +257,8 @@ class Logoot extends EventEmitter {
 				const toBlock = this._searchAllBlock(item.to);
 				toBlock.setMerged();
 				toBlock.mergedTimestamp = item.timestamp;
-				console.log('    - Added');
 			}
 		}
-
-		// const tempList = list.filter(op => op.to === blockId2);
-		// // const rootId = this._getBaseBlock(block1, this).blockId;
-		// // console.log(list);
-		// // console.log(tempList);
-
-		// let overwritten = false;
-		// if (tempList.length === 0) {
-		// 	list.push({ from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp });
-		// } else if (isLastWriter(tempList[0].timestamp, operation.mergedTimestamp)) {
-		// 	list = list.map(op => {
-		// 		if (op.to === tempList[0].to) {
-		// 			return { from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp };
-		// 		}
-		// 		return op;
-		// 	});
-		// 	overwritten = true;
-		// } else {
-		// 	overwritten = true;
-		// }
-
-		// list.sort((a, b) => {
-		// 	if (a.timestamp.timestamp > b.timestamp.timestamp) {
-		// 		return 1;
-		// 	} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
-		// 		return 0;
-		// 	}
-		// 	return -1;
-		// });
-
-		// const baseBlock1 = this._getBaseBlock(block1, this);
-		// const baseBlock2 = this._getBaseBlock(block2, this);
-
-		// // console.log(list);
-
-		// // Needs to check for cycles
-		// if (baseBlock1.blockId === baseBlock2.blockId && !overwritten) {
-		// 	// Cycle detected!!!
-		// 	let checkBlock = block1;
-
-		// 	// List of all blockIds
-		// 	const cycleList = [];
-		// 	cycleList.push(checkBlock.blockId);
-
-		// 	while (checkBlock.blockId !== block2.blockId && checkBlock.merged) {
-		// 		checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
-		// 		cycleList.push(checkBlock.blockId);
-		// 	}
-
-		// 	// Get all references which includes the blocks of the cycle
-		// 	let newList = list.filter(op => cycleList.includes(op.to));
-
-		// 	newList = newList.sort((a, b) => {
-		// 		if (a.timestamp.timestamp > b.timestamp.timestamp) {
-		// 			return 1;
-		// 		} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
-		// 			return 0;
-		// 		}
-		// 		return -1;
-		// 	});
-
-		// 	const toDelete = newList.shift();
-
-		// 	// List should delete toDelete
-		// 	if (toDelete) {
-		// 		list = list.filter(op => {
-		// 			return op.from !== toDelete.from && op.to !== toDelete.to;
-		// 		});
-		// 	}
-		// }
-
-		// this._removeAllMergeReferences(block1, this);
-		// this._removeAllMergeReferences(block2, this);
-
-		// for (const merge of list) {
-		// 	const block = this._searchAllBlock(merge.from);
-		// 	block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
-
-		// 	const toBlock = this._searchAllBlock(merge.to);
-		// 	toBlock.setMerged();
-		// 	toBlock.mergedTimestamp = merge.timestamp;
-		// }
-
-		// block2.setMerged();
 	}
 
 	/**
@@ -734,7 +647,7 @@ class Logoot extends EventEmitter {
 			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received, newBlock.blockId);
 		}
 
-		if (logoot._mergeAfterSplitNode(endNode, this, logoot._getAllSplitReferences(blockId))) {
+		if (logoot._afterSplitNode(endNode, this)) {
 			const newBlock = logoot._searchAllBlock(endNode.referTo);
 			delete endNode.referTo;
 			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received, newBlock.blockId);
@@ -761,7 +674,6 @@ class Logoot extends EventEmitter {
 
 		if (splitNode.type === 'Split') {
 			arr.push(splitNode.reference);
-			console.log(splitNode.reference);
 			arr.concat(this._getAllSplitReferences(splitNode.reference));
 		}
 
@@ -1367,19 +1279,6 @@ class Logoot extends EventEmitter {
 		const prevNode = logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
 		return prevNode instanceof SplitNode;
-	}
-
-	/**
-	 * Checks whether the node contains a split node in front of the node
-	 * @param {Node} node to check
-	 * @param {CRDT} logoot to check
-	 * @return {boolean} whether there is a split node before the current node
-	 */
-	_mergeAfterSplitNode(node, logoot, blockIds) {
-		const prevNode = logoot._root.getChildByOrder(node.getOrder());
-		node.referTo = prevNode.reference;
-
-		return prevNode instanceof SplitNode && !blockIds.includes(prevNode.reference);
 	}
 
 	/**
