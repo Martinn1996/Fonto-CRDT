@@ -194,6 +194,8 @@ class Logoot extends EventEmitter {
 			throw Error('BlockId does not exist');
 		}
 
+		console.log('INSERTING', blockId1, ' -> ', blockId2);
+
 		let list = this._getAllMergeReferences(this._getBaseBlock(block1, this), this);
 		// Only insert distinct operations
 		this._getAllMergeReferences(this._getBaseBlock(block2, this), this).forEach(op => {
@@ -208,14 +210,10 @@ class Logoot extends EventEmitter {
 				list.push(op);
 			}
 		});
-
 		const tempList = list.filter(op => op.to === blockId2);
-		// const rootId = this._getBaseBlock(block1, this).blockId;
-		// console.log(list);
-		// console.log(tempList);
 
-		let overwritten = false;
 		if (tempList.length === 0) {
+			// No edge to same direction
 			list.push({ from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp });
 		} else if (isLastWriter(tempList[0].timestamp, operation.mergedTimestamp)) {
 			list = list.map(op => {
@@ -224,72 +222,128 @@ class Logoot extends EventEmitter {
 				}
 				return op;
 			});
-			overwritten = true;
-		} else {
-			overwritten = true;
 		}
 
 		list.sort((a, b) => {
 			if (a.timestamp.timestamp > b.timestamp.timestamp) {
 				return 1;
 			} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
-				return 0;
+				if (a.timestamp.site > b.timestamp.site) {
+					return 1;
+				} else if (a.timestamp.site === b.timestamp.site) {
+					return 0;
+				}
+				return -1;
 			}
 			return -1;
 		});
 
-		const baseBlock1 = this._getBaseBlock(block1, this);
-		const baseBlock2 = this._getBaseBlock(block2, this);
-
-		// console.log(list);
-
-		// Needs to check for cycles
-		if (baseBlock1.blockId === baseBlock2.blockId && !overwritten) {
-			// Cycle detected!!!
-			let checkBlock = block1;
-
-			// List of all blockIds
-			const cycleList = [];
-			cycleList.push(checkBlock.blockId);
-
-			while (checkBlock.blockId !== block2.blockId && checkBlock.merged) {
-				checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
-				cycleList.push(checkBlock.blockId);
-			}
-
-			// Get all references which includes the blocks of the cycle
-			let newList = list.filter(op => cycleList.includes(op.to));
-
-			newList = newList.sort((a, b) => {
-				if (a.timestamp.timestamp > b.timestamp.timestamp) {
-					return 1;
-				} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
-					return 0;
-				}
-				return -1;
-			});
-
-			const toDelete = newList.shift();
-
-			// List should delete toDelete
-			if (toDelete) {
-				list = list.filter(op => {
-					return op.from !== toDelete.from && op.to !== toDelete.to;
-				});
-			}
-		}
-
 		this._removeAllMergeReferences(block1, this);
 		this._removeAllMergeReferences(block2, this);
 
-		for (const merge of list) {
-			const block = this._searchAllBlock(merge.from);
-			block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
+		// Keep adding until cycle appears
+		while (list.length !== 0) {
+			const item = list.shift();
 
-			const toBlock = this._searchAllBlock(merge.to);
-			toBlock.setMerged();
-			toBlock.mergedTimestamp = merge.timestamp;
+			let base1 = this._searchAllBlock(item.from);
+			let base2 = this._searchAllBlock(item.to);
+			base1 = this._getBaseBlock(base1, this).blockId;
+			base2 = this._getBaseBlock(base2, this).blockId;
+
+			// Not circular or same edge direction
+			if (!(base1 === base2)) {
+				// Add item
+				const block = this._searchAllBlock(item.from);
+				block.logoot._insertMergeNode(item.to, this, item.timestamp, true, block.blockId);
+
+				const toBlock = this._searchAllBlock(item.to);
+				toBlock.setMerged();
+				toBlock.mergedTimestamp = item.timestamp;
+				console.log('    - Added');
+			}
 		}
+
+		// const tempList = list.filter(op => op.to === blockId2);
+		// // const rootId = this._getBaseBlock(block1, this).blockId;
+		// // console.log(list);
+		// // console.log(tempList);
+
+		// let overwritten = false;
+		// if (tempList.length === 0) {
+		// 	list.push({ from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp });
+		// } else if (isLastWriter(tempList[0].timestamp, operation.mergedTimestamp)) {
+		// 	list = list.map(op => {
+		// 		if (op.to === tempList[0].to) {
+		// 			return { from: blockId1, to: blockId2, timestamp: operation.mergedTimestamp };
+		// 		}
+		// 		return op;
+		// 	});
+		// 	overwritten = true;
+		// } else {
+		// 	overwritten = true;
+		// }
+
+		// list.sort((a, b) => {
+		// 	if (a.timestamp.timestamp > b.timestamp.timestamp) {
+		// 		return 1;
+		// 	} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
+		// 		return 0;
+		// 	}
+		// 	return -1;
+		// });
+
+		// const baseBlock1 = this._getBaseBlock(block1, this);
+		// const baseBlock2 = this._getBaseBlock(block2, this);
+
+		// // console.log(list);
+
+		// // Needs to check for cycles
+		// if (baseBlock1.blockId === baseBlock2.blockId && !overwritten) {
+		// 	// Cycle detected!!!
+		// 	let checkBlock = block1;
+
+		// 	// List of all blockIds
+		// 	const cycleList = [];
+		// 	cycleList.push(checkBlock.blockId);
+
+		// 	while (checkBlock.blockId !== block2.blockId && checkBlock.merged) {
+		// 		checkBlock = this._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+		// 		cycleList.push(checkBlock.blockId);
+		// 	}
+
+		// 	// Get all references which includes the blocks of the cycle
+		// 	let newList = list.filter(op => cycleList.includes(op.to));
+
+		// 	newList = newList.sort((a, b) => {
+		// 		if (a.timestamp.timestamp > b.timestamp.timestamp) {
+		// 			return 1;
+		// 		} else if (a.timestamp.timestamp === b.timestamp.timestamp) {
+		// 			return 0;
+		// 		}
+		// 		return -1;
+		// 	});
+
+		// 	const toDelete = newList.shift();
+
+		// 	// List should delete toDelete
+		// 	if (toDelete) {
+		// 		list = list.filter(op => {
+		// 			return op.from !== toDelete.from && op.to !== toDelete.to;
+		// 		});
+		// 	}
+		// }
+
+		// this._removeAllMergeReferences(block1, this);
+		// this._removeAllMergeReferences(block2, this);
+
+		// for (const merge of list) {
+		// 	const block = this._searchAllBlock(merge.from);
+		// 	block.logoot._insertMergeNode(merge.to, this, merge.timestamp);
+
+		// 	const toBlock = this._searchAllBlock(merge.to);
+		// 	toBlock.setMerged();
+		// 	toBlock.mergedTimestamp = merge.timestamp;
+		// }
 
 		// block2.setMerged();
 	}
@@ -304,15 +358,17 @@ class Logoot extends EventEmitter {
 		const array = [];
 
 		let endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		let oldBlock = block;
 
 		while (endNode.type === 'Merge') {
 			const newBlock = logoot._searchAllBlock(endNode.referenceId, logoot);
 			array.push({
-				from: block.blockId,
+				from: oldBlock.blockId,
 				to: endNode.referenceId,
 				timestamp: newBlock.mergedTimestamp
 			});
 			endNode = newBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
+			oldBlock = newBlock;
 		}
 
 		return array;
@@ -322,6 +378,17 @@ class Logoot extends EventEmitter {
 		let checkBlock = block;
 		while (checkBlock.merged) {
 			checkBlock = logoot._searchAllBlock(checkBlock.mergedTimestamp.blockId);
+		}
+
+		return checkBlock;
+	}
+
+	_getMergedBlock(block, logoot) {
+		let checkBlock = block;
+		let endNode = checkBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		while (endNode.type === 'Merge') {
+			checkBlock = logoot._searchAllBlock(endNode.referenceId);
+			endNode = checkBlock.logoot._root.getChildById({ int: 256, site: null, clock: null });
 		}
 
 		return checkBlock;
@@ -659,18 +726,18 @@ class Logoot extends EventEmitter {
 	 * @param {timestamp} timestamp timestamp
 	 * @return {MergeNode} MergeNode that is inserted
 	 */
-	_insertMergeNode(referenceId, logoot, timestamp) {
+	_insertMergeNode(referenceId, logoot, timestamp, received = false, blockId) {
 		const endNode = this._root.getChildById({ int: 256, site: null, clock: null });
 
 		if (endNode.type === 'Merge') {
 			const newBlock = logoot._searchAllBlock(endNode.referenceId);
-			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
+			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received, newBlock.blockId);
 		}
 
-		if (logoot._afterSplitNode(endNode, this)) {
+		if (logoot._mergeAfterSplitNode(endNode, this, logoot._getAllSplitReferences(blockId))) {
 			const newBlock = logoot._searchAllBlock(endNode.referTo);
 			delete endNode.referTo;
-			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp);
+			return newBlock.logoot._insertMergeNode(referenceId, logoot, timestamp, received, newBlock.blockId);
 		}
 
 		delete endNode.referTo;
@@ -682,7 +749,23 @@ class Logoot extends EventEmitter {
 
 		endNode.referenceId = referenceId;
 		endNode.type = 'Merge';
-		return endNode;
+		return {node: endNode, blockId: blockId};
+	}
+
+	_getAllSplitReferences(blockId) {
+		const block = this._searchAllBlock(blockId);
+		const endNode = block.logoot._root.getChildById({int: 256, site: null, clock: null});
+
+		const splitNode = block.logoot._root.getChildByOrder(endNode.getOrder());
+		const arr = [];
+
+		if (splitNode.type === 'Split') {
+			arr.push(splitNode.reference);
+			console.log(splitNode.reference);
+			arr.concat(this._getAllSplitReferences(splitNode.reference));
+		}
+
+		return arr;
 	}
 
 	/**
@@ -1071,18 +1154,20 @@ class Logoot extends EventEmitter {
 	 * @param {string} blockId2 The second block which will be deleted after the merge
 	 */
 	mergeBlocks(blockId1, blockId2) {
-		const block1 = this._searchBlock(blockId1);
+		const block1 = this._getMergedBlock(this._searchBlock(blockId1), this);
 		const block2 = this._searchBlock(blockId2);
 		if (!block1 || !block2) {
 			throw Error('BlockId does not exist');
 		}
+
 		const timestamp = {
 			timestamp: new Date().getTime(),
 			site: this.site,
 			blockId: blockId1
 		};
 		// insert merge node
-		const node = block1.logoot._insertMergeNode(blockId2, this, timestamp);
+		const item = block1.logoot._insertMergeNode(blockId2, this, timestamp, false, block1.blockId);
+		const node = item.node;
 		// set block2 to invisible
 		block2.setMerged();
 		block2.mergedTimestamp = timestamp;
@@ -1091,7 +1176,7 @@ class Logoot extends EventEmitter {
 			type: 'mergeBlocks',
 			position: node.getPath(),
 			mergedTimestamp: block2.mergedTimestamp,
-			blockId1: blockId1,
+			blockId1: block1.blockId,
 			blockId2: blockId2
 		});
 	}
@@ -1282,6 +1367,19 @@ class Logoot extends EventEmitter {
 		const prevNode = logoot._root.getChildByOrder(node.getOrder());
 		node.referTo = prevNode.reference;
 		return prevNode instanceof SplitNode;
+	}
+
+	/**
+	 * Checks whether the node contains a split node in front of the node
+	 * @param {Node} node to check
+	 * @param {CRDT} logoot to check
+	 * @return {boolean} whether there is a split node before the current node
+	 */
+	_mergeAfterSplitNode(node, logoot, blockIds) {
+		const prevNode = logoot._root.getChildByOrder(node.getOrder());
+		node.referTo = prevNode.reference;
+
+		return prevNode instanceof SplitNode && !blockIds.includes(prevNode.reference);
 	}
 
 	/**

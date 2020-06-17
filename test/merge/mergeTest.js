@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
 const Logoot = require('../../src/logoot');
+const { wait } = require('../util/testUtilities');
 
 describe('Simple merge tests', () => {
 	let crdt1;
@@ -37,6 +38,7 @@ describe('Simple merge tests', () => {
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt1.insertContentInBlock('Cas', 0, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block3.blockId);
 
 		assert.equal(crdt1.value(), 'HoiDoeiCas\n\n');
@@ -64,19 +66,6 @@ describe('Simple merge tests', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 	});
 
-	it('should merge three blocks into one after two merges', () => {
-		const block1 = crdt1.insertBlock(0);
-		const block2 = crdt1.insertBlock(0);
-		const block3 = crdt1.insertBlock(0);
-		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
-		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
-		crdt1.insertContentInBlock('!', 0, block3.blockId);
-		crdt1.mergeBlocks(block2.blockId, block3.blockId);
-		crdt1.mergeBlocks(block1.blockId, block2.blockId);
-		assert.equal(crdt1.value(), 'HoiDoei!\n\n');
-		assert.equal(crdt1.value(), crdt2.value());
-	});
-
 	it('should throw an error when a block does not exist', () => {
 		const error = () => crdt1.mergeBlocks(null, null);
 		assert.throw(error, Error);
@@ -90,6 +79,7 @@ describe('Simple merge tests', () => {
 		crdt1.insertContentInBlock('derde', 0, block2.blockId);
 		crdt1.insertContentInBlock('tweede', 0, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block3.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.value(), 'eerstetweedederde\n\n');
 		assert.equal(crdt1.value(), crdt2.value());
@@ -141,10 +131,16 @@ describe('merge blocks + insertion tests', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(0);
 		const block3 = crdt1.insertBlock(0);
+
+		console.log('Block 1: ', block1.blockId);
+		console.log('Block 2: ', block2.blockId);
+		console.log('Block 3: ', block3.blockId);
+		
 		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt1.insertContentInBlock('!', 0, block3.blockId);
 		crdt1.mergeBlocks(block2.blockId, block3.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
 		assert.equal(crdt1.length(), 1);
 		assert.equal(crdt1.value(), 'HoiDoei!\n\n');
@@ -165,6 +161,7 @@ describe('merge blocks + insertion tests', () => {
 		crdt1.insertContentInBlock('2', 1, block2.blockId);
 		crdt1.insertContentInBlock('3', 0, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block2.blockId, block3.blockId);
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.equal(crdt1.getState(), crdt2.getState());
@@ -173,6 +170,7 @@ describe('merge blocks + insertion tests', () => {
 	it('merge 2 blocks and insert on index 1', () => {
 		const block1 = crdt1.insertBlock(0);
 		const block2 = crdt1.insertBlock(1);
+
 		crdt1.insertContentInBlock('Hoi', 0, block1.blockId);
 		crdt1.insertContentInBlock('Doei', 1, block2.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
@@ -432,6 +430,7 @@ describe('Multiple Merges', () => {
 		crdt1.insertContentInBlock('Doei', 0, block2.blockId);
 		crdt1.insertContentInBlock('Terug', 0, block3.blockId);
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block3.blockId);
 		assert.equal(crdt1.value(), 'HoiDoeiTerug\n\n');
 		assert.deepEqual(crdt1.getState(), crdt2.getState());
@@ -473,11 +472,17 @@ describe('Multiple Merges', () => {
 		crdt1.insertContentInBlock('8888', 0, block8.blockId);
 
 		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block3.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block4.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block5.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block6.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block7.blockId);
+		wait(10);
 		crdt1.mergeBlocks(block1.blockId, block8.blockId);
 
 		assert.equal(crdt1.value(), '11112222333344445555666677778888\n\n');

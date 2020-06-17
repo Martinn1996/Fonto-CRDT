@@ -99,4 +99,19 @@ describe('Merge and Split Block Integration', () => {
 		assert.equal(crdt1.value(), crdt2.value());
 		assert.equal(crdt1.getState(), crdt2.getState());
 	});
+
+	it('testest', () => {
+		const block1 = crdt1.insertBlock(0);
+
+		crdt1.insertContentInBlock('HoiDoei', 0, block1.blockId);
+		const block2 = crdt1.splitBlock(block1.blockId, 3);
+
+		// console.log(crdt1._getAllSplitReferences(block1.blockId));
+
+		crdt1.mergeBlocks(block1.blockId, block2.blockId);
+		console.log(crdt1.getState());
+		assert.equal(crdt1.value(), 'HoiDoei\n\n');
+		assert.equal(crdt1.value(), crdt2.value());
+		assert.equal(crdt1.getState(), crdt2.getState());
+	});
 });
