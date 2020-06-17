@@ -199,28 +199,6 @@ class Node {
 	}
 
 	/**
-	 * Find child (excluding merged blocks) with corresponding index
-	 * @param {Integer} index of the child
-	 * @return {Node}
-	 */
-	getChildByOrderLocal(index) {
-		if (index === 0 && !this.empty) return this;
-
-		let left = this.empty ? 0 : 1;
-		let right = left;
-
-		for (const child of this.children) {
-			right += child.size;
-			if (left <= index && right > index) {
-				return child.getChildByOrderLocal(index - left);
-			}
-			left = right;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Find child (including merged blocks) with corresponding index
 	 * @param {Integer} i is index of the child
 	 * @param {Logoot} logoot of the entire CRDT
