@@ -42,6 +42,11 @@ $('#trigger-reset').on('click', () => {
 $('#trigger-online').on('click', () => {
 	online = !online;
 	$('#trigger-online').html(online ? 'Go offline' : 'Go online');
+	$('#status-div-id').removeClass('offline');
+	$('#status-div-id').removeClass('online');
+	const classToAdd = online ? 'online' : 'offline';
+	$('#status-div-id').addClass(classToAdd);
+
 	$('#network-status').html(online ? 'Online' : 'Offline');
 
 	if (online) {
@@ -55,6 +60,8 @@ $('#trigger-online').on('click', () => {
 		opsToReceive = [];
 	}
 });
+
+
 
 let initialized = false;
 socket.onmessage = function(event) {
@@ -101,7 +108,7 @@ const html = `
 	<div id="test" class="container">
 		<div class="row">
 			<div class="col-sm">
-				<button class="insert operation" id="insert-0">insert block here</button>
+				<button class="btn btn-secondary insert operation" id="insert-0">insert block here</button>
 			</div>
 		</div>
 		<% for(let i = 0; i < blocks.length; i++) { %>
@@ -115,16 +122,16 @@ const html = `
 				<div id="<%= blocks[i].blockId %>"></div>
 			</div>
 			<div class="col-sm-4">
-				<button class="delete operation" id="delete-<%= blocks[i].blockId %>">Delete block</button>
-				<button class="split operation" id="split-<%= blocks[i].blockId %>">Split block at cursor</button>
-				<div><button class="move operation" id="move-<%= blocks[i].blockId %>">Move block</button><input class="move-input" id="input-<%= blocks[i].blockId %>" placeholder="Move to index"/></div>
+				<button class="btn btn-secondary delete operation" id="delete-<%= blocks[i].blockId %>">Delete block</button>
+				<button class="btn btn-secondary split operation" id="split-<%= blocks[i].blockId %>">Split block at cursor</button>
+				<div><button class="btn btn-secondary move operation" id="move-<%= blocks[i].blockId %>">Move block</button><input class="form-control move-input operation" id="input-<%= blocks[i].blockId %>" placeholder="Move to index"/></div>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm">
-				<button class="insert operation" id="insert-<%= i + 1 %>">insert block here</button>
+				<button class="btn btn-secondary insert operation" id="insert-<%= i + 1 %>">insert block here</button>
 				<%if (i < blocks.length - 1) { %>
-					<button class="merge" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge blocks</button>
+					<button class="btn btn-secondary merge operation" id="merge-<%= blocks[i].blockId %>-<%= blocks[i + 1].blockId %>">Merge blocks</button>
 				<% } %>
 			</div>
 		</div>

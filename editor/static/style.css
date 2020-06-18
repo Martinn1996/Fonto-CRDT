@@ -14,3 +14,19 @@ p {
 .move-input {
     width: 200px;
 }
+
+.status-div {
+    border-width: 2px;
+    border-radius: 5px;
+    border-style: solid;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.online {
+    border-color: green;
+}
+
+.offline {
+    border-color: red;
+}
