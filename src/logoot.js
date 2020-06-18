@@ -765,7 +765,7 @@ class Logoot extends EventEmitter {
 		this._root.walk(node => {
 			if (!node.empty && !node.merged) {
 				if (node.logoot) {
-					arr.push(`<p>${node.logoot.value(root)}</p>`);
+					arr.push(`<p id="${node.blockId}">${node.logoot.value(root)}</p>`);
 				} else if (node.type === 'Merge') {
 					const block = root._searchBlock(node.referenceId);
 					if (block) {
