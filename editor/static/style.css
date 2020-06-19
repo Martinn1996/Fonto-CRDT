@@ -16,13 +16,24 @@
     border-radius: 5px;
     border-style: solid;
     margin-top: 5px;
+    width: 300px;
     padding: 5px;
 }
 
 .online {
-    border-color: green;
+    border-color: lightgreen;
 }
 
 .offline {
     border-color: red;
+}
+
+.sticky-modal {
+    position: fixed; 
+    width: inherit;
+}
+
+.parsed {
+    height: 500px;
+    overflow-y: scroll;
 }
