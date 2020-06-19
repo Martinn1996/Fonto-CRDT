@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 const WebSocket = require('ws').Server;
 
 app.use(express.static('editor/static'));
-const ops = [];
+let ops = [];
 
 const Logoot = require('../src/logoot');
 let l1 = new Logoot('site1');
@@ -56,6 +56,7 @@ wss.on('connection', function connection(ws) {
 		const data = JSON.parse(message);
 		if (data.type === 'reset') {
 			l1 = new Logoot('site1');
+			ops = [];
 		} else {
 			l1.receive(data);
 		}
