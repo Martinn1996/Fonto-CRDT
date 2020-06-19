@@ -1,3 +1,48 @@
 .row {
     padding: 5px;
 }
+
+.operation {
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+.move-input {
+    width: 200px;
+}
+
+.status-div {
+    border-width: 2px;
+    border-radius: 5px;
+    border-style: solid;
+    margin-top: 5px;
+    width: 300px;
+    padding: 5px;
+}
+
+.online {
+    border-color: lightgreen;
+}
+
+.offline {
+    border-color: red;
+}
+
+.sticky-modal {
+    position: fixed; 
+    width: 500px;
+}
+
+.parsed {
+    height: 500px;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+pre {
+    white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+    white-space: -pre-wrap; /* Opera */
+    white-space: -o-pre-wrap; /* Opera */
+    white-space: pre-wrap; /* CSS3 - Text module (Candidate Recommendation) http://www.w3.org/TR/css3-text/#white-space */
+    word-wrap: break-word; /* IE 5.5+ */
+}
