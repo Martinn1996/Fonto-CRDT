@@ -13,8 +13,10 @@ describe('Offline Support move', () => {
 	beforeEach(() => {
 		crdt1 = new Logoot('crdt1');
 		crdt2 = new Logoot('crdt2');
+
 		ops1 = [];
 		ops2 = [];
+
 		crdt1.on('operation', op => {
 			ops2.push(op);
 		});
