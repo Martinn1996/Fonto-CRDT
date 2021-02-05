@@ -1,5 +1,5 @@
 const operations = require('./operations');
-const Logoot = require('../../src/logoot');
+const Logoot = require('../src/logoot');
 const TestNode = require('./TestNode');
 
 const initialCRDT = new Logoot('1');
