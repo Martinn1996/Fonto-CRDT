@@ -40,7 +40,6 @@ class TestNode {
 	}
 
 	sync() {
-		console.log(this.ops1, this.ops2);
 		this.ops1.forEach(op => this.crdt1.receive(op));
 		this.ops2.forEach(op => this.crdt2.receive(op));
 		this.ops1 = [];

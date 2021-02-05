@@ -349,6 +349,7 @@ class Logoot extends EventEmitter {
 		const blockId = operation.blockId;
 		node.timestamp = operation.timestamp;
 		node.blockId = blockId;
+		node.logoot.site = operation.site;
 		node.setEmpty(false);
 		const index = node.getOrder();
 		this.emit('insertBlock', {
@@ -833,17 +834,18 @@ class Logoot extends EventEmitter {
 		 * @param {Node} parent
 		 * @return {Node}
 		 */
-		function parseNode(n, parent) {
+		function parseNode(n, parent, site) {
 			const NodeType = createNodeFromType(n.type);
 			const node = new NodeType(parseId(n.id), n.value, Logoot);
 			node.parent = parent;
-			node.children = n.children.map(c => parseNode(c, node));
+			node.children = n.children.map(c => parseNode(c, node, site));
 			node.size = n.size;
 			node.empty = n.empty;
 			if (n.type === 'Block') {
 				node.blockId = n.blockId;
 				node.logoot = new Logoot(node.blockId);
 				node.logoot.setState(JSON.stringify({ root: n.logoot }));
+				node.logoot.site = site;
 				node.merged = n.merged;
 				node.timestamp = n.timestamp;
 			}
@@ -855,7 +857,7 @@ class Logoot extends EventEmitter {
 			}
 			return node;
 		}
-		this._root = parseNode(parsed.root, null);
+		this._root = parseNode(parsed.root, null, this.site);
 		this._deleteQueue = parsed.deleteQueue ? parsed.deleteQueue : [];
 	}
 
@@ -869,9 +871,9 @@ class Logoot extends EventEmitter {
 		const node = this._root.getChildByPath(position, true, BlockNode, Logoot);
 		node.setEmpty(false);
 		const blockId = id ? id : generateString(5);
+		node.logoot.site = this.site;
 		node.blockId = blockId;
 		node.timestamp = { timestamp: new Date().getTime(), site: this.site };
-
 		return node;
 	}
 	/**
@@ -882,11 +884,13 @@ class Logoot extends EventEmitter {
 	 */
 	insertBlock(index, id) {
 		const node = this._insertBlock(index, id);
+
 		this.emit('operation', {
 			type: 'insertBlock',
 			position: node.getPath(),
 			blockId: node.blockId,
-			timestamp: node.timestamp
+			timestamp: node.timestamp,
+			site: node.logoot.site
 		});
 		return node;
 	}

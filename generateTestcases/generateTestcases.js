@@ -2,7 +2,7 @@ const operations = require('./operations');
 const Logoot = require('../src/logoot');
 const TestNode = require('./TestNode');
 
-const initialCRDT = new Logoot('1');
+const initialCRDT = new Logoot('initial');
 const blocks = [];
 for (let i = 0; i < 3; i++) {
 	blocks.push(initialCRDT.insertBlock(i).blockId);
