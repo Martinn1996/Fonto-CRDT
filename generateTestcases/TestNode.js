@@ -35,7 +35,7 @@ class TestNode {
 			console.log('states different, trace: ', this.trace);
 			console.log('value crdt1:', this.crdt1.getState());
 			console.log('value crdt2:', this.crdt2.getState());
-			x
+			x;
 		}
 	}
 
