@@ -11,7 +11,7 @@ for (let i = 0; i < 3; i++) {
 	initialCRDT.insertContentInBlock(content, 0, blocks[i]);
 }
 
-const rootTestNode = new TestNode(initialCRDT, initialCRDT, blocks, blocks, [], []);
+const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
 
 // rootTestNode.generateOperations(operations, rootTestNode.crdt1, rootTestNode.blocks1);
 rootTestNode.createChildNodes(operations);

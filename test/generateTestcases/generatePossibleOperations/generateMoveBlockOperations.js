@@ -1,10 +1,10 @@
 const generateIndices = require('../generateIndices');
 
-module.exports = (rootCRDT, blocks) => {
+module.exports = rootCRDT => {
 	const indices = generateIndices(rootCRDT);
 	const res = [];
 	for (const index of indices) {
-		for (const blockId of blocks) {
+		for (const blockId of rootCRDT.getBlocks()) {
 			res.push({
 				type: 'moveBlock',
 				blockId: blockId,

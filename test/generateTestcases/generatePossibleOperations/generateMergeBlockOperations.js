@@ -1,6 +1,6 @@
-module.exports = (_, blocks) => {
+module.exports = rootCRDT => {
 	const res = [];
-
+	const blocks = rootCRDT.getBlocks();
 	for (const blockId1 of blocks) {
 		for (const blockId2 of blocks) {
 			if (blockId1 !== blockId2) {

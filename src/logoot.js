@@ -945,6 +945,22 @@ class Logoot extends EventEmitter {
 		return null;
 	}
 
+	getBlocks() {
+		const queue = [];
+		const res = [];
+		queue.push(this._root);
+		while (queue.length > 0) {
+			const node = queue.shift();
+			if (node instanceof BlockNode && !node.empty && !node.merged) {
+				res.push(node.blockId);
+			}
+			for (const child of node.children) {
+				queue.push(child);
+			}
+		}
+		return res;
+	}
+
 	/**
 	 * Breadth-first search for blocks on id
 	 * @param {string} blockId for searching block
