@@ -31,7 +31,7 @@ class TestNode {
 	assertCRDTs() {
 		it('trace: ' + JSON.stringify(this.trace), () => {
 			try {
-				assert.equal(this.crdt1.value() + 1, this.crdt2.value());
+				assert.equal(this.crdt1.value(), this.crdt2.value());
 			} catch (e) {
 				failedTests.failedTests[md5(JSON.stringify(this.trace))] = { trace: this.trace };
 				throw new Error(e);
