@@ -49,10 +49,12 @@ class TestNode {
 
 	createChildNodes(operations) {
 		const childNodesAsObject = this.generateOperationsForBothCRDTs(operations);
-		for (let i = 0; i < childNodesAsObject.length; i++) {
+
+		return childNodesAsObject.map(operation => {
 			const node = this.copy();
-			executeOperation(node, childNodesAsObject[i]);
-		}
+			executeOperation(node, operation);
+			return node;
+		});
 	}
 
 	generateOperationsForBothCRDTs(operations) {
