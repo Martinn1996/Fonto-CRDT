@@ -1,6 +1,8 @@
 const operations = require('./operations');
 const Logoot = require('../src/logoot');
 const TestNode = require('./TestNode');
+const failedTests = require('./failedTests');
+const fs = require('fs');
 
 function createRootTestNode() {
 	const initialCRDT = new Logoot('initial');
@@ -11,7 +13,7 @@ function createRootTestNode() {
 		const content = '' + base + '' + (base + 1) + '' + (base + 2);
 		initialCRDT.insertContentInBlock(content, 0, blocks[i]);
 	}
-
+	failedTests.initialCRDTState = initialCRDT.getState();
 	const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
 
 	return rootTestNode;
@@ -30,6 +32,16 @@ function test(nodesInLayer, treeLevel) {
 	test(res, treeLevel - 1);
 }
 
-// rootTestNode.generateOperations(operations, rootTestNode.crdt1, rootTestNode.blocks1);
-// console.log(rootTestNode.createChildNodes(operations));
-test([createRootTestNode()], 2);
+describe('test', () => {
+	test([createRootTestNode()], 1);
+
+	after(() => {
+		fs.writeFile(
+			'generateTestcases/data/failedTests.json',
+			JSON.stringify(failedTests, null, 4),
+			function(err) {
+				if (err) return console.error(err);
+			}
+		);
+	});
+});

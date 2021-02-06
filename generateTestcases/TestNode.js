@@ -1,7 +1,7 @@
 const Logoot = require('../src/logoot');
 const executeOperation = require('./executeOperation');
 const assert = require('chai').assert;
-
+const failedTests = require('./failedTests');
 class TestNode {
 	constructor(CRDT1, CRDT2, ops1, ops2, trace) {
 		this.crdt1 = new Logoot('crdt1');
@@ -28,15 +28,14 @@ class TestNode {
 	}
 
 	assertCRDTs() {
-		try {
-			assert.equal(this.crdt1.value(), this.crdt2.value());
-		} catch (_) {
-			console.log(this.crdt1.site);
-			console.log('states different, trace: ', this.trace);
-			console.log('value crdt1:', this.crdt1.getState());
-			console.log('value crdt2:', this.crdt2.getState());
-			x;
-		}
+		it('trace: ' + JSON.stringify(this.trace), () => {
+			try {
+				assert.equal(this.crdt1.value() + 1, this.crdt2.value());
+			} catch (e) {
+				failedTests.failedTests.push({ trace: this.trace });
+				throw new Error(e);
+			}
+		});
 	}
 
 	sync() {
