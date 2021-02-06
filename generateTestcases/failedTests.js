@@ -1,4 +1,4 @@
 module.exports = {
 	initialCRDTState: '',
-	failedTests: []
+	failedTests: {}
 };

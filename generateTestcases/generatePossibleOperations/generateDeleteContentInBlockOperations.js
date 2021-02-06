@@ -1,6 +1,6 @@
 const generateIndices = require('../generateIndices');
 
-module.exports = (rootCRDT) => {
+module.exports = rootCRDT => {
 	const res = [];
 	for (const blockId of rootCRDT.getBlocks()) {
 		const crdt = rootCRDT._searchBlock(blockId).logoot;
@@ -9,7 +9,7 @@ module.exports = (rootCRDT) => {
 			res.push({
 				type: 'deleteContentInBlock',
 				blockId: blockId,
-				index: index,
+				index: index
 			});
 		}
 	}

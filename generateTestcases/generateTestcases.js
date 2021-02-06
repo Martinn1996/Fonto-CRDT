@@ -4,7 +4,7 @@ const TestNode = require('./TestNode');
 const failedTests = require('./failedTests');
 const fs = require('fs');
 
-function createRootTestNode() {
+function createDefaultRootTestNode() {
 	const initialCRDT = new Logoot('initial');
 	const blocks = [];
 	for (let i = 0; i < 3; i++) {
@@ -33,7 +33,7 @@ function test(nodesInLayer, treeLevel) {
 }
 
 describe('test', () => {
-	test([createRootTestNode()], 1);
+	test([createDefaultRootTestNode()], 1);
 
 	after(() => {
 		fs.writeFile(

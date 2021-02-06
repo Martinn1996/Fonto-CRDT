@@ -1,6 +1,7 @@
 const Logoot = require('../src/logoot');
 const executeOperation = require('./executeOperation');
 const assert = require('chai').assert;
+const md5 = require('md5');
 const failedTests = require('./failedTests');
 class TestNode {
 	constructor(CRDT1, CRDT2, ops1, ops2, trace) {
@@ -32,7 +33,7 @@ class TestNode {
 			try {
 				assert.equal(this.crdt1.value() + 1, this.crdt2.value());
 			} catch (e) {
-				failedTests.failedTests.push({ trace: this.trace });
+				failedTests.failedTests[md5(JSON.stringify(this.trace))] = { trace: this.trace };
 				throw new Error(e);
 			}
 		});
