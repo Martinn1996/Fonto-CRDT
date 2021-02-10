@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const operations = require('./operations');
 const initialOperations = require('./initialOperations');
 const Logoot = require('../src/logoot');
@@ -37,7 +38,7 @@ function test(nodesInLayer, treeLevel) {
 function createDefaultRootTestNodeInitial() {
 	const initialCRDT = new Logoot('initial');
 	for (let i = 0; i < 3; i++) {
-		const base = 3 * i + "";
+		const base = 3 * i + '';
 		initialCRDT.insert(base, i);
 	}
 	failedTests.initialCRDTState = initialCRDT.getState();
