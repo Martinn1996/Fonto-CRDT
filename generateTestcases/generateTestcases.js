@@ -1,8 +1,10 @@
 const operations = require('./operations');
+const initialOperations = require('./initialOperations');
 const Logoot = require('../src/logoot');
 const TestNode = require('./TestNode');
 const failedTests = require('./failedTests');
 const fs = require('fs');
+const _ = require('underscore');
 
 function createDefaultRootTestNode() {
 	const initialCRDT = new Logoot('initial');
@@ -32,8 +34,49 @@ function test(nodesInLayer, treeLevel) {
 	test(res, treeLevel - 1);
 }
 
+function createDefaultRootTestNodeInitial() {
+	const initialCRDT = new Logoot('initial');
+	for (let i = 0; i < 3; i++) {
+		const base = 3 * i + "";
+		initialCRDT.insert(base, i);
+	}
+	failedTests.initialCRDTState = initialCRDT.getState();
+	const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
+
+	return rootTestNode;
+}
+
+function factorial(n) {
+	let answer = 1;
+	if (n === 0 || n === 1) {
+		return answer;
+	}
+
+	for (let i = n; i >= 1; i--) {
+		answer = answer * i;
+	}
+	return answer;
+}
+
+function testInitial(nodesInLayer, treeLevel) {
+	console.error = () => {};
+	if (treeLevel === 0) return nodesInLayer;
+	let res = [];
+	let count = 0;
+	for (const testNode of nodesInLayer) {
+		count++;
+		res = res.concat(testNode.createChildNodes(initialOperations));
+		res = _.sample(res, res.length / factorial(count));
+
+		console.log(treeLevel, count, '/', nodesInLayer.length);
+	}
+
+	testInitial(res, treeLevel - 1);
+}
+
 describe('test', () => {
 	test([createDefaultRootTestNode()], 1);
+	testInitial([createDefaultRootTestNodeInitial()], 10);
 
 	after(() => {
 		fs.writeFile(
