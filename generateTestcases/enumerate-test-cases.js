@@ -1,24 +1,25 @@
-const createRootNode = require('./src/createRootNode');
-const failedTests = require('./src/failedTests');
-const runTestSuite = require('./src/runTestSuite');
-const fs = require('fs');
 const operations = require('./src/operations');
+const initialOperations = require('./src/initialOperations');
 
-describe('test', () => {
-	before(() => {
-		failedTests.initialCRDTState = {};
-		failedTests.failedTests = [];
-	});
-	runTestSuite([createRootNode()], 1, operations);
-	// testInitial([createDefaultRootTestNodeInitial()], 10);
+const createTestSuite = require('./src/createTestSuite');
+const TestNode = require('./src/TestNode');
+const Logoot = require('../src/logoot');
 
-	after(() => {
-		fs.writeFile(
-			'generateTestcases/data/failedTests.json',
-			JSON.stringify(failedTests, null, 4),
-			function(err) {
-				if (err) return console.error(err);
-			}
-		);
-	});
-});
+function createDefaultRootTestNodeInitial() {
+	const initialCRDT = new Logoot('initial');
+	for (let i = 0; i < 3; i++) {
+		const base = 3 * i + '';
+		initialCRDT.insert(base, i);
+	}
+	const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
+
+	return rootTestNode;
+}
+// createTestSuite('test-all-cases', operations, 1);
+createTestSuite(
+	'test-basic case',
+	initialOperations,
+	10,
+	0.9,
+	createDefaultRootTestNodeInitial().crdt1.getState()
+);

@@ -38,7 +38,6 @@ module.exports = state => {
 	} else {
 		initialCRDT = setState(state);
 	}
-	failedTests.initialCRDTState = initialCRDT.getState();
 	const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
 
 	return rootTestNode;

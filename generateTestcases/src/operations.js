@@ -6,7 +6,17 @@ const generateMergeBlockOperations = require('./generatePossibleOperations/gener
 const generateMoveBlockOperations = require('./generatePossibleOperations/generateMoveBlockOperations');
 const generateSplitBlockOperations = require('./generatePossibleOperations/generateSplitBlockOperations');
 
-module.exports = [
+// module.exports = [
+	// generateInsertContentInBlockOperations,
+	// generateDeleteContentInBlockOperations,
+	// generateInsertBlockOperations,
+	// generateDeleteBlockOperations,
+	// generateMoveBlockOperations,
+	// generateSplitBlockOperations,
+	// generateMergeBlockOperations
+// ];
+
+module.exports = {
 	generateInsertContentInBlockOperations,
 	generateDeleteContentInBlockOperations,
 	generateInsertBlockOperations,
@@ -14,4 +24,4 @@ module.exports = [
 	generateMoveBlockOperations,
 	generateSplitBlockOperations,
 	generateMergeBlockOperations
-];
+}

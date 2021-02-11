@@ -12,7 +12,7 @@ module.exports = function test(nodesInLayer, treeLevel, operations, prunePercent
 	}
 
 	if (prunePercentage) {
-		res = _.sample(res, Math.floor(res.length / (res.length * prunePercentage)));
+		res = _.sample(res, Math.floor(res.length / (res.length * (1 - prunePercentage))));
 	}
-	test(res, treeLevel - 1, prunePercentage);
+	test(res, treeLevel - 1, operations, prunePercentage);
 };
