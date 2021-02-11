@@ -16,6 +16,8 @@ function createTestSuite(name, operations, actionCount, prunePercentage, state) 
 		runTestSuite([testNode], actionCount, operations, prunePercentage);
 
 		after(() => {
+			console.log(failedTests)
+
 			fs.writeFile(
 				`generateTestcases/data/${name}.json`,
 				JSON.stringify(failedTests, null, 4),

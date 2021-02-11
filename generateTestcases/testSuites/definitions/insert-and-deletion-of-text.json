@@ -1,0 +1,10 @@
+{
+    "name": "base case test on plain text crdt",
+    "actionCount": 10,
+    "prunePercentage": 0.9,
+    "operations": [
+        "generateDeleteOperations",
+        "generateInsertOperations"
+    ],
+    "startState": "{\"root\":{\"size\":5,\"empty\":true,\"type\":\"Node\",\"children\":[{\"id\":{\"int\":0,\"site\":null,\"clock\":null},\"size\":1,\"empty\":false,\"type\":\"Node\",\"children\":[]},{\"id\":{\"int\":1,\"site\":\"initial\",\"clock\":0},\"size\":1,\"empty\":false,\"type\":\"Character\",\"value\":\"0\",\"children\":[]},{\"id\":{\"int\":26,\"site\":\"initial\",\"clock\":1},\"size\":1,\"empty\":false,\"type\":\"Character\",\"value\":\"3\",\"children\":[]},{\"id\":{\"int\":243,\"site\":\"initial\",\"clock\":2},\"size\":1,\"empty\":false,\"type\":\"Character\",\"value\":\"6\",\"children\":[]},{\"id\":{\"int\":256,\"site\":null,\"clock\":null},\"size\":1,\"empty\":false,\"type\":\"Node\",\"children\":[]}]},\"deleteQueue\":[]}"
+}

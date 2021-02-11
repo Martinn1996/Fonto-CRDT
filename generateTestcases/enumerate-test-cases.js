@@ -1,25 +1,25 @@
-const operations = require('./src/operations');
-const initialOperations = require('./src/initialOperations');
-
 const createTestSuite = require('./src/createTestSuite');
-const TestNode = require('./src/TestNode');
-const Logoot = require('../src/logoot');
+const parseOperations = require('./src/parseOperations');
+const parser = require('./testSuites/parser');
 
-function createDefaultRootTestNodeInitial() {
-	const initialCRDT = new Logoot('initial');
-	for (let i = 0; i < 3; i++) {
-		const base = 3 * i + '';
-		initialCRDT.insert(base, i);
-	}
-	const rootTestNode = new TestNode(initialCRDT, initialCRDT, [], [], []);
+const operations = parseOperations([
+	'generateInsertContentInBlockOperations',
+	'generateDeleteContentInBlockOperations',
+	'generateInsertBlockOperations',
+	'generateDeleteBlockOperations',
+	'generateMoveBlockOperations',
+	'generateSplitBlockOperations',
+	'generateMergeBlockOperations'
+]);
 
-	return rootTestNode;
+const testSuites = parser();
+
+for (const testSuite of testSuites) {
+	createTestSuite(
+		testSuite.name,
+		testSuite.operations,
+		testSuite.actionCount,
+		testSuite.prunePercentage,
+		testSuite.startState
+	);
 }
-// createTestSuite('test-all-cases', operations, 1);
-createTestSuite(
-	'test-basic case',
-	initialOperations,
-	10,
-	0.9,
-	createDefaultRootTestNodeInitial().crdt1.getState()
-);
