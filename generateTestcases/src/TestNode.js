@@ -33,7 +33,11 @@ class TestNode {
 			try {
 				assert.equal(this.crdt1.value(), this.crdt2.value());
 			} catch (e) {
-				failedTests.failedTests[md5(JSON.stringify(this.trace))] = { trace: this.trace };
+				failedTests.failedTests[md5(JSON.stringify(this.trace))] = {
+					valueCRDT1: this.crdt1.value(),
+					valueCRDT2: this.crdt1.value(),
+					trace: this.trace
+				};
 				throw new Error(e);
 			}
 		});
@@ -52,7 +56,19 @@ class TestNode {
 
 		return childNodesAsObject.map(operation => {
 			const node = this.copy();
-			executeOperation(node, operation);
+			try {
+				executeOperation(node, operation);
+			} catch (e) {
+				it('trace: ' + JSON.stringify(this.trace), () => {
+					failedTests.failedTests[md5(JSON.stringify(this.trace))] = {
+						valueCRDT1: this.crdt1.value(),
+						valueCRDT2: this.crdt1.value(),
+						trace: this.trace,
+						error: e
+					};
+					throw new Error(e);
+				});
+			}
 			return node;
 		});
 	}
