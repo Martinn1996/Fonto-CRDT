@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Logoot = require('../src/logoot');
-const executeOperation = require('./executeOperation');
-const TestNode = require('./TestNode');
+const executeOperation = require('./src/executeOperation');
+const TestNode = require('./src/TestNode');
 
 function createTestNodeFromState(state) {
 	const crdt = new Logoot('crdt1');
@@ -10,7 +10,7 @@ function createTestNodeFromState(state) {
 }
 
 async function runTestCases(traceCodes) {
-	let data = fs.readFileSync('generateTestcases/data/failedTests.json', {
+	let data = fs.readFileSync('generateTestcases/data/base case test on plain text crdt.json', {
 		encoding: 'utf8',
 		flag: 'r'
 	});
@@ -27,5 +27,5 @@ async function runTestCases(traceCodes) {
 }
 
 describe('test', () => {
-	runTestCases(['5e2f145b6d6e8627f5efeafd30be83f1', '871eb4d227589e8e89d5cc94099beacf']);
+	runTestCases(['bb19de1747780c6974f685a12ae01278']);
 });

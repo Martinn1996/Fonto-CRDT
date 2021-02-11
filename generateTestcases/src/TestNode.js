@@ -64,7 +64,7 @@ class TestNode {
 						valueCRDT1: this.crdt1.value(),
 						valueCRDT2: this.crdt1.value(),
 						trace: this.trace,
-						error: e
+						error: new Error(e)
 					};
 					throw new Error(e);
 				});

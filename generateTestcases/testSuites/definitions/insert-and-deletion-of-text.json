@@ -1,6 +1,6 @@
 {
     "name": "base case test on plain text crdt",
-    "actionCount": 5,
+    "actionCount": 4,
     "prunePercentage": 0.97,
     "operations": [
         "generateDeleteOperations",
