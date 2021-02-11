@@ -48,8 +48,12 @@ function executeOnCRDT(crdt, operation) {
 module.exports = (testNode, operation) => {
 	executeOnCRDT(testNode.crdt1, operation.operationCRDT1);
 	executeOnCRDT(testNode.crdt2, operation.operationCRDT2);
-	testNode.trace.push(operation);
-
+	const res = {
+		operation,
+		lastops: [testNode.lastOps1, testNode.lastOps2],
+		currentValues: [testNode.crdt1.value(), testNode.crdt2.value()]
+	};
+	testNode.trace.push(res);
 	if (operation.sync) {
 		testNode.sync();
 	}

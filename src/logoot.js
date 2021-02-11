@@ -44,9 +44,9 @@ function parseOperation(operation) {
 function arePositionsEqual(a, b) {
 	if (a.length !== b.length) return false;
 
-	return !a.some((id, index) => {
+	return !a.filter((id, index) => {
 		return id.compare(b[index]) !== 0;
-	});
+	}).length === 0;
 }
 
 /**
@@ -859,6 +859,10 @@ class Logoot extends EventEmitter {
 		}
 		this._root = parseNode(parsed.root, null, this.site);
 		this._deleteQueue = parsed.deleteQueue ? parsed.deleteQueue : [];
+		this._deleteQueue = this._deleteQueue.map(obj => {
+			obj.position = obj.position.map(parseId);
+			return obj;
+		});
 	}
 
 	_insertBlock(index, id) {

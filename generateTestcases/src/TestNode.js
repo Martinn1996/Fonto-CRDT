@@ -14,28 +14,38 @@ class TestNode {
 		this.ops1 = this.deepCopyArray(ops1);
 		this.ops2 = this.deepCopyArray(ops2);
 		this.trace = this.deepCopyArray(trace);
-
+		this.lastOps1 = null;
+		this.lastOps2 = null;
 		this.crdt1.on('operation', op => {
 			this.ops2.push(op);
+			this.lastOps1 = op;
 		});
 
 		this.crdt2.on('operation', op => {
 			this.ops1.push(op);
+			this.lastOps2 = op;
 		});
 	}
 
 	copy() {
-		return new TestNode(this.crdt1, this.crdt2, this.ops1, this.ops2, this.trace);
+		const res = new TestNode(this.crdt1, this.crdt2, this.ops1, this.ops2, this.trace);
+		res.crdt1.clock = this.crdt1.clock;
+		res.crdt2.clock = this.crdt2.clock;
+		return res;
 	}
 
 	assertCRDTs() {
+		const v1 = this.crdt1.value();
+		const v2 = this.crdt2.value();
 		it('trace: ' + JSON.stringify(this.trace), () => {
 			try {
-				assert.equal(this.crdt1.value(), this.crdt2.value());
+				assert.equal(v1, v2);
 			} catch (e) {
 				failedTests.failedTests[md5(JSON.stringify(this.trace))] = {
-					valueCRDT1: this.crdt1.value(),
-					valueCRDT2: this.crdt1.value(),
+					valueCRDT1: v1,
+					valueCRDT2: v2,
+					state1: this.crdt1.getState(),
+					state2: this.crdt2.getState(),
 					trace: this.trace
 				};
 				throw new Error(e);
@@ -48,6 +58,9 @@ class TestNode {
 		this.ops2.forEach(op => this.crdt2.receive(op));
 		this.ops1 = [];
 		this.ops2 = [];
+		this.trace.push({
+			valuesAfterSync: [this.crdt1.value(), this.crdt2.value()]
+		});
 		this.assertCRDTs();
 	}
 

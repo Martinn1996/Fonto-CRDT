@@ -5,6 +5,6 @@
     },
     {
         "file": "test-all-cases-1-action.json",
-        "execute": false
+        "execute": true
     }
 ]
