@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-const operations = require('./operations');
-const initialOperations = require('./initialOperations');
+const operations = require('./src/operations');
+const initialOperations = require('./src/initialOperations');
 const Logoot = require('../src/logoot');
-const TestNode = require('./TestNode');
-const failedTests = require('./failedTests');
+const TestNode = require('./src/TestNode');
+const failedTests = require('./src/failedTests');
 const fs = require('fs');
 const _ = require('underscore');
 

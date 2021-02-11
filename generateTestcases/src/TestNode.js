@@ -1,4 +1,4 @@
-const Logoot = require('../src/logoot');
+const Logoot = require('../../src/logoot');
 const executeOperation = require('./executeOperation');
 const assert = require('chai').assert;
 const md5 = require('md5');
