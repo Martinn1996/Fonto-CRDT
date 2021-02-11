@@ -20,7 +20,8 @@ module.exports = () => {
 	const defintions = JSON.parse(data);
 
 	for (const file of defintions) {
-		res.push(parseSuiteFromJSON(file));
+		if (!file.execute) continue;
+		res.push(parseSuiteFromJSON(file.file));
 	}
 	return res;
 };

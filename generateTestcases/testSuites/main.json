@@ -1,3 +1,10 @@
 [
-    "insert-and-deletion-of-text.json"
+    {
+        "file": "insert-and-deletion-of-text.json",
+        "execute": true
+    },
+    {
+        "file": "test-all-cases-1-action.json",
+        "execute": false
+    }
 ]

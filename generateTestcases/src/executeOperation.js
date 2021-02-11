@@ -1,5 +1,7 @@
 const deleteBlock = require('./operations/deleteBlock');
 const deleteContentInBlock = require('./operations/deleteContentInBlock');
+const deleteText = require('./operations/deleteText');
+const insert = require('./operations/insert');
 const insertBlock = require('./operations/insertBlock');
 const insertContentInBlock = require('./operations/insertContentInBlock');
 const mergeBlocks = require('./operations/mergeBlocks');
@@ -32,8 +34,14 @@ function executeOnCRDT(crdt, operation) {
 		case 'deleteContentInBlock':
 			deleteContentInBlock(crdt, operation.blockId, operation.index);
 			break;
+		case 'insert':
+			insert(crdt, operation.index, operation.text);
+			break;
+		case 'delete':
+			deleteText(crdt, operation.index);
+			break;
 		default:
-			console.error(operation.type, 'is not defined');
+			console.log(operation.type, 'is not defined');
 	}
 }
 

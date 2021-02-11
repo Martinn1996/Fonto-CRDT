@@ -10,14 +10,12 @@ function createTestSuite(name, operations, actionCount, prunePercentage, state) 
 
 		before(() => {
 			failedTests.initialCRDTState = testNode.crdt1.getState();
-			failedTests.failedTests = [];
+			failedTests.failedTests = {};
 		});
 
 		runTestSuite([testNode], actionCount, operations, prunePercentage);
 
 		after(() => {
-			console.log(failedTests)
-
 			fs.writeFile(
 				`generateTestcases/data/${name}.json`,
 				JSON.stringify(failedTests, null, 4),
