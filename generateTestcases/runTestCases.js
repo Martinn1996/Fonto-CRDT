@@ -10,10 +10,13 @@ function createTestNodeFromState(state) {
 }
 
 async function runTestCases(traceCodes) {
-	let data = fs.readFileSync('generateTestcases/data/base case test on plain text crdt.json', {
-		encoding: 'utf8',
-		flag: 'r'
-	});
+	let data = fs.readFileSync(
+		'generateTestcases/data/test all operations with 1 action per crdt.json',
+		{
+			encoding: 'utf8',
+			flag: 'r'
+		}
+	);
 	data = JSON.parse(data);
 	const startNode = createTestNodeFromState(data.initialCRDTState);
 
@@ -21,11 +24,12 @@ async function runTestCases(traceCodes) {
 		const trace = data.failedTests[hashedTrace];
 		const node = startNode.copy();
 		for (const operation of trace.trace) {
-			executeOperation(node, operation);
+			// console.log(operation.operation.operationCRDT1);
+			if (operation.operation) executeOperation(node, operation.operation);
 		}
 	}
 }
 
 describe('test', () => {
-	runTestCases(['916ae6d72b912f3ddb40526df0885f67']);
+	runTestCases(['0519c803afbf0e9cbb287722c185ef7e']);
 });

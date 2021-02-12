@@ -1,7 +1,7 @@
 [
     {
         "file": "insert-and-deletion-of-text.json",
-        "execute": true
+        "execute": false
     },
     {
         "file": "test-all-cases-1-action.json",
