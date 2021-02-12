@@ -5,6 +5,10 @@
     },
     {
         "file": "test-all-cases-1-action.json",
+        "execute": false
+    },
+    {
+        "file": "merge-delete-block.json",
         "execute": true
     }
 ]
