@@ -24,7 +24,6 @@ async function runTestCases(traceCodes) {
 		const trace = data.failedTests[hashedTrace];
 		const node = startNode.copy();
 		for (const operation of trace.trace) {
-			// console.log(operation.operation.operationCRDT1);
 			if (operation.operation) executeOperation(node, operation.operation);
 		}
 	}

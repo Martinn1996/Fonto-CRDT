@@ -1,14 +1,18 @@
 [
     {
         "file": "insert-and-deletion-of-text.json",
-        "execute": false
+        "execute": true
     },
     {
         "file": "test-all-cases-1-action.json",
-        "execute": false
+        "execute": true
     },
     {
-        "file": "merge-delete-block.json",
+        "file": "merge.json",
+        "execute": true
+    },
+    {
+        "file": "merge and delete.json",
         "execute": true
     }
 ]

@@ -1,0 +1,9 @@
+{
+    "name": "merge and delete",
+    "prunePercentage": 0,
+    "actionCount": 3,
+    "operations": [
+        "generateDeleteBlockOperations",
+        "generateMergeBlockOperations"
+    ]
+}

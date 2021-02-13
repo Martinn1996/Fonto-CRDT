@@ -1,7 +1,7 @@
 {
     "name": "merge",
-    "actionCount": 5,
-    "prunePercentage": 0.5,
+    "actionCount": 4,
+    "prunePercentage": 0,
     "operations": [
         "generateMergeBlockOperations"
     ]
