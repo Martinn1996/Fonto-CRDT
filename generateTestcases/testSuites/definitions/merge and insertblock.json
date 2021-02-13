@@ -1,0 +1,9 @@
+{
+    "name": "merge and insertblock",
+    "prunePercentage": 0,
+    "actionCount": 2,
+    "operations": [
+        "generateInsertBlockOperations",
+        "generateMergeBlockOperations"
+    ]
+}

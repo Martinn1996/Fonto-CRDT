@@ -12,6 +12,7 @@
     "build": "browserify editor/static/script.js > editor/static/bundle.js",
     "start": "npm run build && node editor/server.js",
     "checkstyle": "eslint .",
+    "generate-test-suite": "node generateTestcases/testSuites/generateSuite.js",
     "jsdoc": "./node_modules/.bin/jsdoc src/logoot.js"
   },
   "repository": {

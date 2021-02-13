@@ -1,3 +1,3 @@
-module.exports = (crdt, index) => {
-	crdt.insertBlock(index);
+module.exports = (crdt, index, blockId) => {
+	crdt.insertBlock(index, blockId);
 };

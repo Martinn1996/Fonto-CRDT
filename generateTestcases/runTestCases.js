@@ -3,6 +3,9 @@ const Logoot = require('../src/logoot');
 const executeOperation = require('./src/executeOperation');
 const TestNode = require('./src/TestNode');
 
+const file = 'test all operations with 1 action per crdt.json';
+const testCases = ['7dd2201bfc061ad55ded63a27369a590', '5d35b8476f3c6e4b2e5d22fbcfff5160'];
+
 function createTestNodeFromState(state) {
 	const crdt = new Logoot('crdt1');
 	crdt.setState(state);
@@ -10,13 +13,10 @@ function createTestNodeFromState(state) {
 }
 
 async function runTestCases(traceCodes) {
-	let data = fs.readFileSync(
-		'generateTestcases/data/test all operations with 1 action per crdt.json',
-		{
-			encoding: 'utf8',
-			flag: 'r'
-		}
-	);
+	let data = fs.readFileSync(`generateTestcases/data/${file}`, {
+		encoding: 'utf8',
+		flag: 'r'
+	});
 	data = JSON.parse(data);
 	const startNode = createTestNodeFromState(data.initialCRDTState);
 
@@ -30,5 +30,5 @@ async function runTestCases(traceCodes) {
 }
 
 describe('test', () => {
-	runTestCases(['0519c803afbf0e9cbb287722c185ef7e']);
+	runTestCases(testCases);
 });

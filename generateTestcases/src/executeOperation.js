@@ -14,7 +14,7 @@ function executeOnCRDT(crdt, operation) {
 	}
 	switch (operation.type) {
 		case 'insertBlock':
-			insertBlock(crdt, operation.index);
+			insertBlock(crdt, operation.index, operation.blockId);
 			break;
 		case 'deleteBlock':
 			deleteBlock(crdt, operation.blockId);

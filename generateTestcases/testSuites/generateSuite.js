@@ -2,10 +2,10 @@ const fs = require('fs');
 const Logoot = require('../../src/logoot');
 
 // Enter name of test suite
-const testSuiteName = 'merge and delete';
+const testSuiteName = 'merge and insertblock';
 
 // Enter prune percentage
-const prunePercentage = 0;
+const prunePercentage = 0.5;
 
 // Enter action count
 const actionCount = 3;
@@ -13,8 +13,8 @@ const actionCount = 3;
 // Comment out which one you do not want to test
 const operations = [
 	// 'generateInsertContentInBlockOperations',
-	'generateDeleteContentInBlockOperations',
-	// 'generateInsertBlockOperations',
+	// 'generateDeleteContentInBlockOperations',
+	'generateInsertBlockOperations',
 	// 'generateDeleteBlockOperations',
 	// 'generateMoveBlockOperations',
 	// 'generateSplitBlockOperations',
