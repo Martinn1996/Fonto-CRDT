@@ -4,7 +4,11 @@ const executeOperation = require('./src/executeOperation');
 const TestNode = require('./src/TestNode');
 
 const file = 'test all operations with 1 action per crdt.json';
-const testCases = ['7dd2201bfc061ad55ded63a27369a590', '5d35b8476f3c6e4b2e5d22fbcfff5160'];
+// eslint-disable-next-line prettier/prettier
+const testCases = [
+	'7dd2201bfc061ad55ded63a27369a590', 
+	'5d35b8476f3c6e4b2e5d22fbcfff5160'
+];
 
 function createTestNodeFromState(state) {
 	const crdt = new Logoot('crdt1');

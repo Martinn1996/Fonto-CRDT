@@ -8,7 +8,7 @@ module.exports = function test(nodesInLayer, treeLevel, operations, prunePercent
 	for (const testNode of nodesInLayer) {
 		count++;
 		res = res.concat(testNode.createChildNodes(operations));
-		console.log('level: ', treeLevel, 'progress: ', count, '/', nodesInLayer.length);
+		console.log('actions left: ', treeLevel, 'progress: ', count, '/', nodesInLayer.length);
 	}
 
 	if (prunePercentage) {
