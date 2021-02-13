@@ -5,7 +5,7 @@
     },
     {
         "file": "test-all-cases-1-action.json",
-        "execute": true
+        "execute": false
     },
     {
         "file": "merge.json",
@@ -16,7 +16,11 @@
         "execute": false
     },
     {
-        "file": "merge and insertblock.json",
+        "file": "merge and split and insert in block.json",
         "execute": false
+    },
+    {
+        "file": "merge and split.json",
+        "execute": true
     }
 ]
