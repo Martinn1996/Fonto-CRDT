@@ -94,12 +94,14 @@ class TestNode {
 
 		for (const operationCRDT1 of operationsCRDT1) {
 			for (const operationCRDT2 of operationsCRDT2) {
+				if (operationCRDT2.type === 'mergeBlocks') {
+					continue;
+				}
 				res.push({
 					operationCRDT1,
 					operationCRDT2,
 					sync: true
 				});
-
 				res.push({
 					operationCRDT1,
 					operationCRDT2,

@@ -848,6 +848,7 @@ class Logoot extends EventEmitter {
 				node.logoot.site = site;
 				node.merged = n.merged;
 				node.timestamp = n.timestamp;
+				node.mergedTimestamp = n.mergedTimestamp;
 			}
 			if (n.type === 'Merge') {
 				node.referenceId = n.referenceId;

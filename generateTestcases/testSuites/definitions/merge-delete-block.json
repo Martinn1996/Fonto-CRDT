@@ -1,5 +1,5 @@
 {
-    "name": "test all operations with 1 action per crdt",
+    "name": "merge",
     "actionCount": 5,
     "prunePercentage": 0.5,
     "operations": [
