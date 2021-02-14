@@ -2,7 +2,7 @@ const fs = require('fs');
 const Logoot = require('../../src/logoot');
 
 // Enter name of test suite
-const testSuiteName = 'merge and insertblock';
+const testSuiteName = 'merge and split';
 
 // Enter prune percentage
 const prunePercentage = 0.5;
@@ -14,10 +14,10 @@ const actionCount = 3;
 const operations = [
 	// 'generateInsertContentInBlockOperations',
 	// 'generateDeleteContentInBlockOperations',
-	'generateInsertBlockOperations',
+	// 'generateInsertBlockOperations',
 	// 'generateDeleteBlockOperations',
 	// 'generateMoveBlockOperations',
-	// 'generateSplitBlockOperations',
+	'generateSplitBlockOperations',
 	'generateMergeBlockOperations'
 ];
 

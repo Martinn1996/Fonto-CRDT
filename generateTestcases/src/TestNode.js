@@ -94,7 +94,7 @@ class TestNode {
 
 		for (const operationCRDT1 of operationsCRDT1) {
 			for (const operationCRDT2 of operationsCRDT2) {
-				if (operationCRDT2.type === 'mergeBlocks' || operationCRDT2.type === 'splitBlock') {
+				if (operationCRDT2.type === 'mergeBlocks') {
 					continue;
 				}
 				res.push({

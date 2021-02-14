@@ -44,9 +44,11 @@ function parseOperation(operation) {
 function arePositionsEqual(a, b) {
 	if (a.length !== b.length) return false;
 
-	return !a.filter((id, index) => {
-		return id.compare(b[index]) !== 0;
-	}).length === 0;
+	return (
+		!a.filter((id, index) => {
+			return id.compare(b[index]) !== 0;
+		}).length === 0
+	);
 }
 
 /**
@@ -1225,7 +1227,7 @@ class Logoot extends EventEmitter {
 			node.setEmpty(true);
 			node.trimEmpty();
 
-			return { node: newNode, block: newBlock };
+			return this._moveInsertOnSplitNode(newNode, newBlock, SplitNode);
 		}
 
 		return { node: node, block: block };
