@@ -1,0 +1,8 @@
+{
+    "name": "move",
+    "prunePercentage": 0.5,
+    "actionCount": 2,
+    "operations": [
+        "generateMoveBlockOperations"
+    ]
+}

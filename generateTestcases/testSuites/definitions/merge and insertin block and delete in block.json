@@ -1,10 +1,10 @@
 {
-    "name": "merge and insertblock",
-    "prunePercentage": 0.96,
+    "name": "merge and insertin block and delete in block",
+    "prunePercentage": 0.99,
     "actionCount": 2,
     "operations": [
         "generateInsertContentInBlockOperations",
-        "generateSplitBlockOperations",
+        "generateDeleteContentInBlockOperations",
         "generateMergeBlockOperations"
     ]
 }

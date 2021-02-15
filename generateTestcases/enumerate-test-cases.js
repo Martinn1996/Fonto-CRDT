@@ -4,6 +4,7 @@ const parser = require('./testSuites/parser');
 const testSuites = parser();
 
 for (const testSuite of testSuites) {
+	console.log(testSuite.name);
 	try {
 		createTestSuite(
 			testSuite.name,

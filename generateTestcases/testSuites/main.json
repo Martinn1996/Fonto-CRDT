@@ -17,10 +17,54 @@
     },
     {
         "file": "merge and split and insert in block.json",
-        "execute": true
+        "execute": false
     },
     {
         "file": "merge and split.json",
         "execute": false
+    },
+    {
+        "file": "split.json",
+        "execute": false
+    },
+    {
+        "file": "move.json",
+        "execute": false
+    },
+    {
+        "file": "deleteBlock.json",
+        "execute": false
+    },
+    {
+        "file": "move deleteBlock.json",
+        "execute": false
+    },
+    {
+        "file": "split deleteBlock.json",
+        "execute": false
+    },
+    {
+        "file": "move deleteInBlock insertInBlock.json",
+        "execute": true
+    },
+    {
+        "file": "split and delete in block.json",
+        "execute": true
+    },
+    {
+        "file": "delete in block.json",
+        "execute": true
+    },
+    {
+        "file": "Split and move.json",
+        "execute": true
+    },
+    {
+        "file": "merge and insertin block and delete in block.json",
+        "execute": true
+    },
+    {
+        "file": "merge and insert block and move block.json",
+        "execute": true
     }
 ]

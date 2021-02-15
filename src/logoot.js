@@ -489,6 +489,9 @@ class Logoot extends EventEmitter {
 	 */
 	_receiveMoveBlock(operation) {
 		const oldBlock = this._searchAllBlock(operation.blockId);
+		if (!oldBlock) {
+			return;
+		}
 		if (isLastWriter(operation.timestamp, oldBlock.timestamp)) {
 			return;
 		}
@@ -554,7 +557,9 @@ class Logoot extends EventEmitter {
 
 		// Create split node
 		let node = block.logoot._root.getChildByPath(operation.position, true, SplitNode);
+
 		node.setEmpty(false);
+
 		node.reference = operation.reference;
 
 		// Move node when splitNode is encountered
@@ -652,7 +657,11 @@ class Logoot extends EventEmitter {
 			const prevPos = prev.getPath();
 			const nextPos = next.getPath();
 			let position = null;
-			position = this._generatePositionBetween(prevPos, nextPos, logoot.site);
+			position = this._generatePositionBetween(
+				prevPos,
+				nextPos,
+				logoot ? logoot.site : this.site
+			);
 			const node = this._root.getChildByPath(position, true, CharacterNode);
 			node.value = value;
 			node.setEmpty(false);
@@ -1244,6 +1253,17 @@ class Logoot extends EventEmitter {
 		if (this._afterSplitNode(node, block.logoot)) {
 			const refBlock = this._searchAllBlock(node.referTo);
 			const deleteNode = refBlock.logoot._root.getChildByPath(node.getPath(), false, type);
+			if (!deleteNode) {
+				const temp = refBlock.logoot._root.getChildByPath(node.getPath(), true, type);
+				const ret = this._moveDeleteOnSplitNode(temp, refBlock, type);
+				temp.setEmpty(true);
+				temp.trimEmpty();
+				return ret;
+			}
+
+			// if (this._moveDeleteOnSplitNode(deleteNode, refBlock, type)) {
+			// 	return true;
+			// }
 			deleteNode.setEmpty(false);
 
 			// Remove node

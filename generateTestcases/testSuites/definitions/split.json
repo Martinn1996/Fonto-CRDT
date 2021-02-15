@@ -1,0 +1,8 @@
+{
+    "name": "split",
+    "prunePercentage": 0,
+    "actionCount": 2,
+    "operations": [
+        "generateSplitBlockOperations"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "name": "split and delete in block",
+    "prunePercentage": 0.97,
+    "actionCount": 2,
+    "operations": [
+        "generateDeleteContentInBlockOperations",
+        "generateSplitBlockOperations"
+    ]
+}
