@@ -41,6 +41,7 @@ function executeOnCRDT(crdt, operation) {
 			deleteText(crdt, operation.index);
 			break;
 		default:
+			// eslint-disable-next-line no-console
 			console.log(operation.type, 'is not defined');
 	}
 }

@@ -8,6 +8,8 @@ module.exports = function test(nodesInLayer, treeLevel, operations, prunePercent
 	for (const testNode of nodesInLayer) {
 		count++;
 		res = res.concat(testNode.createChildNodes(operations));
+
+		// eslint-disable-next-line no-console
 		console.log('actions left: ', treeLevel, 'progress: ', count, '/', nodesInLayer.length);
 	}
 

@@ -1,5 +1,4 @@
 const Logoot = require('../../src/logoot');
-const failedTests = require('./failedTests');
 const TestNode = require('./TestNode');
 
 // eslint-disable-next-line valid-jsdoc

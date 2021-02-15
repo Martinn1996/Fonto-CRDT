@@ -4,6 +4,7 @@ const parser = require('./testSuites/parser');
 const testSuites = parser();
 
 for (const testSuite of testSuites) {
+	// eslint-disable-next-line no-console
 	console.log(testSuite.name);
 	try {
 		createTestSuite(
@@ -14,6 +15,7 @@ for (const testSuite of testSuites) {
 			testSuite.startState
 		);
 	} catch (e) {
+		// eslint-disable-next-line no-console
 		console.log(e);
 	}
 }

@@ -28,6 +28,7 @@ const res = {
 	operations
 };
 
+// eslint-disable-next-line no-unused-vars
 function createInitialCRDT(instance) {
 	const logoot = new Logoot('initial');
 

@@ -679,6 +679,7 @@ class Logoot extends EventEmitter {
 	 * Generates a new identifier based on previous and next ids
 	 * @param {Integer} prevInt id of left neighbor
 	 * @param {Integer} nextInt id of right neighbor
+	 * @param {any} site of the logoot instance generating the identifier
 	 * @return {Identifier} generated identifier
 	 */
 	_generateNewIdentifier(prevInt, nextInt, site) {
@@ -690,6 +691,7 @@ class Logoot extends EventEmitter {
 	 * Generates the position between the prevPos and nextPos
 	 * @param {Array.<number>} prevPos position of left neighbor
 	 * @param {Array.<number>} nextPos position of right neighbor
+	 * @param {any} site of the logoot instance generating the identifier
 	 * @return {Array.<number>} generated position
 	 */
 	_generatePositionBetween(prevPos, nextPos, site = this.site) {
@@ -845,6 +847,8 @@ class Logoot extends EventEmitter {
 		 * Function to parse the JSON into the tree
 		 * @param {Node} n
 		 * @param {Node} parent
+		 * @param {any} site of the logoot instance
+
 		 * @return {Node}
 		 */
 		function parseNode(n, parent, site) {
@@ -1125,6 +1129,7 @@ class Logoot extends EventEmitter {
 	 * Split block into two and moves the content over
 	 * @param {string} blockId
 	 * @param {Integer} index
+	 * @param {string} newBlockId of the newly inserted block
 	 * @return {BlockNode} newBlock
 	 */
 	splitBlock(blockId, index, newBlockId = generateCode(5)) {
