@@ -23,7 +23,7 @@ function executeOnCRDT(crdt, operation) {
 			mergeBlocks(crdt, operation.blockId1, operation.blockId2);
 			break;
 		case 'splitBlock':
-			splitBlock(crdt, operation.blockId, operation.index);
+			splitBlock(crdt, operation.blockId, operation.index, operation.newBlockId);
 			break;
 		case 'moveBlock':
 			moveBlock(crdt, operation.blockId, operation.index);

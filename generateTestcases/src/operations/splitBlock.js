@@ -1,3 +1,3 @@
-module.exports = (crdt, blockId, index) => {
-	crdt.splitBlock(blockId, index);
+module.exports = (crdt, blockId, index, newBlockId) => {
+	crdt.splitBlock(blockId, index, newBlockId);
 };

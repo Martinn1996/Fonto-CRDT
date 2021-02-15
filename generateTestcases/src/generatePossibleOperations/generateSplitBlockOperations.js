@@ -1,3 +1,4 @@
+const generateCode = require('../../../src/util/generateCode');
 const generateIndices = require('../generateIndices');
 
 module.exports = rootCRDT => {
@@ -9,7 +10,8 @@ module.exports = rootCRDT => {
 			res.push({
 				type: 'splitBlock',
 				blockId: blockId,
-				index: index
+				index: index,
+				newBlockId: generateCode(5)
 			});
 		}
 	}

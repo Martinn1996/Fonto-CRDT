@@ -10,6 +10,7 @@ const SplitNode = require('./class/SplitNode');
 const generateString = require('./util/generateCode');
 const createNodeFromType = require('./util/createNodeFromType');
 const isLastWriter = require('./util/isLastWriter');
+const generateCode = require('./util/generateCode');
 
 const MIN = 0;
 const MAX = Number.MAX_SAFE_INTEGER;
@@ -1126,7 +1127,7 @@ class Logoot extends EventEmitter {
 	 * @param {Integer} index
 	 * @return {BlockNode} newBlock
 	 */
-	splitBlock(blockId, index) {
+	splitBlock(blockId, index, newBlockId = generateCode(5)) {
 		const block = this._searchAllBlock(blockId);
 
 		if (!block) {
@@ -1154,7 +1155,7 @@ class Logoot extends EventEmitter {
 		}
 
 		if (prev.block) {
-			return this.splitBlock(prev.block.blockId, prev.index);
+			return this.splitBlock(prev.block.blockId, prev.index, newBlockId);
 		}
 		index = Math.min(index, block.logoot.length());
 		prev = block.logoot._root.getChildByOrder(index, this);
@@ -1173,7 +1174,7 @@ class Logoot extends EventEmitter {
 		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
 		split.setEmpty(false);
 
-		const newBlock = this.insertBlock(blockIndex + 1);
+		const newBlock = this.insertBlock(blockIndex + 1, newBlockId);
 		newBlock.logoot.setState(block.logoot.getState());
 		split.reference = newBlock.blockId;
 
