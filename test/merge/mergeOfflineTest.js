@@ -17,34 +17,6 @@ describe('Offline Support merge', () => {
 			ops1.push(op);
 		});
 	});
-	it('wtf bro', () => {
-		const block1 = crdt1.insertBlock(0);
-		const block2 = crdt1.insertBlock(1);
-		const block3 = crdt1.insertBlock(2);
-
-		crdt1.insertContentInBlock('123', 0, block1.blockId);
-		crdt1.insertContentInBlock('456', 0, block2.blockId);
-		crdt1.insertContentInBlock('789', 0, block3.blockId);
-		ops1.forEach(op => crdt1.receive(op));
-		ops2.forEach(op => crdt2.receive(op));
-		ops1 = [];
-		ops2 = [];
-		crdt1.splitBlock(block2.blockId, 2);
-		crdt2.splitBlock(block3.blockId, 2);
-		ops1.forEach(op => crdt1.receive(op));
-		ops2.forEach(op => crdt2.receive(op));
-		ops1 = [];
-		ops2 = [];
-
-		crdt2.splitBlock(block1.blockId, 1);
-		crdt1.splitBlock(block2.blockId, 1);
-
-		ops1.forEach(op => crdt1.receive(op));
-		ops2.forEach(op => crdt2.receive(op));
-
-		assert.equal(crdt1.value(), crdt2.value());
-		assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
-	});
 
 	it('should converge after replica 1 merges block 1 and 2 and replica 2 merges block 2 and 3', () => {
 		const block1 = crdt1.insertBlock(0);
