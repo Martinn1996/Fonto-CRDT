@@ -17,10 +17,10 @@
     },
     {
         "file": "merge and split and insert in block.json",
-        "execute": false
+        "execute": true
     },
     {
         "file": "merge and split.json",
-        "execute": true
+        "execute": false
     }
 ]

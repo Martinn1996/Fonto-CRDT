@@ -1,6 +1,6 @@
 {
     "name": "merge and insertblock",
-    "prunePercentage": 0.98,
+    "prunePercentage": 0.9,
     "actionCount": 2,
     "operations": [
         "generateInsertContentInBlockOperations",

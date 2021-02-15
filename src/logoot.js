@@ -549,6 +549,7 @@ class Logoot extends EventEmitter {
 			false,
 			SplitNode
 		);
+
 		if (existingNode) return;
 
 		// Create split node
@@ -651,7 +652,7 @@ class Logoot extends EventEmitter {
 			const prevPos = prev.getPath();
 			const nextPos = next.getPath();
 			let position = null;
-			position = this._generatePositionBetween(prevPos, nextPos);
+			position = this._generatePositionBetween(prevPos, nextPos, logoot.site);
 			const node = this._root.getChildByPath(position, true, CharacterNode);
 			node.value = value;
 			node.setEmpty(false);
@@ -670,9 +671,9 @@ class Logoot extends EventEmitter {
 	 * @param {Integer} nextInt id of right neighbor
 	 * @return {Identifier} generated identifier
 	 */
-	_generateNewIdentifier(prevInt, nextInt) {
+	_generateNewIdentifier(prevInt, nextInt, site) {
 		const int = randomBiasedInt(prevInt, nextInt, randomAlternation(this._bias));
-		return new Identifier(int, this.site, this.clock++);
+		return new Identifier(int, site, this.clock++);
 	}
 
 	/**
@@ -681,7 +682,7 @@ class Logoot extends EventEmitter {
 	 * @param {Array.<number>} nextPos position of right neighbor
 	 * @return {Array.<number>} generated position
 	 */
-	_generatePositionBetween(prevPos, nextPos) {
+	_generatePositionBetween(prevPos, nextPos, site = this.site) {
 		const newPos = [];
 		const maxLength = Math.max(prevPos.length, nextPos.length);
 		let samePrefixes = true;
@@ -694,11 +695,11 @@ class Logoot extends EventEmitter {
 					: new Identifier(DEPTH_MAX, null, null);
 			const diff = nextId.int - prevId.int;
 			if (diff > 1) {
-				newPos.push(this._generateNewIdentifier(prevId.int, nextId.int));
+				newPos.push(this._generateNewIdentifier(prevId.int, nextId.int, site));
 				break;
 			} else {
 				// eslint-disable-next-line no-unused-expressions
-				if (prevId.site === null && depth > 0) prevId.site === this.site;
+				if (prevId.site === null && depth > 0) prevId.site === site;
 				newPos.push(prevId);
 				if (prevId.compare(nextId) !== 0) samePrefixes = false;
 			}
@@ -1144,47 +1145,46 @@ class Logoot extends EventEmitter {
 		}
 
 		if (prev.block) {
-			this.splitBlock(prev.block.blockId, prev.index);
-		} else {
-			index = Math.min(index, block.logoot.length());
-			prev = block.logoot._root.getChildByOrder(index, this);
-
-			let next = block.logoot._root.getChildByOrder(index + 1, this);
-
-			if (next.ref) {
-				next = next.ref;
-			}
-
-			const prevPos = prev.getPath();
-			const nextPos = next.getPath();
-
-			let position = null;
-			position = block.logoot._generatePositionBetween(prevPos, nextPos);
-			const split = block.logoot._root.getChildByPath(position, true, SplitNode);
-			split.setEmpty(false);
-
-			const newBlock = this.insertBlock(blockIndex + 1);
-			newBlock.logoot.setState(block.logoot.getState());
-			split.reference = newBlock.blockId;
-
-			this.emit('operation', {
-				type: 'splitBlock',
-				blockId: blockId,
-				position: position,
-				reference: split.reference,
-				blockPosition: block.getPath(),
-				blockReferences: block.references
-			});
-
-			block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
-			newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
-
-			const endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
-			endNode.type = 'Node';
-			delete endNode.referenceId;
-
-			return newBlock;
+			return this.splitBlock(prev.block.blockId, prev.index);
 		}
+		index = Math.min(index, block.logoot.length());
+		prev = block.logoot._root.getChildByOrder(index, this);
+
+		let next = block.logoot._root.getChildByOrder(index + 1, this);
+
+		if (next.ref) {
+			next = next.ref;
+		}
+
+		const prevPos = prev.getPath();
+		const nextPos = next.getPath();
+
+		let position = null;
+		position = block.logoot._generatePositionBetween(prevPos, nextPos, this.site);
+		const split = block.logoot._root.getChildByPath(position, true, SplitNode);
+		split.setEmpty(false);
+
+		const newBlock = this.insertBlock(blockIndex + 1);
+		newBlock.logoot.setState(block.logoot.getState());
+		split.reference = newBlock.blockId;
+
+		this.emit('operation', {
+			type: 'splitBlock',
+			blockId: blockId,
+			position: position,
+			reference: split.reference,
+			blockPosition: block.getPath(),
+			blockReferences: block.references
+		});
+
+		block.logoot._setEmpty(split.getOrder() + 1, block.logoot.length(), this);
+		newBlock.logoot._setEmpty(0, split.getOrder() + 1, this);
+
+		const endNode = block.logoot._root.getChildById({ int: 256, site: null, clock: null });
+		endNode.type = 'Node';
+		delete endNode.referenceId;
+
+		return newBlock;
 	}
 
 	/**
@@ -1227,7 +1227,7 @@ class Logoot extends EventEmitter {
 			node.setEmpty(true);
 			node.trimEmpty();
 
-			return this._moveInsertOnSplitNode(newNode, newBlock, SplitNode);
+			return this._moveInsertOnSplitNode(newNode, newBlock, type);
 		}
 
 		return { node: node, block: block };
