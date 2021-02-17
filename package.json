@@ -6,8 +6,7 @@
   "scripts": {
     "test": "nyc mocha --recursive",
     "test-case": "mocha generateTestcases/runTestCases.js",
-    "enum-2": "mocha -R min generateTestcases/enumerate-test-cases.js",
-    "enumerate-all-test-cases": "mocha generateTestcases/generateTestcases.js",
+    "enumerate-all-test-cases": "mocha -R min generateTestcases/enumerate-test-cases.js",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "build": "browserify editor/static/script.js > editor/static/bundle.js",
     "start": "npm run build && node editor/server.js",
