@@ -1,0 +1,13 @@
+{
+    "name": "test all operations with 1 action per crdt",
+    "actionCount": 1,
+    "operations": [
+        "generateInsertContentInBlockOperations",
+        "generateDeleteContentInBlockOperations",
+        "generateInsertBlockOperations",
+        "generateDeleteBlockOperations",
+        "generateMoveBlockOperations",
+        "generateSplitBlockOperations",
+        "generateMergeBlockOperations"
+    ]
+}

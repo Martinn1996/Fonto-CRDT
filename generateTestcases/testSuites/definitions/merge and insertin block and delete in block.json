@@ -1,0 +1,10 @@
+{
+    "name": "merge and insertin block and delete in block",
+    "prunePercentage": 0.99,
+    "actionCount": 2,
+    "operations": [
+        "generateInsertContentInBlockOperations",
+        "generateDeleteContentInBlockOperations",
+        "generateMergeBlockOperations"
+    ]
+}

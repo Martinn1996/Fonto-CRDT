@@ -61,8 +61,6 @@ $('#trigger-online').on('click', () => {
 	}
 });
 
-
-
 let initialized = false;
 socket.onmessage = function(event) {
 	const data = JSON.parse(event.data);

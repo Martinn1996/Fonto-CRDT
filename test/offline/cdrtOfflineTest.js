@@ -32,6 +32,39 @@ describe('Offline Support', () => {
 	});
 
 	describe('Insert and Delete Characters', () => {
+		it('abcdefg', () => {
+			crdt1.insert('abc', 0);
+
+			// Network is back and both CRDTs receive operations from other crdt
+			ops1.forEach(op => crdt1.receive(op));
+			ops2.forEach(op => crdt2.receive(op));
+			ops1 = [];
+			ops2 = [];
+
+			crdt1.delete(3, 1, crdt1);
+			crdt2.delete(3, 1, crdt2);
+
+			ops1.forEach(op => crdt1.receive(op));
+			ops2.forEach(op => crdt2.receive(op));
+			ops1 = [];
+			ops2 = [];
+
+			crdt1.insert('1', 2, crdt1);
+			crdt2.insert('5', 2, crdt2);
+
+			ops1.forEach(op => crdt1.receive(op));
+			ops2.forEach(op => crdt2.receive(op));
+			ops1 = [];
+			ops2 = [];
+
+			crdt1.delete(2, 1, crdt1);
+			crdt2.delete(2, 1, crdt2);
+
+			ops1.forEach(op => crdt1.receive(op));
+			ops2.forEach(op => crdt2.receive(op));
+			assert.equal(crdt1.value(), crdt2.value());
+			assert.deepEqual(crdt1.getState().root, crdt2.getState().root);
+		});
 		it('should converge when 2 editors are working offline when both CRDTs are initially empty', () => {
 			crdt1.insert('crdt1', 0);
 			crdt2.insert('CRDT2', 0);

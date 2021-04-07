@@ -5,10 +5,13 @@
   "main": "logoot.js",
   "scripts": {
     "test": "nyc mocha --recursive",
+    "test-case": "mocha generateTestcases/runTestCases.js",
+    "enumerate-all-test-cases": "mocha -R min generateTestcases/enumerate-test-cases.js",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "build": "browserify editor/static/script.js > editor/static/bundle.js",
     "start": "npm run build && node editor/server.js",
     "checkstyle": "eslint .",
+    "generate-test-suite": "node generateTestcases/testSuites/generateSuite.js",
     "jsdoc": "./node_modules/.bin/jsdoc src/logoot.js"
   },
   "repository": {
@@ -30,6 +33,7 @@
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.13.0",
     "jsdoc": "^3.6.4",
+    "md5": "^2.3.0",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
     "prettier": "^1.17.1"
@@ -42,6 +46,7 @@
     "nanobus": "^4.4.0",
     "quill-cursors": "^3.0.0",
     "randomstring": "^1.1.5",
+    "underscore": "^1.12.0",
     "ws": "^7.2.5",
     "xml-formatter": "^2.1.0"
   }

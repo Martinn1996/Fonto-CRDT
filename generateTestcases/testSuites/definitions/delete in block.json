@@ -1,0 +1,8 @@
+{
+    "name": "delete in block",
+    "prunePercentage": 0.9,
+    "actionCount": 2,
+    "operations": [
+        "generateDeleteContentInBlockOperations"
+    ]
+}

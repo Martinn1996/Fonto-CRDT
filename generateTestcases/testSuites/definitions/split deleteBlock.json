@@ -1,0 +1,10 @@
+{
+    "name": "split deleteBlock",
+    "prunePercentage": 0.98,
+    "actionCount": 2,
+    "operations": [
+        "generateInsertContentInBlockOperations",
+        "generateDeleteContentInBlockOperations",
+        "generateMoveBlockOperations"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Split and move",
+    "prunePercentage": 0.95,
+    "actionCount": 2,
+    "operations": [
+        "generateMoveBlockOperations",
+        "generateSplitBlockOperations"
+    ]
+}
