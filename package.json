@@ -47,7 +47,7 @@
     "quill-cursors": "^3.0.0",
     "randomstring": "^1.1.5",
     "underscore": "^1.12.0",
-    "ws": "^7.2.5",
+    "ws": "^7.4.6",
     "xml-formatter": "^2.1.0"
   }
 }
